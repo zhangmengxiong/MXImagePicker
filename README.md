@@ -7,10 +7,10 @@
 
 #### 第一步：项目增加Androidx库和Glide图片加载库
 ```
-    implementation 'androidx.appcompat:appcompat:x.x.x'
+    implementation `androidx.appcompat:appcompat:x.x.x`
     implementation "androidx.recyclerview:recyclerview:x.x.x"
-    implementation 'com.github.bumptech.glide:glide:x.x.x'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation `com.github.bumptech.glide:glide:x.x.x`
+    implementation `androidx.constraintlayout:constraintlayout:2.0.4`
 ``` 
 
 #### 第二步：在AndroidManifest.xml中添加Activity声明
@@ -24,7 +24,7 @@
     Manifest.permission.READ_EXTERNAL_STORAGE
     Manifest.permission.READ_EXTERNAL_STORAGE
 ```
-注意：'没有权限进入选择页面会报错！'
+注意：`没有权限进入选择页面会报错！`
 
 #### 第四步：启动选择页面
 ```
@@ -32,8 +32,8 @@ val intent = PickerBuilder().setMaxSize(3).createIntent(this)
 startActivityForResult(intent,0x22)
 ```
 ##### PickerBuilder参数说明
-1. ’setMaxSize(size: Int)‘ 设置最大选择文件个数
-2. ’setType(type: PickerType)‘ 设置类型 
+1. `setMaxSize(size: Int)` 设置最大选择文件个数
+2. `setType(type: PickerType)` 设置类型 
     * PickerType.Image = 图片
     * PickerType.Video = 视频
 
