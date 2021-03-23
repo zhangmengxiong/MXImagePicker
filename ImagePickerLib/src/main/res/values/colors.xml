@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="picker_color_background">#333333</color>
+    <color name="picker_color_important">#F1F1F1</color>
+    <color name="picker_color_select">#03CE65</color>
+</resources>
