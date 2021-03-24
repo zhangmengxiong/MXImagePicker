@@ -23,7 +23,7 @@
 ```
     Manifest.permission.CAMERA
     Manifest.permission.READ_EXTERNAL_STORAGE
-    Manifest.permission.READ_EXTERNAL_STORAGE
+    Manifest.permission.WRITE_EXTERNAL_STORAGE
 ```
 注意：`没有权限进入选择页面会报错！`
 
