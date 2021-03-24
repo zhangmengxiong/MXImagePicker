@@ -14,7 +14,8 @@ import com.mx.imgpicker.models.ImageItem
 import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.views.PickerTextView
 
-class ImgAdapt(val list: ArrayList<ImageItem> = ArrayList()) : RecyclerView.Adapter<ImgAdapt.ImgVH>() {
+class ImgAdapt(val list: ArrayList<ImageItem> = ArrayList()) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var maxSelectSize = 9
     val selectList = ArrayList<ImageItem>()
     var onSelectChange: ((list: ArrayList<ImageItem>) -> Unit)? = null
@@ -29,20 +30,20 @@ class ImgAdapt(val list: ArrayList<ImageItem> = ArrayList()) : RecyclerView.Adap
         val indexLay: RelativeLayout = itemView.findViewById(R.id.indexLay)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImgVH {
-        return ImgVH(LayoutInflater.from(parent.context).inflate(R.layout.adapt_img_item, parent, false))
+    class CameraVH(itemView: View) : RecyclerView.ViewHolder(itemView)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == 0) CameraVH(
+            LayoutInflater.from(parent.context).inflate(R.layout.adapt_img_camera, parent, false)
+        ) else ImgVH(
+            LayoutInflater.from(parent.context).inflate(R.layout.adapt_img_item, parent, false)
+        )
     }
 
-    override fun onBindViewHolder(holder: ImgVH, position: Int) {
-        if (position == 0) {
-            holder.selectBG.visibility = View.GONE
-            holder.indexTxv.visibility = View.GONE
-            holder.videoTag.visibility = View.GONE
-            holder.img.setImageResource(R.drawable.icon_picker_camera)
-            holder.img.setColorFilter(holder.itemView.context.resources.getColor(R.color.picker_color_important))
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is CameraVH) {
             holder.itemView.setOnClickListener { onTakePictureClick?.invoke() }
-        } else {
-            holder.img.setColorFilter(Color.TRANSPARENT)
+        } else if (holder is ImgVH) {
             holder.indexTxv.visibility = View.VISIBLE
             holder.selectBG.visibility = View.VISIBLE
             val item = list.getOrNull(position - 1) ?: return
@@ -70,7 +71,11 @@ class ImgAdapt(val list: ArrayList<ImageItem> = ArrayList()) : RecyclerView.Adap
                 holder.indexTxv.text = ""
                 holder.indexLay.setOnClickListener {
                     if (selectList.size >= maxSelectSize) {
-                        Toast.makeText(it.context, "您最多只能选择${maxSelectSize}张图片！", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            it.context,
+                            "您最多只能选择${maxSelectSize}张图片！",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         return@setOnClickListener
                     }
                     selectList.add(item)
@@ -84,5 +89,9 @@ class ImgAdapt(val list: ArrayList<ImageItem> = ArrayList()) : RecyclerView.Adap
 
     override fun getItemCount(): Int {
         return list.size + 1
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (position == 0) 0 else 1
     }
 }

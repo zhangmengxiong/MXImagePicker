@@ -29,6 +29,14 @@ class ImgPickerActivity : AppCompatActivity() {
     private val folderAdapt = FolderAdapt()
     private var cacheFile: File? = null
 
+    var returnBtn: ImageView? = null
+    var selectBtn: TextView? = null
+    var folderNameTxv: TextView? = null
+    var recycleView: RecyclerView? = null
+    var folderRecycleView: RecyclerView? = null
+    var folderMoreLay: View? = null
+    var folderMoreImg: View? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_img_picker)
@@ -50,22 +58,29 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     private fun initView() {
-        findViewById<ImageView>(R.id.returnBtn)?.setOnClickListener { onBackPressed() }
+        returnBtn = findViewById(R.id.returnBtn)
+        recycleView = findViewById(R.id.recycleView)
+        folderRecycleView = findViewById(R.id.folderRecycleView)
+        folderMoreLay = findViewById(R.id.folderMoreLay)
+        folderMoreImg = findViewById(R.id.folderMoreImg)
+        folderNameTxv = findViewById(R.id.folderNameTxv)
+        selectBtn = findViewById(R.id.selectBtn)
 
-        findViewById<RecyclerView>(R.id.recycleView)?.let {
+        returnBtn?.setOnClickListener { onBackPressed() }
+        recycleView?.let {
             it.setHasFixedSize(true)
             it.layoutManager = GridLayoutManager(this, 4)
             it.adapter = adapt
         }
-        val folderRecycleView = findViewById<RecyclerView>(R.id.folderRecycleView)
+
         folderRecycleView?.let {
             it.setHasFixedSize(true)
             it.layoutManager = LinearLayoutManager(this)
             it.adapter = folderAdapt
         }
 //        findViewById<View>(R.id.folderMoreLay)?.background?.alpha = (255 * 0.5).toInt()
-        findViewById<View>(R.id.folderMoreLay)?.setOnClickListener {
-            if (folderRecycleView.isShown) {
+        folderMoreLay?.setOnClickListener {
+            if (folderRecycleView?.isShown == true) {
                 showFolderList(false)
             } else {
                 if (folderAdapt.list.size <= 1) return@setOnClickListener
@@ -85,8 +100,7 @@ class ImgPickerActivity : AppCompatActivity() {
             ImagePathBiz.openImage(this, item)
         }
 
-        val selectBtn = findViewById<TextView>(R.id.selectBtn)
-        selectBtn.setOnClickListener {
+        selectBtn?.setOnClickListener {
             val paths = adapt.selectList.map { it.path }
             setResult(
                 RESULT_OK,
@@ -96,11 +110,11 @@ class ImgPickerActivity : AppCompatActivity() {
         }
         adapt.onSelectChange = { list ->
             if (list.isEmpty()) {
-                selectBtn.visibility = View.GONE
-                selectBtn.text = "选择"
+                selectBtn?.visibility = View.GONE
+                selectBtn?.text = "选择"
             } else {
-                selectBtn.visibility = View.VISIBLE
-                selectBtn.text = "选择(${list.size}/${adapt.maxSelectSize})"
+                selectBtn?.visibility = View.VISIBLE
+                selectBtn?.text = "选择(${list.size}/${adapt.maxSelectSize})"
             }
         }
 
@@ -133,11 +147,11 @@ class ImgPickerActivity : AppCompatActivity() {
 
     private fun showFolderList(show: Boolean) {
         if (show) {
-            findViewById<View>(R.id.folderMoreImg)?.rotation = 180f
-            findViewById<View>(R.id.folderRecycleView)?.visibility = View.VISIBLE
+            folderMoreImg?.rotation = 180f
+            folderRecycleView?.visibility = View.VISIBLE
         } else {
-            findViewById<View>(R.id.folderMoreImg)?.rotation = 0f
-            findViewById<View>(R.id.folderRecycleView)?.visibility = View.GONE
+            folderMoreImg?.rotation = 0f
+            folderRecycleView?.visibility = View.GONE
         }
     }
 
@@ -149,7 +163,7 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     private fun showFolder(folder: FolderItem?) {
-        findViewById<TextView>(R.id.folderNameTxv)?.text = folder?.name ?: "全部照片"
+        folderNameTxv?.text = folder?.name ?: "全部照片"
         adapt.list.clear()
         if (folder != null) {
             adapt.list.addAll(folder.images)
@@ -172,7 +186,7 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (findViewById<View>(R.id.folderRecycleView)?.isShown == true) {
+        if (folderRecycleView?.isShown == true) {
             showFolderList(false)
             return
         }
