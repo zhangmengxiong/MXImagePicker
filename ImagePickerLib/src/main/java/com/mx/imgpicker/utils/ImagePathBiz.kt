@@ -3,9 +3,9 @@ package com.mx.imgpicker.utils
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.provider.MediaStore
-import com.mx.imgpicker.models.ImageItem
+import android.widget.Toast
+import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.PickerType
 import java.io.File
 import java.text.SimpleDateFormat
@@ -24,32 +24,29 @@ object ImagePathBiz {
     /**
      * 将图片保存到手机相册
      */
-    fun saveToGallery(context: Context, imgFile: File) {
+    fun saveToGallery(context: Context, imgFile: File): Boolean {
         val bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
         val title = imgFile.name
-        MediaStore.Images.Media.insertImage(context.contentResolver, bitmap, title, "")
+        try {
+            MediaStore.Images.Media.insertImage(context.contentResolver, bitmap, title, "")
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
     }
 
-    fun openImage(context: Context, item: ImageItem) {
-        when (item.type) {
-            PickerType.Image -> {
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setDataAndType(item.uri, item.mimeType)
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-            PickerType.Video -> {
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setDataAndType(Uri.fromFile(File(item.path)), item.mimeType)
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
+    /**
+     * 打开视频或者图片
+     */
+    fun openItem(context: Context, item: Item) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.setDataAndType(item.uri, item.mimeType)
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "打开失败！", Toast.LENGTH_SHORT).show()
         }
     }
 }

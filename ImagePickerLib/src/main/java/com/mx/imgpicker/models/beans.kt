@@ -14,7 +14,7 @@ enum class PickerType {
 /**
  * 类型对象
  */
-data class ImageItem(val path: String, val uri: Uri, val mimeType: String, val time: Long, val name: String, val type: PickerType) : Serializable {
+data class Item(val path: String, val uri: Uri, val mimeType: String, val time: Long, val name: String, val type: PickerType) : Serializable {
     fun getFolderName(): String {
         val paths = path.split(File.separator)
         if (paths.size >= 2) {
@@ -27,4 +27,4 @@ data class ImageItem(val path: String, val uri: Uri, val mimeType: String, val t
 /**
  * 分组对象
  */
-data class FolderItem(val name: String, val images: ArrayList<ImageItem> = ArrayList()) : Serializable
+data class FolderItem(val name: String, val images: ArrayList<Item> = ArrayList()) : Serializable

@@ -12,6 +12,6 @@
 
     <!--  图片选取器 颜色覆盖  -->
     <color name="picker_color_background">#F9F9F9</color>
-    <color name="picker_color_important">#333333</color>
-    <color name="picker_color_select">#03CE65</color>
+    <color name="picker_color_important">#FF0000</color>
+    <color name="picker_color_select">#008EFF</color>
 </resources>

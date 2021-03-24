@@ -10,7 +10,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.widget.ImageView
 import com.bumptech.glide.Glide
-import com.mx.imgpicker.models.ImageItem
+import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.PickerType
 import java.io.File
 import java.util.*
@@ -19,14 +19,14 @@ import java.util.*
  * 图片显示接口
  */
 interface IImageLoader {
-    fun displayImage(img: ImageItem, imageView: ImageView)
+    fun displayImage(img: Item, imageView: ImageView)
 }
 
 /**
  * 提供默认Glide显示图片
  */
 class GlideImageLoader : IImageLoader {
-    override fun displayImage(img: ImageItem, imageView: ImageView) {
+    override fun displayImage(img: Item, imageView: ImageView) {
         if (img.type == PickerType.Image) {
             Glide.with(imageView).load(img.uri).into(imageView)
         } else {

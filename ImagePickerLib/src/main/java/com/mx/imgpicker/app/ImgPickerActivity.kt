@@ -15,7 +15,7 @@ import com.mx.imgpicker.adapts.ImgGridAdapt
 import com.mx.imgpicker.adapts.ImgLargeAdapt
 import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.FolderItem
-import com.mx.imgpicker.models.ImageItem
+import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.observer.ImageChangeObserver
 import com.mx.imgpicker.observer.VideoChangeObserver
 import com.mx.imgpicker.utils.BarColorChangeBiz
@@ -27,8 +27,8 @@ import java.io.File
 class ImgPickerActivity : AppCompatActivity() {
     private val pickerVM by lazy { ImgPickerVM(this) }
     private var maxSelectSize = 9
-    private val imageList = ArrayList<ImageItem>()
-    private val selectList = ArrayList<ImageItem>()
+    private val imageList = ArrayList<Item>()
+    private val selectList = ArrayList<Item>()
 
     private val imgAdapt = ImgGridAdapt(imageList, selectList)
     private val imgLargeAdapt = ImgLargeAdapt(imageList, selectList)
@@ -145,7 +145,7 @@ class ImgPickerActivity : AppCompatActivity() {
             finish()
         }
 
-        val onSelectChange = { item: ImageItem ->
+        val onSelectChange = { item: Item ->
             val index = imageList.indexOf(item)
             val isSelect = selectList.contains(item)
             if (isSelect) {
@@ -212,7 +212,7 @@ class ImgPickerActivity : AppCompatActivity() {
         }
     }
 
-    private fun showLargeView(show: Boolean, target: ImageItem? = null) {
+    private fun showLargeView(show: Boolean, target: Item? = null) {
         if (show) {
             showFolderList(false)
             val index = imageList.indexOf(target)
@@ -246,9 +246,12 @@ class ImgPickerActivity : AppCompatActivity() {
         if (requestCode == REQUEST_TAKE_IMG && cacheFile?.exists() == true) {
             val file = cacheFile ?: return
             if (file.exists()) {
-                ImagePathBiz.saveToGallery(this, file)
-                file.delete()
-                cacheFile = null
+                if (ImagePathBiz.saveToGallery(this, file)) {
+                    file.delete()
+                    cacheFile = null
+                } else {
+
+                }
                 pickerVM.startScan()
             }
         }

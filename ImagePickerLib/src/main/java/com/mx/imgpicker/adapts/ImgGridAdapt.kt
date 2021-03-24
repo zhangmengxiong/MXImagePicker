@@ -8,16 +8,16 @@ import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
-import com.mx.imgpicker.models.ImageItem
+import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.views.PickerTextView
 
 class ImgGridAdapt(
-    private val list: ArrayList<ImageItem>,
-    private val selectList: ArrayList<ImageItem>
+    private val list: ArrayList<Item>,
+    private val selectList: ArrayList<Item>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var onSelectClick: ((item: ImageItem) -> Unit)? = null
-    var onItemClick: ((item: ImageItem, list: ArrayList<ImageItem>) -> Unit)? = null
+    var onSelectClick: ((item: Item) -> Unit)? = null
+    var onItemClick: ((item: Item, list: ArrayList<Item>) -> Unit)? = null
     var onTakePictureClick: (() -> Unit)? = null
 
     class ImgVH(itemView: View) : RecyclerView.ViewHolder(itemView) {

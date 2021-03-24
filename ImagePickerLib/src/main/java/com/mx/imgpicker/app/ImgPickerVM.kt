@@ -4,15 +4,16 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.mx.imgpicker.models.FolderItem
-import com.mx.imgpicker.models.ImageItem
+import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.PickerType
-import com.mx.imgpicker.utils.ImgSourceBiz
+import com.mx.imgpicker.utils.source_loader.ImageSourceLoader
+import com.mx.imgpicker.utils.source_loader.VideoSourceLoader
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
 class ImgPickerVM(val context: Context) {
     companion object {
-        private val imageList = ArrayList<ImageItem>()
+        private val imageList = ArrayList<Item>()
     }
 
     private val isInScan = AtomicBoolean(false)
@@ -25,19 +26,23 @@ class ImgPickerVM(val context: Context) {
         thread {
             synchronized(this) {
                 isInScan.set(true)
-
-                val images = if (type == PickerType.Image) {
-                    ImgSourceBiz.loadImageFromPhone(context).sortedByDescending { it.time }
+                val iSourceLoader = if (type == PickerType.Image) {
+                    ImageSourceLoader(context)
                 } else {
-                    ImgSourceBiz.loadVideoFromPhone(context).sortedByDescending { it.time }
+                    VideoSourceLoader(context)
                 }
-
+                val images = iSourceLoader.scan().sortedByDescending { it.time }
                 val hasChange = (!images.toTypedArray().contentEquals(imageList.toTypedArray()))
                 if (hasChange) {
                     imageList.clear()
                     imageList.addAll(images)
                     val allItems = imageList.sortedByDescending { it.time }
-                    val folderList = (arrayOf(FolderItem("全部", ArrayList(allItems))) + allItems.groupBy { it.getFolderName() }.map { entry ->
+                    val folderList = (arrayOf(
+                        FolderItem(
+                            "全部",
+                            ArrayList(allItems)
+                        )
+                    ) + allItems.groupBy { it.getFolderName() }.map { entry ->
                         FolderItem(entry.key, ArrayList(entry.value))
                     }).toList()
                     mHandler.post {

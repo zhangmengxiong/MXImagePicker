@@ -16,7 +16,7 @@ public class ImagePickerProvider extends FileProvider {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             return ImagePickerProvider.getUriForFile(context, context.getPackageName() + ".imagePickerProvider", file);
         } else {
-            return Uri.fromFile(file);
+            return Uri.parse("file://" + file.getAbsolutePath());
         }
     }
 }
