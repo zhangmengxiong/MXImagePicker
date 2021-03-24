@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import com.gyf.immersionbar.ImmersionBar
 import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.starter.MXStarter
 
@@ -23,7 +24,14 @@ class MainActivity : AppCompatActivity() {
                 if (success) {
                     MXStarter.start(
                         this,
-                        PickerBuilder().setMaxSize(3).createIntent(this)
+                        PickerBuilder().setMaxSize(3).setActivityCallback { activity ->
+                            ImmersionBar.with(activity)
+                                .autoDarkModeEnable(true)
+                                .statusBarColorInt(activity.resources.getColor(R.color.picker_color_background))
+                                .fitsSystemWindows(true)
+                                .navigationBarColor(R.color.picker_color_background)
+                                .init()
+                        }.createIntent(this)
                     ) { resultCode, data ->
 
                     }

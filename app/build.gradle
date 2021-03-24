@@ -41,6 +41,9 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxjava:3.0.4'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'com.github.tbruyelle:rxpermissions:0.12'
+    // 状态栏
+    implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
+    implementation 'com.gyf.immersionbar:immersionbar-ktx:3.0.0'
 
     implementation project(path: ':ImagePickerLib')
 }

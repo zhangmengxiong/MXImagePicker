@@ -9,7 +9,6 @@ import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.widget.ImageView
-import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.mx.imgpicker.models.ImageItem
 import com.mx.imgpicker.models.PickerType
@@ -96,8 +95,10 @@ class DefaultUriToFile : IUriToFile {
                 filePath = if (documentId.startsWith("raw:")) {
                     documentId.replaceFirst("raw:", "")
                 } else {
-                    val contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), documentId.toLongOrNull()
-                            ?: 0)
+                    val contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"), documentId.toLongOrNull()
+                            ?: 0
+                    )
                     getDataColumn(context, contentUri, null, null)
                 }
             }
@@ -115,7 +116,12 @@ class DefaultUriToFile : IUriToFile {
      * 获取数据库表中的 _data 列，即返回Uri对应的文件路径
      * @return
      */
-    private fun getDataColumn(context: Context, uri: Uri, selection: String?, selectionArgs: Array<String>?): String? {
+    private fun getDataColumn(
+        context: Context,
+        uri: Uri,
+        selection: String?,
+        selectionArgs: Array<String>?
+    ): String? {
         var path: String? = null
 
         val projection = arrayOf(MediaStore.Images.Media.DATA)
@@ -152,15 +158,5 @@ class DefaultUriToFile : IUriToFile {
      */
     private fun isDownloadsDocument(uri: Uri): Boolean {
         return "com.android.providers.downloads.documents" == uri.authority
-    }
-
-    fun getUri(context: Context, file: File): Uri {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            //设置7.0以上共享文件，分享路径定义在xml/file_paths.xml
-            FileProvider.getUriForFile(context, "${context.packageName}.fileProvider", file)
-        } else {
-            // 7.0以下,共享文件
-            Uri.fromFile(file)
-        }
     }
 }

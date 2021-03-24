@@ -2,6 +2,7 @@ package com.mx.imgpicker.builder
 
 import android.content.Context
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import com.mx.imgpicker.app.ImgPickerActivity
 import com.mx.imgpicker.models.PickerType
 import java.io.Serializable
@@ -9,7 +10,7 @@ import java.io.Serializable
 class PickerBuilder : Serializable {
     var pickerType: PickerType = PickerType.Image
     var maxPickerSize: Int = 1
-
+    var activityCallback: ((AppCompatActivity) -> Unit)? = null // Activity在创建时会回调这个，可以设置样式等
 
     /**
      * 设置最大选择数量
@@ -24,6 +25,16 @@ class PickerBuilder : Serializable {
      */
     fun setType(type: PickerType): PickerBuilder {
         pickerType = type
+        return this
+    }
+
+    /**
+     * Activity创建后回调，可以设置整体样式
+     * 一般搭配ImmersionBar设置导航栏和状态栏的颜色等
+     * 一次选择只会调用一次回调！
+     */
+    fun setActivityCallback(call: ((activity: AppCompatActivity) -> Unit)): PickerBuilder {
+        activityCallback = call
         return this
     }
 
