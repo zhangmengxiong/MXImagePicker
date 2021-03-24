@@ -19,18 +19,18 @@ import java.util.*
  * 图片显示接口
  */
 interface IImageLoader {
-    fun displayImage(img: Item, imageView: ImageView)
+    fun displayImage(item: Item, imageView: ImageView)
 }
 
 /**
  * 提供默认Glide显示图片
  */
 class GlideImageLoader : IImageLoader {
-    override fun displayImage(img: Item, imageView: ImageView) {
-        if (img.type == PickerType.Image) {
-            Glide.with(imageView).load(img.uri).into(imageView)
+    override fun displayImage(item: Item, imageView: ImageView) {
+        if (item.type == PickerType.Image) {
+            Glide.with(imageView).load(item.uri).into(imageView)
         } else {
-            Glide.with(imageView).load(Uri.fromFile(File(img.path))).into(imageView)
+            Glide.with(imageView).load(Uri.fromFile(File(item.path))).into(imageView)
         }
     }
 }

@@ -66,7 +66,6 @@ object VideoSource : ISource {
             //获取图片uri
             val uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI.buildUpon()
                 .appendPath(id.toString()).build()
-
             if (File(path).exists() || contentResolver.openFileDescriptor(uri, "r") != null) {
                 return Item(path, uri, mimeType, time, name, PickerType.Video)
             }
@@ -74,6 +73,33 @@ object VideoSource : ISource {
         }
         return null
     }
+
+    /**
+     * 获取视频缓存图片
+     */
+//    private fun queryThumbPath(contentResolver: ContentResolver, videoId: Long): String? {
+//        var cursor: Cursor? = null
+//        try {
+//            cursor = contentResolver.query(
+//                MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
+//                null,
+//                MediaStore.Video.Thumbnails.VIDEO_ID
+//                        + "=" + videoId,
+//                null,
+//                null
+//            )
+//            if (cursor != null && cursor.moveToFirst()) {
+//                return cursor.getString(cursor.getColumnIndex(MediaStore.Video.Thumbnails.DATA))
+//            }
+//        } catch (e: java.lang.Exception) {
+//        } finally {
+//            try {
+//                cursor?.close()
+//            } catch (e: java.lang.Exception) {
+//            }
+//        }
+//        return null
+//    }
 
     override fun save(context: Context, file: File): Boolean {
         try {
