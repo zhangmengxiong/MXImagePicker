@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
@@ -17,8 +16,7 @@ class ImgGridAdapt(
     private val list: ArrayList<ImageItem>,
     private val selectList: ArrayList<ImageItem>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var maxSelectSize = 9
-    var onSelectChange: ((list: ArrayList<ImageItem>) -> Unit)? = null
+    var onSelectClick: ((item: ImageItem) -> Unit)? = null
     var onItemClick: ((item: ImageItem, list: ArrayList<ImageItem>) -> Unit)? = null
     var onTakePictureClick: (() -> Unit)? = null
 
@@ -57,31 +55,16 @@ class ImgGridAdapt(
             } else {
                 holder.videoTag.visibility = View.VISIBLE
             }
-
+            holder.indexLay.setOnClickListener {
+                onSelectClick?.invoke(item)
+            }
             if (isSelect) {
                 holder.selectBG.alpha = 1f
                 holder.indexTxv.text = (index + 1).toString()
-                holder.indexLay.setOnClickListener {
-                    selectList.remove(item)
-                    notifyDataSetChanged()
-                    onSelectChange?.invoke(ArrayList(selectList))
-                }
+
             } else {
                 holder.selectBG.alpha = 0.2f
                 holder.indexTxv.text = ""
-                holder.indexLay.setOnClickListener {
-                    if (selectList.size >= maxSelectSize) {
-                        Toast.makeText(
-                            it.context,
-                            "您最多只能选择${maxSelectSize}张图片！",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@setOnClickListener
-                    }
-                    selectList.add(item)
-                    notifyItemChanged(position)
-                    onSelectChange?.invoke(ArrayList(selectList))
-                }
             }
             holder.itemView.setOnClickListener { onItemClick?.invoke(item, ArrayList(selectList)) }
         }

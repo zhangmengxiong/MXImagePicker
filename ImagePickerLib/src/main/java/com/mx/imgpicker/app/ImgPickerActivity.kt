@@ -6,6 +6,7 @@ import android.provider.MediaStore
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.*
 import com.mx.imgpicker.R
@@ -25,7 +26,7 @@ import java.io.File
 
 class ImgPickerActivity : AppCompatActivity() {
     private val pickerVM by lazy { ImgPickerVM(this) }
-
+    private var maxSelectSize = 9
     private val imageList = ArrayList<ImageItem>()
     private val selectList = ArrayList<ImageItem>()
 
@@ -59,8 +60,7 @@ class ImgPickerActivity : AppCompatActivity() {
         }
 
         pickerVM.type = builder.pickerType
-        imgAdapt.maxSelectSize = builder.maxPickerSize
-        imgLargeAdapt.maxSelectSize = builder.maxPickerSize
+        maxSelectSize = builder.maxPickerSize
 
         initView()
 
@@ -94,17 +94,20 @@ class ImgPickerActivity : AppCompatActivity() {
 
         returnBtn?.setOnClickListener { onBackPressed() }
         recycleView?.let {
+            it.itemAnimator = null
             it.setHasFixedSize(true)
             it.layoutManager = GridLayoutManager(this, 4)
             it.adapter = imgAdapt
         }
 
         folderRecycleView?.let {
+            it.itemAnimator = null
             it.setHasFixedSize(true)
             it.layoutManager = LinearLayoutManager(this)
             it.adapter = folderAdapt
         }
         largeImgRecycleView?.let {
+            it.itemAnimator = null
             PagerSnapHelper().attachToRecyclerView(it)
             it.setHasFixedSize(true)
             it.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -141,15 +144,35 @@ class ImgPickerActivity : AppCompatActivity() {
             )
             finish()
         }
-        imgAdapt.onSelectChange = { list ->
-            if (list.isEmpty()) {
+
+        val onSelectChange = { item: ImageItem ->
+            val index = imageList.indexOf(item)
+            val isSelect = selectList.contains(item)
+            if (isSelect) {
+                selectList.remove(item)
+                imgAdapt.notifyDataSetChanged()
+                imgLargeAdapt.notifyDataSetChanged()
+            } else {
+                if (selectList.size >= maxSelectSize) {
+                    Toast.makeText(this, "您最多只能选择${maxSelectSize}张图片！", Toast.LENGTH_SHORT).show()
+                } else {
+                    selectList.add(item)
+                    imgAdapt.notifyItemChanged(index + 1)
+                    imgLargeAdapt.notifyItemChanged(index)
+                }
+            }
+
+            if (selectList.isEmpty()) {
                 selectBtn?.visibility = View.GONE
                 selectBtn?.text = "选择"
             } else {
                 selectBtn?.visibility = View.VISIBLE
-                selectBtn?.text = "选择(${list.size}/${imgAdapt.maxSelectSize})"
+                selectBtn?.text = "选择(${selectList.size}/${maxSelectSize})"
             }
         }
+
+        imgAdapt.onSelectClick = onSelectChange
+        imgLargeAdapt.onSelectChange = onSelectChange
 
         contentResolver.registerContentObserver(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
