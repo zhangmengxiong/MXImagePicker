@@ -1,94 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/picker_color_background"
-    android:orientation="vertical">
+    android:background="@color/picker_color_background">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="55dp">
-
-        <ImageView
-            android:id="@+id/returnBtn"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            android:padding="12dp"
-            android:src="@drawable/icon_picker_return"
-            android:tint="@color/picker_color_important" />
-
-        <LinearLayout
-            android:id="@+id/folderMoreLay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:animateLayoutChanges="true"
-            android:background="@drawable/bg_picker_folder_select"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:paddingVertical="5dp"
-            android:paddingLeft="15dp"
-            android:paddingRight="10dp">
-
-            <TextView
-                android:id="@+id/folderNameTxv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxEms="8"
-                android:singleLine="true"
-                android:text="全部"
-                android:textColor="@color/picker_color_important"
-                android:textSize="16sp" />
-
-            <ImageView
-                android:id="@+id/folderMoreImg"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginLeft="3dp"
-                android:padding="2dp"
-                android:src="@drawable/icon_picker_more"
-                android:tint="@color/picker_color_important" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/selectBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="14dp"
-            android:background="@drawable/bg_picker_check_button"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="5dp"
-            android:text="选择"
-            android:textColor="@color/picker_color_select"
-            android:textSize="14sp"
-            android:visibility="gone" />
-    </RelativeLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:alpha="0.1"
-        android:background="@color/picker_color_important" />
-
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateLayoutChanges="true">
+        android:orientation="vertical">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycleView"
+        <com.mx.imgpicker.views.BarPlaceView
+            android:id="@+id/barPlaceView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="1dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/folderRecycleView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/picker_color_background"
+            android:layout_height="wrap_content"
             android:visibility="gone" />
-    </FrameLayout>
-</LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/picker_bar_height">
+
+            <ImageView
+                android:id="@+id/returnBtn"
+                android:layout_width="@dimen/picker_bar_height"
+                android:layout_height="@dimen/picker_bar_height"
+                android:padding="12dp"
+                android:src="@drawable/icon_picker_return"
+                android:tint="@color/picker_color_important" />
+
+            <LinearLayout
+                android:id="@+id/folderMoreLay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:animateLayoutChanges="true"
+                android:background="@drawable/bg_picker_folder_select"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingVertical="5dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="10dp">
+
+                <TextView
+                    android:id="@+id/folderNameTxv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxEms="8"
+                    android:singleLine="true"
+                    android:text="全部"
+                    android:textColor="@color/picker_color_important"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/folderMoreImg"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginLeft="3dp"
+                    android:padding="2dp"
+                    android:src="@drawable/icon_picker_more"
+                    android:tint="@color/picker_color_important" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/selectBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="14dp"
+                android:background="@drawable/bg_picker_check_button"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:text="选择"
+                android:textColor="@color/picker_color_select"
+                android:textSize="14sp"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:alpha="0.1"
+            android:background="@color/picker_color_important" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycleView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="1dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/folderRecycleView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/picker_color_background"
+                android:visibility="gone" />
+        </FrameLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
