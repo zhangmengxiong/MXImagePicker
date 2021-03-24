@@ -1,15 +1,17 @@
 package com.mx.imgpicker.utils.source_loader
 
 import android.content.ContentResolver
+import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import android.graphics.BitmapFactory
 import android.provider.MediaStore
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.PickerType
 import java.io.File
 
-class ImageSourceLoader(val context: Context) : ISourceLoader {
-    override fun scan( ): List<Item> {
+object ImageSource : ISource {
+    override fun scan(context: Context): List<Item> {
         //扫描图片
         val mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val mContentResolver = context.contentResolver ?: return emptyList()
@@ -72,5 +74,36 @@ class ImageSourceLoader(val context: Context) : ISourceLoader {
         } catch (e: java.lang.Exception) {
         }
         return null
+    }
+
+    override fun save(context: Context, file: File): Boolean {
+        try {
+            val contentValues = ContentValues()
+            contentValues.put(MediaStore.Images.Media.TITLE, file.name)
+            contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, file.name)
+            contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/*")
+            contentValues.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
+            contentValues.put(MediaStore.Images.Media.DATE_MODIFIED, System.currentTimeMillis())
+            contentValues.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis())
+            contentValues.put(MediaStore.Images.Media.DATA, file.absolutePath)
+            contentValues.put(MediaStore.Images.Media.SIZE, file.length())
+            context.contentResolver.insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                contentValues
+            )
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        try {
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+            val title = file.name
+            MediaStore.Images.Media.insertImage(context.contentResolver, bitmap, title, "")
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
     }
 }

@@ -1,6 +1,7 @@
 package com.mx.imgpicker.utils.source_loader
 
 import android.content.ContentResolver
+import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.provider.MediaStore
@@ -8,8 +9,8 @@ import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.PickerType
 import java.io.File
 
-class VideoSourceLoader(val context: Context) : ISourceLoader {
-    override fun scan(): List<Item> {
+object VideoSource : ISource {
+    override fun scan(context: Context): List<Item> {
         //扫描图片
         val mImageUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
         val mContentResolver = context.contentResolver ?: return emptyList()
@@ -69,8 +70,30 @@ class VideoSourceLoader(val context: Context) : ISourceLoader {
             if (File(path).exists() || contentResolver.openFileDescriptor(uri, "r") != null) {
                 return Item(path, uri, mimeType, time, name, PickerType.Video)
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
         }
         return null
+    }
+
+    override fun save(context: Context, file: File): Boolean {
+        try {
+            val contentValues = ContentValues()
+            contentValues.put(MediaStore.Video.Media.TITLE, file.name)
+            contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, file.name)
+            contentValues.put(MediaStore.Video.Media.MIME_TYPE, "video/*")
+            contentValues.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis())
+            contentValues.put(MediaStore.Video.Media.DATE_MODIFIED, System.currentTimeMillis())
+            contentValues.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis())
+            contentValues.put(MediaStore.Video.Media.DATA, file.absolutePath)
+            contentValues.put(MediaStore.Video.Media.SIZE, file.length())
+            context.contentResolver.insert(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                contentValues
+            )
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
     }
 }

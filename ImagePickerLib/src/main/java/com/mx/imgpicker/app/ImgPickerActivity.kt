@@ -16,11 +16,14 @@ import com.mx.imgpicker.adapts.ImgLargeAdapt
 import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.Item
+import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.observer.ImageChangeObserver
 import com.mx.imgpicker.observer.VideoChangeObserver
 import com.mx.imgpicker.utils.BarColorChangeBiz
 import com.mx.imgpicker.utils.ImagePathBiz
 import com.mx.imgpicker.utils.ImagePickerProvider
+import com.mx.imgpicker.utils.source_loader.ImageSource
+import com.mx.imgpicker.utils.source_loader.VideoSource
 import java.io.File
 
 
@@ -123,13 +126,27 @@ class ImgPickerActivity : AppCompatActivity() {
             }
         }
         imgAdapt.onTakePictureClick = {
-            val file = ImagePathBiz.createImageFile(this)
-            val uri = ImagePickerProvider.createUri(this, file)
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
-            startActivityForResult(intent, REQUEST_TAKE_IMG)
-            cacheFile = file
+            when (pickerVM.type) {
+                PickerType.Image -> {
+                    val file = ImagePathBiz.createImageFile(this)
+                    val uri = ImagePickerProvider.createUri(this, file)
+                    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                    startActivityForResult(intent, REQUEST_TAKE_IMG)
+                    cacheFile = file
+                }
+                PickerType.Video -> {
+                    val file = ImagePathBiz.createVideoFile(this)
+                    val uri = ImagePickerProvider.createUri(this, file)
+                    val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+//                    intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, minTime)
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                    startActivityForResult(intent, REQUEST_TAKE_VIDEO)
+                    cacheFile = file
+                }
+            }
+            println("PATH = ${cacheFile?.absolutePath}")
         }
         imgAdapt.onItemClick = { item, list ->
             showLargeView(true, item)
@@ -246,12 +263,14 @@ class ImgPickerActivity : AppCompatActivity() {
         if (requestCode == REQUEST_TAKE_IMG && cacheFile?.exists() == true) {
             val file = cacheFile ?: return
             if (file.exists()) {
-                if (ImagePathBiz.saveToGallery(this, file)) {
-                    file.delete()
-                    cacheFile = null
-                } else {
-
-                }
+                ImageSource.save(this, file)
+                pickerVM.startScan()
+            }
+        }
+        if (requestCode == REQUEST_TAKE_VIDEO && cacheFile?.exists() == true) {
+            val file = cacheFile ?: return
+            if (file.exists()) {
+                VideoSource.save(this, file)
                 pickerVM.startScan()
             }
         }
@@ -278,5 +297,6 @@ class ImgPickerActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_TAKE_IMG = 0x12
+        private const val REQUEST_TAKE_VIDEO = REQUEST_TAKE_IMG + 1
     }
 }

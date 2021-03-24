@@ -6,8 +6,8 @@ import android.os.Looper
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.PickerType
-import com.mx.imgpicker.utils.source_loader.ImageSourceLoader
-import com.mx.imgpicker.utils.source_loader.VideoSourceLoader
+import com.mx.imgpicker.utils.source_loader.ImageSource
+import com.mx.imgpicker.utils.source_loader.VideoSource
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
@@ -26,12 +26,11 @@ class ImgPickerVM(val context: Context) {
         thread {
             synchronized(this) {
                 isInScan.set(true)
-                val iSourceLoader = if (type == PickerType.Image) {
-                    ImageSourceLoader(context)
+                val images = if (type == PickerType.Image) {
+                    ImageSource.scan(context).sortedByDescending { it.time }
                 } else {
-                    VideoSourceLoader(context)
+                    VideoSource.scan(context).sortedByDescending { it.time }
                 }
-                val images = iSourceLoader.scan().sortedByDescending { it.time }
                 val hasChange = (!images.toTypedArray().contentEquals(imageList.toTypedArray()))
                 if (hasChange) {
                     imageList.clear()
