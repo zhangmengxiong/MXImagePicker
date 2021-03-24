@@ -7,14 +7,14 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.*
 import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.FolderAdapt
-import com.mx.imgpicker.adapts.ImgAdapt
+import com.mx.imgpicker.adapts.ImgGridAdapt
+import com.mx.imgpicker.adapts.ImgLargeAdapt
 import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.FolderItem
+import com.mx.imgpicker.models.ImageItem
 import com.mx.imgpicker.observer.ImageChangeObserver
 import com.mx.imgpicker.observer.VideoChangeObserver
 import com.mx.imgpicker.utils.BarColorChangeBiz
@@ -25,7 +25,12 @@ import java.io.File
 
 class ImgPickerActivity : AppCompatActivity() {
     private val pickerVM by lazy { ImgPickerVM(this) }
-    private val adapt = ImgAdapt()
+
+    private val imageList = ArrayList<ImageItem>()
+    private val selectList = ArrayList<ImageItem>()
+
+    private val imgAdapt = ImgGridAdapt(imageList, selectList)
+    private val imgLargeAdapt = ImgLargeAdapt(imageList, selectList)
     private val folderAdapt = FolderAdapt()
     private var cacheFile: File? = null
 
@@ -34,6 +39,7 @@ class ImgPickerActivity : AppCompatActivity() {
     private var folderNameTxv: TextView? = null
     private var recycleView: RecyclerView? = null
     private var folderRecycleView: RecyclerView? = null
+    private var largeImgRecycleView: RecyclerView? = null
     private var folderMoreLay: View? = null
     private var folderMoreImg: View? = null
     private var barPlaceView: View? = null
@@ -53,7 +59,9 @@ class ImgPickerActivity : AppCompatActivity() {
         }
 
         pickerVM.type = builder.pickerType
-        adapt.maxSelectSize = builder.maxPickerSize
+        imgAdapt.maxSelectSize = builder.maxPickerSize
+        imgLargeAdapt.maxSelectSize = builder.maxPickerSize
+
         initView()
 
         if (builder.activityCallback != null) {
@@ -77,6 +85,7 @@ class ImgPickerActivity : AppCompatActivity() {
         returnBtn = findViewById(R.id.returnBtn)
         recycleView = findViewById(R.id.recycleView)
         folderRecycleView = findViewById(R.id.folderRecycleView)
+        largeImgRecycleView = findViewById(R.id.largeImgRecycleView)
         folderMoreLay = findViewById(R.id.folderMoreLay)
         folderMoreImg = findViewById(R.id.folderMoreImg)
         folderNameTxv = findViewById(R.id.folderNameTxv)
@@ -87,13 +96,19 @@ class ImgPickerActivity : AppCompatActivity() {
         recycleView?.let {
             it.setHasFixedSize(true)
             it.layoutManager = GridLayoutManager(this, 4)
-            it.adapter = adapt
+            it.adapter = imgAdapt
         }
 
         folderRecycleView?.let {
             it.setHasFixedSize(true)
             it.layoutManager = LinearLayoutManager(this)
             it.adapter = folderAdapt
+        }
+        largeImgRecycleView?.let {
+            PagerSnapHelper().attachToRecyclerView(it)
+            it.setHasFixedSize(true)
+            it.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            it.adapter = imgLargeAdapt
         }
 //        findViewById<View>(R.id.folderMoreLay)?.background?.alpha = (255 * 0.5).toInt()
         folderMoreLay?.setOnClickListener {
@@ -104,7 +119,7 @@ class ImgPickerActivity : AppCompatActivity() {
                 showFolderList(true)
             }
         }
-        adapt.onTakePictureClick = {
+        imgAdapt.onTakePictureClick = {
             val file = ImagePathBiz.createImageFile(this)
             val uri = ImagePickerProvider.createUri(this, file)
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -113,25 +128,26 @@ class ImgPickerActivity : AppCompatActivity() {
             startActivityForResult(intent, REQUEST_TAKE_IMG)
             cacheFile = file
         }
-        adapt.onItemClick = { item, list ->
-            ImagePathBiz.openImage(this, item)
+        imgAdapt.onItemClick = { item, list ->
+            showLargeView(true, item)
+//            ImagePathBiz.openImage(this, item)
         }
 
         selectBtn?.setOnClickListener {
-            val paths = adapt.selectList.map { it.path }
+            val paths = selectList.map { it.path }
             setResult(
                 RESULT_OK,
                 Intent().putExtra(PickerBuilder.KEY_INTENT_RESULT, ArrayList(paths))
             )
             finish()
         }
-        adapt.onSelectChange = { list ->
+        imgAdapt.onSelectChange = { list ->
             if (list.isEmpty()) {
                 selectBtn?.visibility = View.GONE
                 selectBtn?.text = "选择"
             } else {
                 selectBtn?.visibility = View.VISIBLE
-                selectBtn?.text = "选择(${list.size}/${adapt.maxSelectSize})"
+                selectBtn?.text = "选择(${list.size}/${imgAdapt.maxSelectSize})"
             }
         }
 
@@ -166,9 +182,21 @@ class ImgPickerActivity : AppCompatActivity() {
         if (show) {
             folderMoreImg?.rotation = 180f
             folderRecycleView?.visibility = View.VISIBLE
+            showLargeView(false)
         } else {
             folderMoreImg?.rotation = 0f
             folderRecycleView?.visibility = View.GONE
+        }
+    }
+
+    private fun showLargeView(show: Boolean, target: ImageItem? = null) {
+        if (show) {
+            showFolderList(false)
+            val index = imageList.indexOf(target)
+            largeImgRecycleView?.visibility = View.VISIBLE
+            largeImgRecycleView?.scrollToPosition(index)
+        } else {
+            largeImgRecycleView?.visibility = View.GONE
         }
     }
 
@@ -181,12 +209,13 @@ class ImgPickerActivity : AppCompatActivity() {
 
     private fun showFolder(folder: FolderItem?) {
         folderNameTxv?.text = folder?.name ?: "全部照片"
-        adapt.list.clear()
+        imageList.clear()
         if (folder != null) {
-            adapt.list.addAll(folder.images)
+            imageList.addAll(folder.images)
         }
         folderAdapt.selectItem = folder
-        adapt.notifyDataSetChanged()
+        imgAdapt.notifyDataSetChanged()
+        imgLargeAdapt.notifyDataSetChanged()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -205,6 +234,10 @@ class ImgPickerActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (folderRecycleView?.isShown == true) {
             showFolderList(false)
+            return
+        }
+        if (largeImgRecycleView?.isShown == true) {
+            showLargeView(false)
             return
         }
         super.onBackPressed()

@@ -13,10 +13,11 @@ import com.mx.imgpicker.models.ImageItem
 import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.views.PickerTextView
 
-class ImgAdapt(val list: ArrayList<ImageItem> = ArrayList()) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ImgGridAdapt(
+    private val list: ArrayList<ImageItem>,
+    private val selectList: ArrayList<ImageItem>
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var maxSelectSize = 9
-    val selectList = ArrayList<ImageItem>()
     var onSelectChange: ((list: ArrayList<ImageItem>) -> Unit)? = null
     var onItemClick: ((item: ImageItem, list: ArrayList<ImageItem>) -> Unit)? = null
     var onTakePictureClick: (() -> Unit)? = null
