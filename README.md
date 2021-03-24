@@ -61,6 +61,37 @@ setActivityCallback { activity ->
     <color name="picker_color_select">#03CE65</color>
 ```
 
+##### 自定义图片加载器（默认使用Glide）
+
+通过继承实现接口`IImageLoader` ,并注册到服务`ImagePickerService`即可
+```
+// 数据对象
+data class Item(val path: String, val uri: Uri, val mimeType: String, val time: Long, val name: String, val type: PickerType)
+
+/**
+ * 图片显示接口
+ */
+interface IImageLoader {
+    fun displayImage(item: Item, imageView: ImageView)
+}
+
+/**
+ * 提供默认Glide显示图片
+ */
+class GlideImageLoader : IImageLoader {
+    override fun displayImage(item: Item, imageView: ImageView) {
+        if (item.type == PickerType.Image) {
+            Glide.with(imageView).load(item.uri).into(imageView)
+        } else {
+            Glide.with(imageView).load(Uri.fromFile(File(item.path))).into(imageView)
+        }
+    }
+}
+
+// 全局注册加载器，可以卸载Application里面，不影响启动速度
+ImagePickerService.registerImageLoader(GlideImageLoader())
+```
+
 #### 第五步：获取返回结果
 ```
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
