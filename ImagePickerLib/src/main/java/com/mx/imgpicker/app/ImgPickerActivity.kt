@@ -1,13 +1,11 @@
 package com.mx.imgpicker.app
 
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
-import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
@@ -15,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.FolderAdapt
 import com.mx.imgpicker.adapts.ImgAdapt
@@ -34,26 +31,27 @@ class ImgPickerActivity : AppCompatActivity() {
     private val folderAdapt = FolderAdapt()
     private var cacheFile: File? = null
 
-    var returnBtn: ImageView? = null
-    var selectBtn: TextView? = null
-    var folderNameTxv: TextView? = null
-    var recycleView: RecyclerView? = null
-    var folderRecycleView: RecyclerView? = null
-    var folderMoreLay: View? = null
-    var folderMoreImg: View? = null
+    private var returnBtn: ImageView? = null
+    private var selectBtn: TextView? = null
+    private var folderNameTxv: TextView? = null
+    private var recycleView: RecyclerView? = null
+    private var folderRecycleView: RecyclerView? = null
+    private var folderMoreLay: View? = null
+    private var folderMoreImg: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_img_picker)
-        fullScreen(this)
+        fullScreen()
         initIntent()
     }
 
-    private fun fullScreen(activity: Activity) {
+    private fun fullScreen() {
+        val window = window ?: return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            findViewById<View>(R.id.barPlaceView)?.visibility = View.VISIBLE
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 //5.x开始需要把颜色设置透明，否则导航栏会呈现系统默认的浅灰色
-                val window = activity.window
                 val decorView = window.decorView
                 //两个 flag 要结合使用，表示让应用的主体内容占用系统状态栏的空间
                 val option = (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -61,11 +59,9 @@ class ImgPickerActivity : AppCompatActivity() {
                 decorView.systemUiVisibility = option
                 window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                 window.statusBarColor = Color.TRANSPARENT
-
                 //导航栏颜色也可以正常设置
                 window.navigationBarColor = resources.getColor(R.color.picker_color_background)
             } else {
-                val window = activity.window
                 val attributes = window.attributes
                 val flagTranslucentStatus = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
                 val flagTranslucentNavigation =
@@ -74,6 +70,8 @@ class ImgPickerActivity : AppCompatActivity() {
                 //                attributes.flags |= flagTranslucentNavigation;
                 window.attributes = attributes
             }
+        } else {
+            findViewById<View>(R.id.barPlaceView)?.visibility = View.GONE
         }
     }
 
