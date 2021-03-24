@@ -9,7 +9,6 @@ import com.mx.imgpicker.factory.IUriToFile
 object ImagePickerService {
     private var _imageLoader: IImageLoader? = null // 图片加载器
     private var _iUriToFile: IUriToFile? = null // Uri解析器
-    private var _activityCall: ((AppCompatActivity) -> Unit)? = null // Activity在创建时会回调这个，可以设置样式等
 
     fun getImageLoader(): IImageLoader {
         var loader = _imageLoader
@@ -36,11 +35,5 @@ object ImagePickerService {
         }
         return loader
     }
-
-    fun setActivityCall(call: ((activity: AppCompatActivity) -> Unit)) {
-        _activityCall = call
-    }
-
-    fun getActivityCall() = _activityCall
 }
 
