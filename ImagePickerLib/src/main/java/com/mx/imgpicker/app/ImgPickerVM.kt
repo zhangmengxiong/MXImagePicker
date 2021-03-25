@@ -3,6 +3,7 @@ package com.mx.imgpicker.app
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.PickerType
@@ -11,14 +12,13 @@ import com.mx.imgpicker.utils.source_loader.VideoSource
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
-class ImgPickerVM(val context: Context) {
+class ImgPickerVM(val context: Context, private val builder: PickerBuilder) {
     companion object {
         private val imageList = ArrayList<Item>()
     }
 
     private val isInScan = AtomicBoolean(false)
     private val mHandler = Handler(Looper.getMainLooper())
-    var type: PickerType = PickerType.Image
     var scanResult: ((List<FolderItem>) -> Unit)? = null
 
     fun startScan() {
@@ -26,7 +26,7 @@ class ImgPickerVM(val context: Context) {
         thread {
             synchronized(this) {
                 isInScan.set(true)
-                val images = if (type == PickerType.Image) {
+                val images = if (builder.pickerType == PickerType.Image) {
                     ImageSource.scan(context).sortedByDescending { it.time }
                 } else {
                     VideoSource.scan(context).sortedByDescending { it.time }

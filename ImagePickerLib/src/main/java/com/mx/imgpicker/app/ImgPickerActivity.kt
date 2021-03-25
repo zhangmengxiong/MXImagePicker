@@ -16,6 +16,7 @@ import com.mx.imgpicker.adapts.ImgLargeAdapt
 import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.Item
+import com.mx.imgpicker.models.PickerSelectCall
 import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.observer.ImageChangeObserver
 import com.mx.imgpicker.observer.VideoChangeObserver
@@ -25,22 +26,28 @@ import com.mx.imgpicker.utils.ImagePickerProvider
 import com.mx.imgpicker.utils.source_loader.ImageSource
 import com.mx.imgpicker.utils.source_loader.VideoSource
 import java.io.File
+import kotlin.concurrent.thread
 
 
 class ImgPickerActivity : AppCompatActivity() {
-    private val pickerVM by lazy { ImgPickerVM(this) }
-    private var maxSelectSize = 9
+    private val builder by lazy {
+        (intent.getSerializableExtra(PickerBuilder.KEY_INTENT_BUILDER) as PickerBuilder?)
+            ?: PickerBuilder()
+    }
+    private val pickerVM by lazy { ImgPickerVM(this, builder) }
+
     private val imageList = ArrayList<Item>()
     private val selectList = ArrayList<Item>()
 
-    private val imgAdapt = ImgGridAdapt(imageList, selectList)
-    private val imgLargeAdapt = ImgLargeAdapt(imageList, selectList)
+    private val imgAdapt by lazy { ImgGridAdapt(imageList, selectList, builder) }
+    private val imgLargeAdapt by lazy { ImgLargeAdapt(imageList, selectList, builder) }
     private val folderAdapt = FolderAdapt()
     private var cacheFile: File? = null
 
     private var returnBtn: ImageView? = null
     private var selectBtn: TextView? = null
     private var folderNameTxv: TextView? = null
+    private var emptyTxv: TextView? = null
     private var recycleView: RecyclerView? = null
     private var folderRecycleView: RecyclerView? = null
     private var largeImgRecycleView: RecyclerView? = null
@@ -55,18 +62,7 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     private fun initIntent() {
-        val builder =
-            intent.getSerializableExtra(PickerBuilder.KEY_INTENT_BUILDER) as PickerBuilder?
-        if (builder == null) {
-            finish()
-            return
-        }
-
-        pickerVM.type = builder.pickerType
-        maxSelectSize = builder.maxPickerSize
-
         initView()
-
         if (builder.activityCallback != null) {
             barPlaceView?.visibility = View.GONE
             builder.activityCallback?.invoke(this)
@@ -86,6 +82,7 @@ class ImgPickerActivity : AppCompatActivity() {
 
     private fun initView() {
         returnBtn = findViewById(R.id.returnBtn)
+        emptyTxv = findViewById(R.id.emptyTxv)
         recycleView = findViewById(R.id.recycleView)
         folderRecycleView = findViewById(R.id.folderRecycleView)
         largeImgRecycleView = findViewById(R.id.largeImgRecycleView)
@@ -126,7 +123,7 @@ class ImgPickerActivity : AppCompatActivity() {
             }
         }
         imgAdapt.onTakePictureClick = {
-            when (pickerVM.type) {
+            when (builder.pickerType) {
                 PickerType.Image -> {
                     val file = ImagePathBiz.createImageFile(this)
                     val uri = ImagePickerProvider.createUri(this, file)
@@ -140,7 +137,9 @@ class ImgPickerActivity : AppCompatActivity() {
                     val file = ImagePathBiz.createVideoFile(this)
                     val uri = ImagePickerProvider.createUri(this, file)
                     val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-//                    intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, minTime)
+                    if (builder.videoMaxLength > 0) {
+                        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, builder.videoMaxLength)
+                    }
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
                     startActivityForResult(intent, REQUEST_TAKE_VIDEO)
                     cacheFile = file
@@ -162,29 +161,48 @@ class ImgPickerActivity : AppCompatActivity() {
             finish()
         }
 
-        val onSelectChange = { item: Item ->
-            val index = imageList.indexOf(item)
-            val isSelect = selectList.contains(item)
-            if (isSelect) {
-                selectList.remove(item)
-                imgAdapt.notifyDataSetChanged()
-                imgLargeAdapt.notifyDataSetChanged()
-            } else {
-                if (selectList.size >= maxSelectSize) {
-                    Toast.makeText(this, "您最多只能选择${maxSelectSize}张图片！", Toast.LENGTH_SHORT).show()
+        val onSelectChange = object : PickerSelectCall {
+            override fun invoke(item: Item) {
+                if (builder.pickerType == PickerType.Video && builder.videoMaxLength > 0 && item.duration > builder.videoMaxLength) {
+                    Toast.makeText(
+                        this@ImgPickerActivity,
+                        "当前视频时长超出限制，可选择 ${builder.videoMaxLength} 秒以内的视频",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return
+                }
+
+                val index = imageList.indexOf(item)
+                val isSelect = selectList.contains(item)
+                val selectIndexList = selectList.map { imageList.indexOf(it) }
+
+                if (isSelect) {
+                    selectList.remove(item)
+                    selectIndexList.forEach { index ->
+                        imgAdapt.notifyItemChanged(if (builder.enableCamera) index + 1 else index)
+                        imgLargeAdapt.notifyItemChanged(index)
+                    }
                 } else {
+                    if (selectList.size >= builder.maxPickerSize) {
+                        Toast.makeText(
+                            this@ImgPickerActivity,
+                            "您最多只能选择${builder.maxPickerSize}张图片！",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return
+                    }
                     selectList.add(item)
-                    imgAdapt.notifyItemChanged(index + 1)
+                    imgAdapt.notifyItemChanged(if (builder.enableCamera) index + 1 else index)
                     imgLargeAdapt.notifyItemChanged(index)
                 }
-            }
 
-            if (selectList.isEmpty()) {
-                selectBtn?.visibility = View.GONE
-                selectBtn?.text = "选择"
-            } else {
-                selectBtn?.visibility = View.VISIBLE
-                selectBtn?.text = "选择(${selectList.size}/${maxSelectSize})"
+                if (selectList.isEmpty()) {
+                    selectBtn?.visibility = View.GONE
+                    selectBtn?.text = "选择"
+                } else {
+                    selectBtn?.visibility = View.VISIBLE
+                    selectBtn?.text = "选择(${selectList.size}/${builder.maxPickerSize})"
+                }
             }
         }
 
@@ -256,6 +274,7 @@ class ImgPickerActivity : AppCompatActivity() {
         folderAdapt.selectItem = folder
         imgAdapt.notifyDataSetChanged()
         imgLargeAdapt.notifyDataSetChanged()
+        emptyTxv?.visibility = if (imgAdapt.itemCount <= 0) View.VISIBLE else View.GONE
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -270,8 +289,10 @@ class ImgPickerActivity : AppCompatActivity() {
         if (requestCode == REQUEST_TAKE_VIDEO && cacheFile?.exists() == true) {
             val file = cacheFile ?: return
             if (file.exists()) {
-                VideoSource.save(this, file)
-                pickerVM.startScan()
+                thread {
+                    VideoSource.save(this, file)
+                    pickerVM.startScan()
+                }
             }
         }
     }

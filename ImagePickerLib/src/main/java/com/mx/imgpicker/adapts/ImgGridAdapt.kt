@@ -8,15 +8,18 @@ import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
+import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.Item
+import com.mx.imgpicker.models.PickerSelectCall
 import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.views.PickerTextView
 
 class ImgGridAdapt(
     private val list: ArrayList<Item>,
-    private val selectList: ArrayList<Item>
+    private val selectList: ArrayList<Item>,
+    private val builder: PickerBuilder
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var onSelectClick: ((item: Item) -> Unit)? = null
+    var onSelectClick: PickerSelectCall? = null
     var onItemClick: ((item: Item, list: ArrayList<Item>) -> Unit)? = null
     var onTakePictureClick: (() -> Unit)? = null
 
@@ -44,7 +47,8 @@ class ImgGridAdapt(
         } else if (holder is ImgVH) {
             holder.indexTxv.visibility = View.VISIBLE
             holder.selectBG.visibility = View.VISIBLE
-            val item = list.getOrNull(position - 1) ?: return
+            val position = if (builder.enableCamera) position - 1 else position
+            val item = list.getOrNull(position) ?: return
             ImagePickerService.getImageLoader().displayImage(item, holder.img)
             val isSelect = selectList.contains(item)
             val index = selectList.indexOf(item)
@@ -61,7 +65,6 @@ class ImgGridAdapt(
             if (isSelect) {
                 holder.selectBG.alpha = 1f
                 holder.indexTxv.text = (index + 1).toString()
-
             } else {
                 holder.selectBG.alpha = 0.2f
                 holder.indexTxv.text = ""
@@ -71,10 +74,10 @@ class ImgGridAdapt(
     }
 
     override fun getItemCount(): Int {
-        return list.size + 1
+        return if (builder.enableCamera) list.size + 1 else list.size
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (position == 0) 0 else 1
+        return if (builder.enableCamera && position == 0) 0 else 1
     }
 }

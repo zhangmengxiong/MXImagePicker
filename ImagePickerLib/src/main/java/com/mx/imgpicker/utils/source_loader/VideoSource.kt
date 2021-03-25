@@ -4,10 +4,12 @@ import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import android.media.MediaMetadataRetriever
 import android.provider.MediaStore
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.PickerType
 import java.io.File
+
 
 object VideoSource : ISource {
     override fun scan(context: Context): List<Item> {
@@ -22,6 +24,7 @@ object VideoSource : ISource {
                 MediaStore.Video.Media.DATE_ADDED,
                 MediaStore.Video.Media._ID,
                 MediaStore.Video.Media.MIME_TYPE,
+                MediaStore.Video.Media.DURATION,
                 MediaStore.Video.Media.SIZE
             ),
             MediaStore.MediaColumns.SIZE + ">0",
@@ -50,6 +53,9 @@ object VideoSource : ISource {
         try { // 获取图片的路径
             val id = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Video.Media._ID))
             val path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Video.Media.DATA))
+            val duration =
+                mCursor.getString(mCursor.getColumnIndex(MediaStore.Video.Media.DURATION))
+                    .toIntOrNull() ?: 0
             //获取图片名称
             val name =
                 mCursor.getString(mCursor.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME))
@@ -67,7 +73,7 @@ object VideoSource : ISource {
             val uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI.buildUpon()
                 .appendPath(id.toString()).build()
             if (File(path).exists() || contentResolver.openFileDescriptor(uri, "r") != null) {
-                return Item(path, uri, mimeType, time, name, PickerType.Video)
+                return Item(path, uri, mimeType, time, name, PickerType.Video, duration / 1000)
             }
         } catch (e: Exception) {
         }
@@ -102,6 +108,7 @@ object VideoSource : ISource {
 //    }
 
     override fun save(context: Context, file: File): Boolean {
+
         try {
             val contentValues = ContentValues()
             contentValues.put(MediaStore.Video.Media.TITLE, file.name)
@@ -110,6 +117,7 @@ object VideoSource : ISource {
             contentValues.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis())
             contentValues.put(MediaStore.Video.Media.DATE_MODIFIED, System.currentTimeMillis())
             contentValues.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis())
+            contentValues.put(MediaStore.Video.Media.DURATION, getVideoLength(file))
             contentValues.put(MediaStore.Video.Media.DATA, file.absolutePath)
             contentValues.put(MediaStore.Video.Media.SIZE, file.length())
             context.contentResolver.insert(
@@ -121,5 +129,19 @@ object VideoSource : ISource {
             e.printStackTrace()
         }
         return false
+    }
+
+    /**
+     * 获取视屏长度，返回毫秒
+     */
+    private fun getVideoLength(file: File): Long {
+        try {
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(file.absolutePath)
+            return (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                .toLongOrNull() ?: 0L)
+        } catch (e: java.lang.Exception) {
+        }
+        return 0L
     }
 }

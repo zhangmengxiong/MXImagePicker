@@ -5,20 +5,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.github.chrisbanes.photoview.PhotoView
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
+import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.Item
+import com.mx.imgpicker.models.PickerSelectCall
 import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.utils.ImagePathBiz
+import com.mx.imgpicker.utils.PickerFormatBiz
 import com.mx.imgpicker.views.PickerTextView
 
 class ImgLargeAdapt(
     private val list: ArrayList<Item>,
-    private val selectList: ArrayList<Item>
+    private val selectList: ArrayList<Item>,
+    builder: PickerBuilder
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var onSelectChange: ((item: Item) -> Unit)? = null
+    var onSelectChange: PickerSelectCall? = null
 
     class ImgScanVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val photoView: PhotoView = itemView.findViewById(R.id.photoView)
@@ -31,6 +36,7 @@ class ImgLargeAdapt(
         val indexTxv: PickerTextView = itemView.findViewById(R.id.indexTxv)
         val indexLay: RelativeLayout = itemView.findViewById(R.id.indexLay)
         val playBtn: ImageView = itemView.findViewById(R.id.playBtn)
+        val videoLengthTxv: TextView = itemView.findViewById(R.id.videoLengthTxv)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -71,6 +77,8 @@ class ImgLargeAdapt(
             val isSelect = selectList.contains(item)
             val index = selectList.indexOf(item)
             holder.indexTxv.isChecked = isSelect
+            holder.videoLengthTxv.text =
+                if (item.duration > 0) PickerFormatBiz.timeToString(item.duration) else ""
 
             holder.indexLay.setOnClickListener {
                 onSelectChange?.invoke(item)

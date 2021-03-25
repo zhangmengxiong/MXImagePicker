@@ -25,14 +25,15 @@ class MainActivity : AppCompatActivity() {
                 if (success) {
                     MXStarter.start(
                         this,
-                        PickerBuilder().setMaxSize(3).setActivityCallback { activity ->
-                            ImmersionBar.with(activity)
-                                .autoDarkModeEnable(true)
-                                .statusBarColorInt(activity.resources.getColor(R.color.picker_color_background))
-                                .fitsSystemWindows(true)
-                                .navigationBarColor(R.color.picker_color_background)
-                                .init()
-                        }.createIntent(this)
+                        PickerBuilder().setMaxSize(9).setCameraEnable(true)
+                            .setActivityCallback { activity ->
+                                ImmersionBar.with(activity)
+                                    .autoDarkModeEnable(true)
+                                    .statusBarColorInt(activity.resources.getColor(R.color.picker_color_background))
+                                    .fitsSystemWindows(true)
+                                    .navigationBarColor(R.color.picker_color_background)
+                                    .init()
+                            }.createIntent(this)
                     ) { resultCode, data ->
 
                     }
@@ -51,14 +52,15 @@ class MainActivity : AppCompatActivity() {
                 if (success) {
                     MXStarter.start(
                         this,
-                        PickerBuilder().setMaxSize(3).setActivityCallback { activity ->
-                            ImmersionBar.with(activity)
-                                .autoDarkModeEnable(true)
-                                .statusBarColorInt(activity.resources.getColor(R.color.picker_color_background))
-                                .fitsSystemWindows(true)
-                                .navigationBarColor(R.color.picker_color_background)
-                                .init()
-                        }.setType(PickerType.Video).createIntent(this)
+                        PickerBuilder().setMaxSize(3).setMaxVideoLength(15)
+                            .setActivityCallback { activity ->
+                                ImmersionBar.with(activity)
+                                    .autoDarkModeEnable(true)
+                                    .statusBarColorInt(activity.resources.getColor(R.color.picker_color_background))
+                                    .fitsSystemWindows(true)
+                                    .navigationBarColor(R.color.picker_color_background)
+                                    .init()
+                            }.setType(PickerType.Video).createIntent(this)
                     ) { resultCode, data ->
 
                     }

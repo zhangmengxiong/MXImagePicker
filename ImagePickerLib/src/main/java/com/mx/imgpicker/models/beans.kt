@@ -14,7 +14,15 @@ enum class PickerType {
 /**
  * 类型对象
  */
-data class Item(val path: String, val uri: Uri, val mimeType: String, val time: Long, val name: String, val type: PickerType) : Serializable {
+data class Item(
+    val path: String,
+    val uri: Uri,
+    val mimeType: String,
+    val time: Long,
+    val name: String,
+    val type: PickerType,
+    val duration: Int = 0
+) : Serializable {
     fun getFolderName(): String {
         val paths = path.split(File.separator)
         if (paths.size >= 2) {
@@ -28,3 +36,5 @@ data class Item(val path: String, val uri: Uri, val mimeType: String, val time: 
  * 分组对象
  */
 data class FolderItem(val name: String, val images: ArrayList<Item> = ArrayList()) : Serializable
+
+typealias PickerSelectCall = ((item: Item) -> Unit)
