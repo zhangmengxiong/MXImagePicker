@@ -1,4 +1,5 @@
 # ImagePicker
+[![](https://jitpack.io/v/com.gitee.zhangmengxiong/MXImagePicker.svg)](https://jitpack.io/#com.gitee.zhangmengxiong/MXImagePicker)
 
 ## 介绍
 基于Kotlin，AndroidX的仿微信图片选择器
