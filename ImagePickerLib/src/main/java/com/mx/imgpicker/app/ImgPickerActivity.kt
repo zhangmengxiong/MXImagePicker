@@ -214,12 +214,12 @@ class ImgPickerActivity : AppCompatActivity() {
 
         contentResolver.registerContentObserver(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            false,
+            true,
             imageChangeObserver
         )
         contentResolver.registerContentObserver(
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-            false,
+            true,
             videoChangeObserver
         )
         pickerVM.scanResult = { list ->
