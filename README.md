@@ -39,6 +39,9 @@ startActivityForResult(intent,0x22)
     * PickerType.Image = 图片
     * PickerType.Video = 视频
 3. `setActivityCallback(call: ((activity: AppCompatActivity) -> Unit))` 在图片选择器Activity创建时会回调这个方法，一般会通过这个来改变导航栏、状态栏的Theme,demo中搭配`ImmersionBar`来实现沉浸式效果
+4. `setCameraEnable(enable: Boolean)` 设置是否启动拍摄功能，默认=true
+5. `setMaxVideoLength(length: Int)` 当类型=Video时，可以选择视频最大时长限制，单位：秒   默认=-1 无限制
+
 ```
 setActivityCallback { activity ->
     ImmersionBar.with(activity)
@@ -60,6 +63,12 @@ setActivityCallback { activity ->
 
     <!--  选中状态颜色  -->  
     <color name="picker_color_select">#03CE65</color>
+```
+
+dimens.xml 资源
+```
+    <!--  顶部导航栏高度  -->  
+    <dimen name="picker_bar_height">50dp</dimen>
 ```
 
 ##### 自定义图片加载器（默认使用Glide）
