@@ -47,11 +47,11 @@
 
     <ImageView
         android:id="@+id/videoTag"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_margin="3dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginLeft="7dp"
+        android:layout_marginBottom="3dp"
         android:src="@drawable/icon_picker_video"
-        android:tint="@color/picker_color_important"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" />

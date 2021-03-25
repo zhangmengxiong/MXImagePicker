@@ -26,6 +26,7 @@ import com.mx.imgpicker.utils.ImagePickerProvider
 import com.mx.imgpicker.utils.source_loader.ImageSource
 import com.mx.imgpicker.utils.source_loader.VideoSource
 import java.io.File
+import java.lang.Exception
 import kotlin.concurrent.thread
 
 
@@ -58,11 +59,12 @@ class ImgPickerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_img_picker)
+
+        initView()
         initIntent()
     }
 
     private fun initIntent() {
-        initView()
         if (builder.activityCallback != null) {
             barPlaceView?.visibility = View.GONE
             builder.activityCallback?.invoke(this)
@@ -93,6 +95,7 @@ class ImgPickerActivity : AppCompatActivity() {
         barPlaceView = findViewById(R.id.barPlaceView)
 
         returnBtn?.setOnClickListener { onBackPressed() }
+
         recycleView?.let {
             it.itemAnimator = null
             it.setHasFixedSize(true)
@@ -113,7 +116,7 @@ class ImgPickerActivity : AppCompatActivity() {
             it.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
             it.adapter = imgLargeAdapt
         }
-//        findViewById<View>(R.id.folderMoreLay)?.background?.alpha = (255 * 0.5).toInt()
+
         folderMoreLay?.setOnClickListener {
             if (folderRecycleView?.isShown == true) {
                 showFolderList(false)
@@ -259,10 +262,14 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     private val imageChangeObserver = ImageChangeObserver {
-        pickerVM.startScan()
+        if (builder.pickerType == PickerType.Image) {
+            pickerVM.startScan()
+        }
     }
     private val videoChangeObserver = VideoChangeObserver {
-        pickerVM.startScan()
+        if (builder.pickerType == PickerType.Video) {
+            pickerVM.startScan()
+        }
     }
 
     private fun showFolder(folder: FolderItem?) {
@@ -311,8 +318,11 @@ class ImgPickerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         pickerVM.destroy()
-        contentResolver.unregisterContentObserver(imageChangeObserver)
-        contentResolver.unregisterContentObserver(videoChangeObserver)
+        try {
+            contentResolver.unregisterContentObserver(imageChangeObserver)
+            contentResolver.unregisterContentObserver(videoChangeObserver)
+        } catch (e: Exception) {
+        }
         super.onDestroy()
     }
 

@@ -28,12 +28,14 @@
             android:id="@+id/folderMoreLay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/returnBtn"
             android:animateLayoutChanges="true"
             android:background="@drawable/bg_picker_folder_select"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingVertical="5dp"
+            android:paddingVertical="4dp"
             android:paddingLeft="15dp"
             android:paddingRight="10dp">
 
@@ -46,7 +48,7 @@
                 android:singleLine="true"
                 android:text="全部"
                 android:textColor="@color/picker_color_important"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
             <ImageView
                 android:id="@+id/folderMoreImg"
@@ -89,7 +91,7 @@
             android:id="@+id/recycleView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="1dp" />
+            android:paddingHorizontal="1dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/folderRecycleView"
