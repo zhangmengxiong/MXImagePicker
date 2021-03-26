@@ -1,13 +1,14 @@
 package com.mx.imgpicker.models
 
 import android.net.Uri
+import androidx.appcompat.app.AppCompatActivity
 import java.io.File
 import java.io.Serializable
 
 /**
  * 类型
  */
-enum class PickerType {
+enum class PickerType : Serializable {
     Image, Video
 }
 
@@ -37,4 +38,9 @@ data class Item(
  */
 data class FolderItem(val name: String, val images: ArrayList<Item> = ArrayList()) : Serializable
 
-typealias PickerSelectCall = ((item: Item) -> Unit)
+/**
+ * 图片选择回调
+ */
+interface ItemSelectCall {
+    fun select(item: Item)
+}

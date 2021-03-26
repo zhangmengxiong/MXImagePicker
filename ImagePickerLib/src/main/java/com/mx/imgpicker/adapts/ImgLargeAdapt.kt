@@ -12,7 +12,7 @@ import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
 import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.Item
-import com.mx.imgpicker.models.PickerSelectCall
+import com.mx.imgpicker.models.ItemSelectCall
 import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.utils.ImagePathBiz
 import com.mx.imgpicker.utils.PickerFormatBiz
@@ -23,7 +23,7 @@ class ImgLargeAdapt(
     private val selectList: ArrayList<Item>,
     builder: PickerBuilder
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var onSelectChange: PickerSelectCall? = null
+    var onSelectChange: ItemSelectCall? = null
 
     class ImgScanVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val photoView: PhotoView = itemView.findViewById(R.id.photoView)
@@ -65,7 +65,7 @@ class ImgLargeAdapt(
             holder.indexTxv.isChecked = isSelect
 
             holder.indexLay.setOnClickListener {
-                onSelectChange?.invoke(item)
+                onSelectChange?.select(item)
             }
             if (isSelect) {
                 holder.indexTxv.text = (index + 1).toString()
@@ -81,7 +81,7 @@ class ImgLargeAdapt(
                 if (item.duration > 0) PickerFormatBiz.timeToString(item.duration) else ""
 
             holder.indexLay.setOnClickListener {
-                onSelectChange?.invoke(item)
+                onSelectChange?.select(item)
             }
             holder.playBtn.setOnClickListener {
                 ImagePathBiz.openItem(it.context, item)

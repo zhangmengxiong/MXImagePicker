@@ -10,7 +10,7 @@ import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
 import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.Item
-import com.mx.imgpicker.models.PickerSelectCall
+import com.mx.imgpicker.models.ItemSelectCall
 import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.views.PickerTextView
 
@@ -19,7 +19,7 @@ class ImgGridAdapt(
     private val selectList: ArrayList<Item>,
     private val builder: PickerBuilder
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var onSelectClick: PickerSelectCall? = null
+    var onSelectClick: ItemSelectCall? = null
     var onItemClick: ((item: Item, list: ArrayList<Item>) -> Unit)? = null
     var onTakePictureClick: (() -> Unit)? = null
 
@@ -60,7 +60,7 @@ class ImgGridAdapt(
                 holder.videoTag.visibility = View.VISIBLE
             }
             holder.indexLay.setOnClickListener {
-                onSelectClick?.invoke(item)
+                onSelectClick?.select(item)
             }
             if (isSelect) {
                 holder.selectBG.alpha = 1f

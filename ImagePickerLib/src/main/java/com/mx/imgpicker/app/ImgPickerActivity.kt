@@ -9,6 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.*
+import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.FolderAdapt
 import com.mx.imgpicker.adapts.ImgGridAdapt
@@ -16,7 +17,7 @@ import com.mx.imgpicker.adapts.ImgLargeAdapt
 import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.Item
-import com.mx.imgpicker.models.PickerSelectCall
+import com.mx.imgpicker.models.ItemSelectCall
 import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.observer.ImageChangeObserver
 import com.mx.imgpicker.observer.VideoChangeObserver
@@ -65,7 +66,8 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     private fun initIntent() {
-        if (builder._activityCall != null) {
+        val activityCall = builder._activityCall ?: ImagePickerService.getGlobalActivityCall()
+        if (activityCall != null) {
             barPlaceView?.visibility = View.GONE
             builder._activityCall?.invoke(this)
         } else {
@@ -164,8 +166,8 @@ class ImgPickerActivity : AppCompatActivity() {
             finish()
         }
 
-        val onSelectChange = object : PickerSelectCall {
-            override fun invoke(item: Item) {
+        val onSelectChange = object : ItemSelectCall {
+            override fun select(item: Item) {
                 if (builder._pickerType == PickerType.Video && builder._videoMaxLength > 0 && item.duration > builder._videoMaxLength) {
                     Toast.makeText(
                         this@ImgPickerActivity,
