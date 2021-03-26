@@ -47,7 +47,7 @@ class ImgGridAdapt(
         } else if (holder is ImgVH) {
             holder.indexTxv.visibility = View.VISIBLE
             holder.selectBG.visibility = View.VISIBLE
-            val position = if (builder.enableCamera) position - 1 else position
+            val position = if (builder._enableCamera) position - 1 else position
             val item = list.getOrNull(position) ?: return
             ImagePickerService.getImageLoader().displayImage(item, holder.img)
             val isSelect = selectList.contains(item)
@@ -74,10 +74,10 @@ class ImgGridAdapt(
     }
 
     override fun getItemCount(): Int {
-        return if (builder.enableCamera) list.size + 1 else list.size
+        return if (builder._enableCamera) list.size + 1 else list.size
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (builder.enableCamera && position == 0) 0 else 1
+        return if (builder._enableCamera && position == 0) 0 else 1
     }
 }

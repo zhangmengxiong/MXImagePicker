@@ -65,9 +65,9 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     private fun initIntent() {
-        if (builder.activityCallback != null) {
+        if (builder._activityCall != null) {
             barPlaceView?.visibility = View.GONE
-            builder.activityCallback?.invoke(this)
+            builder._activityCall?.invoke(this)
         } else {
             // 默认设置
             if (BarColorChangeBiz.setFullScreen(
@@ -126,7 +126,7 @@ class ImgPickerActivity : AppCompatActivity() {
             }
         }
         imgAdapt.onTakePictureClick = {
-            when (builder.pickerType) {
+            when (builder._pickerType) {
                 PickerType.Image -> {
                     val file = ImagePathBiz.createImageFile(this)
                     val uri = ImagePickerProvider.createUri(this, file)
@@ -140,8 +140,8 @@ class ImgPickerActivity : AppCompatActivity() {
                     val file = ImagePathBiz.createVideoFile(this)
                     val uri = ImagePickerProvider.createUri(this, file)
                     val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-                    if (builder.videoMaxLength > 0) {
-                        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, builder.videoMaxLength)
+                    if (builder._videoMaxLength > 0) {
+                        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, builder._videoMaxLength)
                     }
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
                     startActivityForResult(intent, REQUEST_TAKE_VIDEO)
@@ -166,10 +166,10 @@ class ImgPickerActivity : AppCompatActivity() {
 
         val onSelectChange = object : PickerSelectCall {
             override fun invoke(item: Item) {
-                if (builder.pickerType == PickerType.Video && builder.videoMaxLength > 0 && item.duration > builder.videoMaxLength) {
+                if (builder._pickerType == PickerType.Video && builder._videoMaxLength > 0 && item.duration > builder._videoMaxLength) {
                     Toast.makeText(
                         this@ImgPickerActivity,
-                        "当前视频时长超出限制，可选择 ${builder.videoMaxLength} 秒以内的视频",
+                        "当前视频时长超出限制，可选择 ${builder._videoMaxLength} 秒以内的视频",
                         Toast.LENGTH_SHORT
                     ).show()
                     return
@@ -182,20 +182,20 @@ class ImgPickerActivity : AppCompatActivity() {
                 if (isSelect) {
                     selectList.remove(item)
                     selectIndexList.forEach { index ->
-                        imgAdapt.notifyItemChanged(if (builder.enableCamera) index + 1 else index)
+                        imgAdapt.notifyItemChanged(if (builder._enableCamera) index + 1 else index)
                         imgLargeAdapt.notifyItemChanged(index)
                     }
                 } else {
-                    if (selectList.size >= builder.maxPickerSize) {
+                    if (selectList.size >= builder._maxSize) {
                         Toast.makeText(
                             this@ImgPickerActivity,
-                            "您最多只能选择${builder.maxPickerSize}张图片！",
+                            "您最多只能选择${builder._maxSize}张图片！",
                             Toast.LENGTH_SHORT
                         ).show()
                         return
                     }
                     selectList.add(item)
-                    imgAdapt.notifyItemChanged(if (builder.enableCamera) index + 1 else index)
+                    imgAdapt.notifyItemChanged(if (builder._enableCamera) index + 1 else index)
                     imgLargeAdapt.notifyItemChanged(index)
                 }
 
@@ -204,7 +204,7 @@ class ImgPickerActivity : AppCompatActivity() {
                     selectBtn?.text = "选择"
                 } else {
                     selectBtn?.visibility = View.VISIBLE
-                    selectBtn?.text = "选择(${selectList.size}/${builder.maxPickerSize})"
+                    selectBtn?.text = "选择(${selectList.size}/${builder._maxSize})"
                 }
             }
         }
@@ -262,12 +262,12 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     private val imageChangeObserver = ImageChangeObserver {
-        if (builder.pickerType == PickerType.Image) {
+        if (builder._pickerType == PickerType.Image) {
             pickerVM.startScan()
         }
     }
     private val videoChangeObserver = VideoChangeObserver {
-        if (builder.pickerType == PickerType.Video) {
+        if (builder._pickerType == PickerType.Video) {
             pickerVM.startScan()
         }
     }

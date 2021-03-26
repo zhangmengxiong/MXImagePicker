@@ -26,7 +26,7 @@ class ImgPickerVM(val context: Context, private val builder: PickerBuilder) {
         thread {
             synchronized(this) {
                 isInScan.set(true)
-                val images = if (builder.pickerType == PickerType.Image) {
+                val images = if (builder._pickerType == PickerType.Image) {
                     ImageSource.scan(context).sortedByDescending { it.time }
                 } else {
                     VideoSource.scan(context).sortedByDescending { it.time }

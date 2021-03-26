@@ -8,17 +8,17 @@ import com.mx.imgpicker.models.PickerType
 import java.io.Serializable
 
 class PickerBuilder : Serializable {
-    var pickerType: PickerType = PickerType.Image
-    var maxPickerSize: Int = 1 //选择最大数量
-    var activityCallback: ((AppCompatActivity) -> Unit)? = null // Activity在创建时会回调这个，可以设置样式等
-    var enableCamera: Boolean = true // 是否可以拍摄
-    var videoMaxLength: Int = -1 // 视频最大长度，单位：秒
+    var _pickerType: PickerType = PickerType.Image
+    var _maxSize: Int = 1 //选择最大数量
+    var _activityCall: ((AppCompatActivity) -> Unit)? = null // Activity在创建时会回调这个，可以设置样式等
+    var _enableCamera: Boolean = true // 是否可以拍摄
+    var _videoMaxLength: Int = -1 // 视频最大长度，单位：秒
 
     /**
      * 设置最大选择数量
      */
     fun setMaxSize(size: Int): PickerBuilder {
-        maxPickerSize = size
+        _maxSize = size
         return this
     }
 
@@ -26,7 +26,7 @@ class PickerBuilder : Serializable {
      * 选择类型，默认=Image
      */
     fun setType(type: PickerType): PickerBuilder {
-        pickerType = type
+        _pickerType = type
         return this
     }
 
@@ -34,7 +34,7 @@ class PickerBuilder : Serializable {
      * 是否可以拍摄
      */
     fun setCameraEnable(enable: Boolean): PickerBuilder {
-        enableCamera = enable
+        _enableCamera = enable
         return this
     }
 
@@ -42,7 +42,7 @@ class PickerBuilder : Serializable {
      * 视频最长时长,单位：秒
      */
     fun setMaxVideoLength(length: Int): PickerBuilder {
-        videoMaxLength = length
+        _videoMaxLength = length
         return this
     }
 
@@ -52,7 +52,7 @@ class PickerBuilder : Serializable {
      * 一次选择只会调用一次回调！
      */
     fun setActivityCallback(call: ((activity: AppCompatActivity) -> Unit)): PickerBuilder {
-        activityCallback = call
+        _activityCall = call
         return this
     }
 
