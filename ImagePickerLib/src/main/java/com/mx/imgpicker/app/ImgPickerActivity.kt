@@ -69,7 +69,7 @@ class ImgPickerActivity : AppCompatActivity() {
         val activityCall = builder._activityCall ?: ImagePickerService.getGlobalActivityCall()
         if (activityCall != null) {
             barPlaceView?.visibility = View.GONE
-            builder._activityCall?.invoke(this)
+            activityCall.invoke(this)
         } else {
             // 默认设置
             if (BarColorChangeBiz.setFullScreen(
