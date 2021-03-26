@@ -51,7 +51,18 @@ setActivityCallback { activity ->
      .navigationBarColor(R.color.picker_color_background)
      .init()
 }
+        
+        // 也可以在Application中批量设置
+        ImagePickerService.registerActivityCallback { activity ->
+            ImmersionBar.with(activity)
+                    .autoDarkModeEnable(true)
+                    .statusBarColorInt(activity.resources.getColor(R.color.picker_color_background))
+                    .fitsSystemWindows(true)
+                    .navigationBarColor(R.color.picker_color_background)
+                    .init()
+        }
 ```
+
 ##### 页面颜色设置
 将下面颜色值放如主项目的资源xml中，可以修改页面对应的颜色显示
 ```
