@@ -13,14 +13,9 @@
     implementation `com.github.bumptech.glide:glide:x.x.x`
     implementation `androidx.constraintlayout:constraintlayout:2.0.4`
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
-``` 
+```
 
-#### 第二步：在AndroidManifest.xml中添加Activity声明
-``` 
-<activity android:name="com.mx.imgpicker.app.ImgPickerActivity" />
-``` 
-
-#### 第三步：使用前需要添加相册、存储权限 
+#### 第二步：使用前需要添加相册、存储权限
 ```
     Manifest.permission.CAMERA
     Manifest.permission.READ_EXTERNAL_STORAGE
@@ -28,7 +23,7 @@
 ```
 注意：`没有权限进入选择页面会报错！`
 
-#### 第四步：启动选择页面
+#### 第三步：启动选择页面
 ```
 val intent = PickerBuilder().setMaxSize(3).createIntent(this)
 startActivityForResult(intent,0x22)
@@ -102,7 +97,7 @@ class GlideImageLoader : IImageLoader {
 ImagePickerService.registerImageLoader(GlideImageLoader())
 ```
 
-#### 第五步：获取返回结果
+#### 第四步：获取返回结果
 ```
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
