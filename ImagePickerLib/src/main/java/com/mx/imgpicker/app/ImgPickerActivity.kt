@@ -71,6 +71,20 @@ class ImgPickerActivity : AppCompatActivity() {
             finish()
             return
         }
+        
+        if (savedInstanceState?.containsKey(STATE_FILE) == true
+            && savedInstanceState.containsKey(STATE_TYPE)
+        ) {
+            val file = File(savedInstanceState.getString(STATE_FILE))
+            when (savedInstanceState.getString(STATE_TYPE)) {
+                PickerType.Image.name -> {
+                    onTakeImgSave(file)
+                }
+                PickerType.Video.name -> {
+                    onTakeVideoSave(file)
+                }
+            }
+        }
         initView()
         initIntent()
     }
@@ -321,28 +335,43 @@ class ImgPickerActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_TAKE_IMG && cacheFile?.exists() == true) {
-            val file = cacheFile ?: return
-            if (file.exists()) {
-                ImageSource.save(this, file)
-                pickerVM.startScan()
-                MXLog.log("拍照成功：${file.absoluteFile}")
-                return
-            }
+        if (requestCode == REQUEST_TAKE_IMG) {
+            onTakeImgSave(cacheFile)
         }
-        if (requestCode == REQUEST_TAKE_VIDEO && cacheFile?.exists() == true) {
-            val file = cacheFile ?: return
-            if (file.exists()) {
-                thread {
-                    VideoSource.save(this, file)
-                    pickerVM.startScan()
-                }
-                MXLog.log("录制成功：${file.absoluteFile}")
-                return
-            }
+        if (requestCode == REQUEST_TAKE_VIDEO) {
+            onTakeVideoSave(cacheFile)
         }
+    }
 
-        MXLog.log("拍照失败！")
+    private fun onTakeImgSave(file: File?) {
+        if (file?.exists() == true) {
+            ImageSource.save(this, file)
+            pickerVM.startScan()
+            MXLog.log("拍照成功：${file.absoluteFile}")
+        } else {
+            MXLog.log("拍照失败！")
+        }
+    }
+
+    private fun onTakeVideoSave(file: File?) {
+        if (file?.exists() == true) {
+            thread {
+                VideoSource.save(this, file)
+                pickerVM.startScan()
+            }
+            MXLog.log("录制成功：${file.absoluteFile}")
+        } else {
+            MXLog.log("录制失败！")
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val path = cacheFile?.absolutePath
+        if (path != null) {
+            outState.putString(STATE_FILE, path)
+            outState.putString(STATE_TYPE, builder._pickerType.name)
+        }
     }
 
     override fun onBackPressed() {
@@ -368,6 +397,9 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val STATE_FILE = "picker_file"
+        private const val STATE_TYPE = "picker_type"
+
         private const val REQUEST_TAKE_IMG = 0x12
         private const val REQUEST_TAKE_VIDEO = REQUEST_TAKE_IMG + 1
         private var cacheFile: File? = null
