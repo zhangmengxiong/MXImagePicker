@@ -71,7 +71,7 @@ class ImgPickerActivity : AppCompatActivity() {
             finish()
             return
         }
-        
+
         if (savedInstanceState?.containsKey(STATE_FILE) == true
             && savedInstanceState.containsKey(STATE_TYPE)
         ) {
