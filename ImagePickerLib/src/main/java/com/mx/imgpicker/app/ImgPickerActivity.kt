@@ -72,6 +72,9 @@ class ImgPickerActivity : AppCompatActivity() {
             return
         }
 
+        initView()
+        initIntent()
+        
         if (savedInstanceState?.containsKey(STATE_FILE) == true
             && savedInstanceState.containsKey(STATE_TYPE)
         ) {
@@ -85,8 +88,6 @@ class ImgPickerActivity : AppCompatActivity() {
                 }
             }
         }
-        initView()
-        initIntent()
     }
 
     override fun onRequestPermissionsResult(
