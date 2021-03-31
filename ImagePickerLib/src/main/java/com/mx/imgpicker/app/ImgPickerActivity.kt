@@ -27,7 +27,6 @@ import com.mx.imgpicker.utils.ImagePickerProvider
 import com.mx.imgpicker.utils.source_loader.ImageSource
 import com.mx.imgpicker.utils.source_loader.VideoSource
 import java.io.File
-import java.lang.Exception
 import kotlin.concurrent.thread
 
 
@@ -152,7 +151,6 @@ class ImgPickerActivity : AppCompatActivity() {
                     cacheFile = file
                 }
             }
-            println("PATH = ${cacheFile?.absolutePath}")
         }
         imgAdapt.onItemClick = { item, list ->
             showLargeView(true, item)

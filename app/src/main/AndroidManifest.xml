@@ -35,12 +35,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.mx.imgpicker.app.ImgPickerActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat"
-            tools:replace="android:theme" />
-
     </application>
 
 </manifest>
