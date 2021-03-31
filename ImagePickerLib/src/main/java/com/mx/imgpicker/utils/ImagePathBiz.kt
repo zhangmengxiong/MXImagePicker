@@ -8,15 +8,19 @@ import com.mx.imgpicker.models.Item
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.atomic.AtomicLong
 
 
 object ImagePathBiz {
+    private val fileIndex = AtomicLong(1000)
+
     /**
      * 生成缓存图片路径
      */
     fun createImageFile(context: Context): File {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val imageFileName = String.format("IMG_%s.jpg", timeStamp)
+        val imageFileName =
+            String.format("IMG_%s_${fileIndex.incrementAndGet()}.jpg", timeStamp)
         return File(getExistExtDir(context), imageFileName)
     }
 
@@ -25,21 +29,23 @@ object ImagePathBiz {
      */
     fun createVideoFile(context: Context): File {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val imageFileName = String.format("VIDEO_%s.mp4", timeStamp)
+        val imageFileName = String.format("VIDEO_%s_${fileIndex.incrementAndGet()}.mp4", timeStamp)
         return File(getExistExtDir(context), imageFileName)
     }
 
     private fun getExistExtDir(context: Context): File {
-        if (Environment.isExternalStorageEmulated()) {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                val file = context.externalMediaDirs.firstOrNull { it.exists() }
-                if (file != null) {
-                    return file
-                }
+        if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) { //判断外部存储是否可用
+            val file = context.getExternalFilesDir("IMG")
+            file?.mkdirs()
+            if (file?.exists() == true) {
+                return file
             }
-            return Environment.getExternalStorageDirectory()
         }
-
+        val file = File(context.filesDir, "IMG")
+        file.mkdirs()
+        if (file.exists()) { //判断文件目录是否存在
+            return file
+        }
         return context.cacheDir
     }
 

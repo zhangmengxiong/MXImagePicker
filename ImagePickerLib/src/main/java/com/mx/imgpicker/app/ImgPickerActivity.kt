@@ -1,5 +1,6 @@
 package com.mx.imgpicker.app
 
+import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
@@ -21,9 +22,7 @@ import com.mx.imgpicker.models.ItemSelectCall
 import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.observer.ImageChangeObserver
 import com.mx.imgpicker.observer.VideoChangeObserver
-import com.mx.imgpicker.utils.BarColorChangeBiz
-import com.mx.imgpicker.utils.ImagePathBiz
-import com.mx.imgpicker.utils.ImagePickerProvider
+import com.mx.imgpicker.utils.*
 import com.mx.imgpicker.utils.source_loader.ImageSource
 import com.mx.imgpicker.utils.source_loader.VideoSource
 import java.io.File
@@ -43,7 +42,7 @@ class ImgPickerActivity : AppCompatActivity() {
     private val imgAdapt by lazy { ImgGridAdapt(imageList, selectList, builder) }
     private val imgLargeAdapt by lazy { ImgLargeAdapt(imageList, selectList, builder) }
     private val folderAdapt = FolderAdapt()
-    private var cacheFile: File? = null
+
 
     private var returnBtn: ImageView? = null
     private var selectBtn: TextView? = null
@@ -62,8 +61,29 @@ class ImgPickerActivity : AppCompatActivity() {
         supportActionBar?.hide()
         actionBar?.hide()
 
+        MXLog.log("启动")
+        if (!MXPermissionBiz.hasPermission(
+                this,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+            )
+        ) {
+            Toast.makeText(this, "需要读取存储权限", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
         initView()
         initIntent()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == MXPermissionBiz.REQUEST_CODE && MXPermissionBiz.permissionResult(this)) {
+            initView()
+            initIntent()
+        }
     }
 
     private fun initIntent() {
@@ -129,27 +149,40 @@ class ImgPickerActivity : AppCompatActivity() {
             }
         }
         imgAdapt.onTakePictureClick = {
-            when (builder._pickerType) {
-                PickerType.Image -> {
-                    val file = ImagePathBiz.createImageFile(this)
-                    val uri = ImagePickerProvider.createUri(this, file)
-                    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
-                    startActivityForResult(intent, REQUEST_TAKE_IMG)
-                    cacheFile = file
-                }
-                PickerType.Video -> {
-                    val file = ImagePathBiz.createVideoFile(this)
-                    val uri = ImagePickerProvider.createUri(this, file)
-                    val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-                    if (builder._videoMaxLength > 0) {
-                        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, builder._videoMaxLength)
+            val permissions = arrayOf(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
+            )
+            if (!MXPermissionBiz.hasPermission(this, permissions)) {
+                Toast.makeText(this, "需要写入存储、相机权限", Toast.LENGTH_SHORT).show()
+                MXPermissionBiz.requestPermission(this, permissions)
+            } else {
+                when (builder._pickerType) {
+                    PickerType.Image -> {
+                        val file = ImagePathBiz.createImageFile(this)
+                        val uri = ImagePickerProvider.createUri(this, file)
+                        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                        startActivityForResult(intent, REQUEST_TAKE_IMG)
+                        cacheFile = file
                     }
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
-                    startActivityForResult(intent, REQUEST_TAKE_VIDEO)
-                    cacheFile = file
+                    PickerType.Video -> {
+                        val file = ImagePathBiz.createVideoFile(this)
+                        val uri = ImagePickerProvider.createUri(this, file)
+                        val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+                        if (builder._videoMaxLength > 0) {
+                            intent.putExtra(
+                                MediaStore.EXTRA_DURATION_LIMIT,
+                                builder._videoMaxLength
+                            )
+                        }
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                        startActivityForResult(intent, REQUEST_TAKE_VIDEO)
+                        cacheFile = file
+                    }
                 }
+                MXLog.log("PATH = ${cacheFile?.absolutePath}")
             }
         }
         imgAdapt.onItemClick = { item, list ->
@@ -293,6 +326,8 @@ class ImgPickerActivity : AppCompatActivity() {
             if (file.exists()) {
                 ImageSource.save(this, file)
                 pickerVM.startScan()
+                MXLog.log("拍照成功：${file.absoluteFile}")
+                return
             }
         }
         if (requestCode == REQUEST_TAKE_VIDEO && cacheFile?.exists() == true) {
@@ -302,8 +337,12 @@ class ImgPickerActivity : AppCompatActivity() {
                     VideoSource.save(this, file)
                     pickerVM.startScan()
                 }
+                MXLog.log("录制成功：${file.absoluteFile}")
+                return
             }
         }
+
+        MXLog.log("拍照失败！")
     }
 
     override fun onBackPressed() {
@@ -331,5 +370,6 @@ class ImgPickerActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_TAKE_IMG = 0x12
         private const val REQUEST_TAKE_VIDEO = REQUEST_TAKE_IMG + 1
+        private var cacheFile: File? = null
     }
 }

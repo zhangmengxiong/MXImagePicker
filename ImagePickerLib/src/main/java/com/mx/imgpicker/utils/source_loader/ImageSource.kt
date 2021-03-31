@@ -13,11 +13,10 @@ import java.io.File
 object ImageSource : ISource {
     override fun scan(context: Context): List<Item> {
         //扫描图片
-        val mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val mContentResolver = context.contentResolver ?: return emptyList()
 
         val mCursor = mContentResolver.query(
-            mImageUri, arrayOf(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, arrayOf(
                 MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.DISPLAY_NAME,
                 MediaStore.Images.Media.DATE_ADDED,
@@ -25,7 +24,7 @@ object ImageSource : ISource {
                 MediaStore.Images.Media.MIME_TYPE,
                 MediaStore.Images.Media.SIZE
             ),
-            MediaStore.MediaColumns.SIZE + ">0",
+            MediaStore.Images.Media.SIZE + ">0",
             null,
             MediaStore.Images.Media.DATE_ADDED + " DESC"
         )
