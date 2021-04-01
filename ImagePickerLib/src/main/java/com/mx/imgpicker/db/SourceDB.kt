@@ -15,12 +15,17 @@ import java.lang.Exception
 class SourceDB(val context: Context) {
     private val dbHelp by lazy { DBHelp(context.applicationContext).writableDatabase }
     fun addSource(file: File, type: PickerType): Boolean {
-        val values = ContentValues()
-        values.put(DBHelp.DB_KEY_PATH, file.absolutePath)
-        values.put(DBHelp.DB_KEY_TYPE, type.name)
-        values.put(DBHelp.DB_KEY_TIME, System.currentTimeMillis())
-        values.put(DBHelp.DB_KEY_VIDEO_LENGTH, 0)
-        return dbHelp.insert(DBHelp.DB_NAME, null, values) >= 0
+        try {
+            val values = ContentValues()
+            values.put(DBHelp.DB_KEY_PATH, file.absolutePath)
+            values.put(DBHelp.DB_KEY_TYPE, type.name)
+            values.put(DBHelp.DB_KEY_TIME, System.currentTimeMillis())
+            values.put(DBHelp.DB_KEY_VIDEO_LENGTH, 0)
+            return dbHelp.insert(DBHelp.DB_NAME, null, values) >= 0
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
     }
 
     fun getAllSource(type: PickerType): ArrayList<DbSourceItem> {
@@ -56,33 +61,37 @@ class SourceDB(val context: Context) {
     }
 
     private fun cursorToItem(type: PickerType, cursor: Cursor): DbSourceItem? {
-        val mimeType = if (type == PickerType.Video) {
-            VideoSource.MIME_TYPE
-        } else {
-            ImageSource.MIME_TYPE
-        }
-        val path = cursor.getString(cursor.getColumnIndex(DBHelp.DB_KEY_PATH))
-        val time = cursor.getLong(cursor.getColumnIndex(DBHelp.DB_KEY_TIME))
-        var video_length = cursor.getLong(cursor.getColumnIndex(DBHelp.DB_KEY_VIDEO_LENGTH))
-
-        val file = File(path)
-        if (type == PickerType.Video && video_length <= 0 && file.exists()) {
-            video_length = VideoSource.getVideoLength(file)
-            if (video_length > 0) {
-                dbHelp.update(DBHelp.DB_NAME, ContentValues().apply {
-                    put(DBHelp.DB_KEY_VIDEO_LENGTH, video_length)
-                }, "${DBHelp.DB_KEY_PATH}=?", arrayOf(path))
+        try {
+            val mimeType = if (type == PickerType.Video) {
+                VideoSource.MIME_TYPE
+            } else {
+                ImageSource.MIME_TYPE
             }
-        }
+            val path = cursor.getString(cursor.getColumnIndex(DBHelp.DB_KEY_PATH))
+            val time = cursor.getLong(cursor.getColumnIndex(DBHelp.DB_KEY_TIME))
+            var video_length = cursor.getLong(cursor.getColumnIndex(DBHelp.DB_KEY_VIDEO_LENGTH))
 
-        if (path.isNotBlank() && time > 0L) {
-            return DbSourceItem(
-                path,
-                type,
-                mimeType,
-                time,
-                (video_length / 1000).toInt()
-            )
+            val file = File(path)
+            if (type == PickerType.Video && video_length <= 0 && file.exists()) {
+                video_length = VideoSource.getVideoLength(file)
+                if (video_length > 0) {
+                    dbHelp.update(DBHelp.DB_NAME, ContentValues().apply {
+                        put(DBHelp.DB_KEY_VIDEO_LENGTH, video_length)
+                    }, "${DBHelp.DB_KEY_PATH}=?", arrayOf(path))
+                }
+            }
+
+            if (path.isNotBlank() && time > 0L) {
+                return DbSourceItem(
+                    path,
+                    type,
+                    mimeType,
+                    time,
+                    (video_length / 1000).toInt()
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
         return null
     }
