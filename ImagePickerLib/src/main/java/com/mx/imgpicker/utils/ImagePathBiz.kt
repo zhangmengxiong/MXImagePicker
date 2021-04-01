@@ -34,18 +34,11 @@ object ImagePathBiz {
     }
 
     private fun getExistExtDir(context: Context): File {
-        if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) { //判断外部存储是否可用
-            val file = context.getExternalFilesDir("IMG")
-            file?.mkdirs()
-            if (file?.exists() == true) {
-                return file
-            }
-        }
-        val file = File(context.filesDir, "IMG")
-        file.mkdirs()
-        if (file.exists()) { //判断文件目录是否存在
+        val file = context.externalCacheDir
+        if (file != null && file.exists() && file.canWrite()) { //判断文件目录是否存在
             return file
         }
+
         return context.cacheDir
     }
 
