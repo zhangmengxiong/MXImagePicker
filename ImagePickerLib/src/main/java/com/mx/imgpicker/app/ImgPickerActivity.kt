@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.*
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
+import com.mx.imgpicker.db.SourceDB
 import com.mx.imgpicker.adapts.FolderAdapt
 import com.mx.imgpicker.adapts.ImgGridAdapt
 import com.mx.imgpicker.adapts.ImgLargeAdapt
@@ -23,10 +24,7 @@ import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.observer.ImageChangeObserver
 import com.mx.imgpicker.observer.VideoChangeObserver
 import com.mx.imgpicker.utils.*
-import com.mx.imgpicker.utils.source_loader.ImageSource
-import com.mx.imgpicker.utils.source_loader.VideoSource
 import java.io.File
-import kotlin.concurrent.thread
 
 
 class ImgPickerActivity : AppCompatActivity() {
@@ -34,7 +32,8 @@ class ImgPickerActivity : AppCompatActivity() {
         (intent.getSerializableExtra(PickerBuilder.KEY_INTENT_BUILDER) as PickerBuilder?)
             ?: PickerBuilder()
     }
-    private val pickerVM by lazy { ImgPickerVM(this, builder) }
+    private val sourceDB by lazy { SourceDB(this) }
+    private val pickerVM by lazy { ImgPickerVM(this, builder, sourceDB) }
 
     private val imageList = ArrayList<Item>()
     private val selectList = ArrayList<Item>()
@@ -43,7 +42,7 @@ class ImgPickerActivity : AppCompatActivity() {
     private val imgLargeAdapt by lazy { ImgLargeAdapt(imageList, selectList, builder) }
     private val folderAdapt = FolderAdapt()
 
-
+    private var cacheFile: File? = null
     private var returnBtn: ImageView? = null
     private var selectBtn: TextView? = null
     private var folderNameTxv: TextView? = null
@@ -74,20 +73,6 @@ class ImgPickerActivity : AppCompatActivity() {
 
         initView()
         initIntent()
-        
-        if (savedInstanceState?.containsKey(STATE_FILE) == true
-            && savedInstanceState.containsKey(STATE_TYPE)
-        ) {
-            val file = File(savedInstanceState.getString(STATE_FILE))
-            when (savedInstanceState.getString(STATE_TYPE)) {
-                PickerType.Image.name -> {
-                    onTakeImgSave(file)
-                }
-                PickerType.Video.name -> {
-                    onTakeVideoSave(file)
-                }
-            }
-        }
     }
 
     override fun onRequestPermissionsResult(
@@ -180,6 +165,7 @@ class ImgPickerActivity : AppCompatActivity() {
                         intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
                         startActivityForResult(intent, REQUEST_TAKE_IMG)
+                        sourceDB.addSource(file, PickerType.Image)
                         cacheFile = file
                     }
                     PickerType.Video -> {
@@ -194,6 +180,7 @@ class ImgPickerActivity : AppCompatActivity() {
                         }
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
                         startActivityForResult(intent, REQUEST_TAKE_VIDEO)
+                        sourceDB.addSource(file, PickerType.Video)
                         cacheFile = file
                     }
                 }
@@ -336,43 +323,7 @@ class ImgPickerActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_TAKE_IMG) {
-            onTakeImgSave(cacheFile)
-        }
-        if (requestCode == REQUEST_TAKE_VIDEO) {
-            onTakeVideoSave(cacheFile)
-        }
-    }
-
-    private fun onTakeImgSave(file: File?) {
-        if (file?.exists() == true) {
-            ImageSource.save(this, file)
-            pickerVM.startScan()
-            MXLog.log("拍照成功：${file.absoluteFile}")
-        } else {
-            MXLog.log("拍照失败！")
-        }
-    }
-
-    private fun onTakeVideoSave(file: File?) {
-        if (file?.exists() == true) {
-            thread {
-                VideoSource.save(this, file)
-                pickerVM.startScan()
-            }
-            MXLog.log("录制成功：${file.absoluteFile}")
-        } else {
-            MXLog.log("录制失败！")
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        val path = cacheFile?.absolutePath
-        if (path != null) {
-            outState.putString(STATE_FILE, path)
-            outState.putString(STATE_TYPE, builder._pickerType.name)
-        }
+        pickerVM.startScan()
     }
 
     override fun onBackPressed() {
@@ -398,11 +349,8 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val STATE_FILE = "picker_file"
-        private const val STATE_TYPE = "picker_type"
-
         private const val REQUEST_TAKE_IMG = 0x12
         private const val REQUEST_TAKE_VIDEO = REQUEST_TAKE_IMG + 1
-        private var cacheFile: File? = null
+
     }
 }

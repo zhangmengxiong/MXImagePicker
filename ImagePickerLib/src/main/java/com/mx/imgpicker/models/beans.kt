@@ -33,6 +33,14 @@ data class Item(
     }
 }
 
+data class DbSourceItem(
+    val path: String, // 路径
+    val type: PickerType, //类型
+    val mimeType: String, // mime类型
+    val time: Long, // 创建时间
+    val videoLength: Int // 视频时长,单位：秒
+)
+
 /**
  * 分组对象
  */

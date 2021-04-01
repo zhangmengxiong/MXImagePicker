@@ -12,6 +12,8 @@ import java.io.File
 
 
 object VideoSource : ISource {
+    const val MIME_TYPE = "video/*"
+
     override fun scan(context: Context): List<Item> {
         //扫描图片
         val mImageUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -85,7 +87,7 @@ object VideoSource : ISource {
             val contentValues = ContentValues()
             contentValues.put(MediaStore.Video.Media.TITLE, file.name)
             contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, file.name)
-            contentValues.put(MediaStore.Video.Media.MIME_TYPE, "video/*")
+            contentValues.put(MediaStore.Video.Media.MIME_TYPE, MIME_TYPE)
             contentValues.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis())
             contentValues.put(MediaStore.Video.Media.DATE_MODIFIED, System.currentTimeMillis())
             contentValues.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis())
@@ -106,7 +108,7 @@ object VideoSource : ISource {
     /**
      * 获取视屏长度，返回毫秒
      */
-    private fun getVideoLength(file: File): Long {
+      fun getVideoLength(file: File): Long {
         val retriever = MediaMetadataRetriever()
         var length = 0L
         try {

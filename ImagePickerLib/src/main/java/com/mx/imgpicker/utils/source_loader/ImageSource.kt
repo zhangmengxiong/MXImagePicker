@@ -11,6 +11,7 @@ import com.mx.imgpicker.models.PickerType
 import java.io.File
 
 object ImageSource : ISource {
+    const val MIME_TYPE = "image/*"
     override fun scan(context: Context): List<Item> {
         //扫描图片
         val mContentResolver = context.contentResolver ?: return emptyList()
@@ -80,7 +81,7 @@ object ImageSource : ISource {
             val contentValues = ContentValues()
             contentValues.put(MediaStore.Images.Media.TITLE, file.name)
             contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, file.name)
-            contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/*")
+            contentValues.put(MediaStore.Images.Media.MIME_TYPE, MIME_TYPE)
             contentValues.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
             contentValues.put(MediaStore.Images.Media.DATE_MODIFIED, System.currentTimeMillis())
             contentValues.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis())

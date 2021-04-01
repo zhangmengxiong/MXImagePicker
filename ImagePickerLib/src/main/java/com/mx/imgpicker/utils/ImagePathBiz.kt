@@ -56,6 +56,8 @@ object ImagePathBiz {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.setDataAndType(item.uri, item.mimeType)
+            intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
