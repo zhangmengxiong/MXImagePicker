@@ -10,7 +10,6 @@ import com.mx.imgpicker.models.PickerType
 import com.mx.imgpicker.utils.source_loader.ImageSource
 import com.mx.imgpicker.utils.source_loader.VideoSource
 import java.io.File
-import java.lang.Exception
 
 class SourceDB(val context: Context) {
     private val dbHelp by lazy { DBHelp(context.applicationContext).writableDatabase }

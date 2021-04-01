@@ -2,7 +2,6 @@ package com.mx.imgpicker.utils
 
 import android.content.Context
 import android.content.Intent
-import android.os.Environment
 import android.widget.Toast
 import com.mx.imgpicker.models.Item
 import java.io.File

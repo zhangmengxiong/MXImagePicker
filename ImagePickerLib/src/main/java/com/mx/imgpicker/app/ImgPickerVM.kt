@@ -1,11 +1,10 @@
 package com.mx.imgpicker.app
 
 import android.content.Context
-import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import com.mx.imgpicker.db.SourceDB
 import com.mx.imgpicker.builder.PickerBuilder
+import com.mx.imgpicker.db.SourceDB
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.PickerType

@@ -12,11 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.*
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
-import com.mx.imgpicker.db.SourceDB
 import com.mx.imgpicker.adapts.FolderAdapt
 import com.mx.imgpicker.adapts.ImgGridAdapt
 import com.mx.imgpicker.adapts.ImgLargeAdapt
 import com.mx.imgpicker.builder.PickerBuilder
+import com.mx.imgpicker.db.SourceDB
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.ItemSelectCall
@@ -162,7 +162,7 @@ class ImgPickerActivity : AppCompatActivity() {
                         val file = ImagePathBiz.createImageFile(this)
                         val uri = ImagePickerProvider.createUri(this, file)
                         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
                         startActivityForResult(intent, REQUEST_TAKE_IMG)
                         sourceDB.addSource(file, PickerType.Image)
@@ -172,6 +172,7 @@ class ImgPickerActivity : AppCompatActivity() {
                         val file = ImagePathBiz.createVideoFile(this)
                         val uri = ImagePickerProvider.createUri(this, file)
                         val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+                        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                         if (builder._videoMaxLength > 0) {
                             intent.putExtra(
                                 MediaStore.EXTRA_DURATION_LIMIT,

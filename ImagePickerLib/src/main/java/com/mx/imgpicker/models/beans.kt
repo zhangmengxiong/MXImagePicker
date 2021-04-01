@@ -1,7 +1,6 @@
 package com.mx.imgpicker.models
 
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import java.io.File
 import java.io.Serializable
 
