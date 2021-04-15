@@ -7,7 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.gyf.immersionbar.ImmersionBar
 import com.mx.imgpicker.builder.PickerBuilder
-import com.mx.imgpicker.models.PickerType
+import com.mx.imgpicker.models.MXPickerType
 import com.mx.starter.MXStarter
 
 class MainActivity : AppCompatActivity() {
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
                                     .fitsSystemWindows(true)
                                     .navigationBarColor(R.color.picker_color_background)
                                     .init()
-                            }.setType(PickerType.Video).createIntent(this)
+                            }.setType(MXPickerType.Video).createIntent(this)
                     ) { resultCode, data ->
                         val list = PickerBuilder.getPickerResult(data) ?: return@start
                         Toast.makeText(this, list.joinToString(","), Toast.LENGTH_SHORT).show()

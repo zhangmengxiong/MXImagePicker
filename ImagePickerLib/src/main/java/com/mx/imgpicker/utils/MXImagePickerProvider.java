@@ -11,10 +11,10 @@ import java.io.File;
 /**
  * 自定义Provider
  */
-public class ImagePickerProvider extends FileProvider {
+public class MXImagePickerProvider extends FileProvider {
     public static Uri createUri(Context context, File file) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return ImagePickerProvider.getUriForFile(context, context.getPackageName() + ".imagePickerProvider", file);
+            return MXImagePickerProvider.getUriForFile(context, context.getPackageName() + ".imagePickerProvider", file);
         } else {
             return Uri.parse("file://" + file.getAbsolutePath());
         }

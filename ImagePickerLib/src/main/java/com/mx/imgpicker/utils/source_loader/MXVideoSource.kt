@@ -7,11 +7,11 @@ import android.database.Cursor
 import android.media.MediaMetadataRetriever
 import android.provider.MediaStore
 import com.mx.imgpicker.models.Item
-import com.mx.imgpicker.models.PickerType
+import com.mx.imgpicker.models.MXPickerType
 import java.io.File
 
 
-object VideoSource : ISource {
+object MXVideoSource : IMXSource {
     const val MIME_TYPE = "video/*"
 
     override fun scan(context: Context): List<Item> {
@@ -75,7 +75,7 @@ object VideoSource : ISource {
             val uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI.buildUpon()
                 .appendPath(id.toString()).build()
             if (File(path).exists() || contentResolver.openFileDescriptor(uri, "r") != null) {
-                return Item(path, uri, mimeType, time, name, PickerType.Video, duration / 1000)
+                return Item(path, uri, mimeType, time, name, MXPickerType.Video, duration / 1000)
             }
         } catch (e: Exception) {
         }

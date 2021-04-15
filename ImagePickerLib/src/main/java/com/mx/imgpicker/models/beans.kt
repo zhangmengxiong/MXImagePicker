@@ -7,7 +7,7 @@ import java.io.Serializable
 /**
  * 类型
  */
-enum class PickerType : Serializable {
+enum class MXPickerType : Serializable {
     Image, Video
 }
 
@@ -20,7 +20,7 @@ data class Item(
     val mimeType: String,
     val time: Long,
     val name: String,
-    val type: PickerType,
+    val type: MXPickerType,
     val duration: Int = 0
 ) : Serializable {
     fun getFolderName(): String {
@@ -34,7 +34,7 @@ data class Item(
 
 data class DbSourceItem(
     val path: String, // 路径
-    val type: PickerType, //类型
+    val type: MXPickerType, //类型
     val mimeType: String, // mime类型
     val time: Long, // 创建时间
     val videoLength: Int // 视频时长,单位：秒

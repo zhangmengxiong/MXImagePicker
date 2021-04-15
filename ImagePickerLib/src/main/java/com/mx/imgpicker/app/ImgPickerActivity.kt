@@ -15,16 +15,16 @@ import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.FolderAdapt
 import com.mx.imgpicker.adapts.ImgGridAdapt
 import com.mx.imgpicker.adapts.ImgLargeAdapt
+import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.builder.PickerBuilder
-import com.mx.imgpicker.db.SourceDB
+import com.mx.imgpicker.db.MXSourceDB
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.ItemSelectCall
-import com.mx.imgpicker.models.PickerType
+import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.observer.ImageChangeObserver
 import com.mx.imgpicker.observer.VideoChangeObserver
 import com.mx.imgpicker.utils.*
-import java.io.File
 
 
 class ImgPickerActivity : AppCompatActivity() {
@@ -32,7 +32,7 @@ class ImgPickerActivity : AppCompatActivity() {
         (intent.getSerializableExtra(PickerBuilder.KEY_INTENT_BUILDER) as PickerBuilder?)
             ?: PickerBuilder()
     }
-    private val sourceDB by lazy { SourceDB(this) }
+    private val sourceDB by lazy { MXSourceDB(this) }
     private val pickerVM by lazy { ImgPickerVM(this, builder, sourceDB) }
 
     private val imageList = ArrayList<Item>()
@@ -42,7 +42,6 @@ class ImgPickerActivity : AppCompatActivity() {
     private val imgLargeAdapt by lazy { ImgLargeAdapt(imageList, selectList, builder) }
     private val folderAdapt = FolderAdapt()
 
-    private var cacheFile: File? = null
     private var returnBtn: ImageView? = null
     private var selectBtn: TextView? = null
     private var folderNameTxv: TextView? = null
@@ -157,35 +156,15 @@ class ImgPickerActivity : AppCompatActivity() {
                 Toast.makeText(this, "需要写入存储、相机权限", Toast.LENGTH_SHORT).show()
                 MXPermissionBiz.requestPermission(this, permissions)
             } else {
-                when (builder._pickerType) {
-                    PickerType.Image -> {
-                        val file = ImagePathBiz.createImageFile(this)
-                        val uri = ImagePickerProvider.createUri(this, file)
-                        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
-                        startActivityForResult(intent, REQUEST_TAKE_IMG)
-                        sourceDB.addSource(file, PickerType.Image)
-                        cacheFile = file
-                    }
-                    PickerType.Video -> {
-                        val file = ImagePathBiz.createVideoFile(this)
-                        val uri = ImagePickerProvider.createUri(this, file)
-                        val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-                        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        if (builder._videoMaxLength > 0) {
-                            intent.putExtra(
-                                MediaStore.EXTRA_DURATION_LIMIT,
-                                builder._videoMaxLength
-                            )
-                        }
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
-                        startActivityForResult(intent, REQUEST_TAKE_VIDEO)
-                        sourceDB.addSource(file, PickerType.Video)
-                        cacheFile = file
-                    }
-                }
-                MXLog.log("PATH = ${cacheFile?.absolutePath}")
+                val captureBuilder = MXCaptureBuilder(this)
+                    .setType(builder._pickerType)
+                    .setMaxVideoLength(builder._videoMaxLength)
+                val intent = captureBuilder.createIntent()
+                val file = captureBuilder.getCaptureFile()
+                sourceDB.addSource(file, builder._pickerType)
+
+                startActivityForResult(intent, 0x12)
+                MXLog.log("PATH = ${file.absolutePath}")
             }
         }
         imgAdapt.onItemClick = { item, list ->
@@ -204,7 +183,7 @@ class ImgPickerActivity : AppCompatActivity() {
 
         val onSelectChange = object : ItemSelectCall {
             override fun select(item: Item) {
-                if (builder._pickerType == PickerType.Video && builder._videoMaxLength > 0 && item.duration > builder._videoMaxLength) {
+                if (builder._pickerType == MXPickerType.Video && builder._videoMaxLength > 0 && item.duration > builder._videoMaxLength) {
                     Toast.makeText(
                         this@ImgPickerActivity,
                         "当前视频时长超出限制，可选择 ${builder._videoMaxLength} 秒以内的视频",
@@ -300,12 +279,12 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     private val imageChangeObserver = ImageChangeObserver {
-        if (builder._pickerType == PickerType.Image) {
+        if (builder._pickerType == MXPickerType.Image) {
             pickerVM.startScan()
         }
     }
     private val videoChangeObserver = VideoChangeObserver {
-        if (builder._pickerType == PickerType.Video) {
+        if (builder._pickerType == MXPickerType.Video) {
             pickerVM.startScan()
         }
     }
@@ -347,11 +326,5 @@ class ImgPickerActivity : AppCompatActivity() {
         } catch (e: Exception) {
         }
         super.onDestroy()
-    }
-
-    companion object {
-        private const val REQUEST_TAKE_IMG = 0x12
-        private const val REQUEST_TAKE_VIDEO = REQUEST_TAKE_IMG + 1
-
     }
 }

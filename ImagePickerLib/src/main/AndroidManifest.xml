@@ -4,7 +4,7 @@
 
     <application>
         <provider
-            android:name="com.mx.imgpicker.utils.ImagePickerProvider"
+            android:name="com.mx.imgpicker.utils.MXImagePickerProvider"
             android:authorities="${applicationId}.imagePickerProvider"
             android:exported="false"
             android:grantUriPermissions="true">

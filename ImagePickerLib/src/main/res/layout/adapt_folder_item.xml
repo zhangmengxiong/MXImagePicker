@@ -7,7 +7,7 @@
     android:orientation="horizontal"
     android:padding="1dp">
 
-    <com.mx.imgpicker.views.SquareImageView
+    <com.mx.imgpicker.views.MXSquareImageView
         android:id="@+id/img"
         android:layout_width="70dp"
         android:layout_height="wrap_content"

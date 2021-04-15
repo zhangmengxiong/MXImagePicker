@@ -10,7 +10,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
 
-object ImagePathBiz {
+object MXFileBiz {
     private val fileIndex = AtomicLong(1000)
 
     /**

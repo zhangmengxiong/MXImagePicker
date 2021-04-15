@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
 
-    <com.mx.imgpicker.views.BarPlaceView
+    <com.mx.imgpicker.views.MXBarPlaceView
         android:id="@+id/barPlaceView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

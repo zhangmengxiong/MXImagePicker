@@ -11,8 +11,8 @@ import com.mx.imgpicker.R
 import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.ItemSelectCall
-import com.mx.imgpicker.models.PickerType
-import com.mx.imgpicker.views.PickerTextView
+import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.views.MXPickerTextView
 
 class ImgGridAdapt(
     private val list: ArrayList<Item>,
@@ -27,7 +27,7 @@ class ImgGridAdapt(
         val img: ImageView = itemView.findViewById(R.id.img)
         val selectBG: ImageView = itemView.findViewById(R.id.selectBG)
         val videoTag: ImageView = itemView.findViewById(R.id.videoTag)
-        val indexTxv: PickerTextView = itemView.findViewById(R.id.indexTxv)
+        val indexTxv: MXPickerTextView = itemView.findViewById(R.id.indexTxv)
         val indexLay: RelativeLayout = itemView.findViewById(R.id.indexLay)
     }
 
@@ -54,7 +54,7 @@ class ImgGridAdapt(
             val index = selectList.indexOf(item)
             holder.indexTxv.isChecked = isSelect
 
-            if (item.type == PickerType.Image) {
+            if (item.type == MXPickerType.Image) {
                 holder.videoTag.visibility = View.GONE
             } else {
                 holder.videoTag.visibility = View.VISIBLE

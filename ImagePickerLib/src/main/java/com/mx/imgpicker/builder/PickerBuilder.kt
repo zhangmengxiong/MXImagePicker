@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import com.mx.imgpicker.app.ImgPickerActivity
-import com.mx.imgpicker.models.PickerType
+import com.mx.imgpicker.models.MXPickerType
 import java.io.Serializable
 
 class PickerBuilder : Serializable {
-    var _pickerType: PickerType = PickerType.Image
+    var _pickerType: MXPickerType = MXPickerType.Image
     var _maxSize: Int = 1 //选择最大数量
     var _activityCall: ((AppCompatActivity) -> Unit)? = null // Activity在创建时会回调这个，可以设置样式等
     var _enableCamera: Boolean = true // 是否可以拍摄
@@ -25,7 +25,7 @@ class PickerBuilder : Serializable {
     /**
      * 选择类型，默认=Image
      */
-    fun setType(type: PickerType): PickerBuilder {
+    fun setType(type: MXPickerType): PickerBuilder {
         _pickerType = type
         return this
     }

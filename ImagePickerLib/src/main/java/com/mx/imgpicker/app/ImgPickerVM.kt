@@ -4,14 +4,14 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.mx.imgpicker.builder.PickerBuilder
-import com.mx.imgpicker.db.SourceDB
+import com.mx.imgpicker.db.MXSourceDB
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.Item
-import com.mx.imgpicker.models.PickerType
-import com.mx.imgpicker.utils.ImagePickerProvider
+import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.utils.MXImagePickerProvider
 import com.mx.imgpicker.utils.MXLog
-import com.mx.imgpicker.utils.source_loader.ImageSource
-import com.mx.imgpicker.utils.source_loader.VideoSource
+import com.mx.imgpicker.utils.source_loader.MXImageSource
+import com.mx.imgpicker.utils.source_loader.MXVideoSource
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
@@ -19,7 +19,7 @@ import kotlin.concurrent.thread
 class ImgPickerVM(
     val context: Context,
     private val builder: PickerBuilder,
-    private val sourceDB: SourceDB
+    private val sourceDB: MXSourceDB
 ) {
     companion object {
         private val imageList = ArrayList<Item>()
@@ -42,7 +42,7 @@ class ImgPickerVM(
 
                     return@mapNotNull Item(
                         item.path,
-                        ImagePickerProvider.createUri(context, file),
+                        MXImagePickerProvider.createUri(context, file),
                         item.mimeType,
                         file.lastModified(),
                         file.name,
@@ -51,10 +51,10 @@ class ImgPickerVM(
                     )
                 }
 
-                val images = if (builder._pickerType == PickerType.Image) {
-                    (ImageSource.scan(context) + savedSource).sortedByDescending { it.time }
+                val images = if (builder._pickerType == MXPickerType.Image) {
+                    (MXImageSource.scan(context) + savedSource).sortedByDescending { it.time }
                 } else {
-                    VideoSource.scan(context) + savedSource.sortedByDescending { it.time }
+                    MXVideoSource.scan(context) + savedSource.sortedByDescending { it.time }
                 }
 
                 val hasChange = (!images.toTypedArray().contentEquals(imageList.toTypedArray()))

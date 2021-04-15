@@ -11,23 +11,23 @@ import android.provider.MediaStore
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.mx.imgpicker.models.Item
-import com.mx.imgpicker.models.PickerType
+import com.mx.imgpicker.models.MXPickerType
 import java.io.File
 import java.util.*
 
 /**
  * 图片显示接口
  */
-interface IImageLoader {
+interface IMXImageLoader {
     fun displayImage(item: Item, imageView: ImageView)
 }
 
 /**
  * 提供默认Glide显示图片
  */
-class GlideImageLoader : IImageLoader {
+class GlideImageLoader : IMXImageLoader {
     override fun displayImage(item: Item, imageView: ImageView) {
-        if (item.type == PickerType.Image) {
+        if (item.type == MXPickerType.Image) {
             Glide.with(imageView).load(item.uri).into(imageView)
         } else {
             Glide.with(imageView).load(Uri.fromFile(File(item.path))).into(imageView)

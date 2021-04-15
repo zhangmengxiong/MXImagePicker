@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import kotlin.math.roundToInt
 
-class SquareImageView @JvmOverloads constructor(
+class MXSquareImageView @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : androidx.appcompat.widget.AppCompatImageView(context, attrs, defStyleAttr) {
     private var ratio_width: Float = 1f

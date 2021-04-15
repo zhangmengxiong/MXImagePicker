@@ -22,7 +22,7 @@
         android:layout_margin="10dp"
         android:elevation="10dp">
 
-        <com.mx.imgpicker.views.PickerTextView
+        <com.mx.imgpicker.views.MXPickerTextView
             android:id="@+id/indexTxv"
             android:layout_width="23dp"
             android:layout_height="23dp"

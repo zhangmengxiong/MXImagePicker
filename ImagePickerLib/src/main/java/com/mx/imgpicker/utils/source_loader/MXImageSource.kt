@@ -7,10 +7,10 @@ import android.database.Cursor
 import android.graphics.BitmapFactory
 import android.provider.MediaStore
 import com.mx.imgpicker.models.Item
-import com.mx.imgpicker.models.PickerType
+import com.mx.imgpicker.models.MXPickerType
 import java.io.File
 
-object ImageSource : ISource {
+object MXImageSource : IMXSource {
     const val MIME_TYPE = "image/*"
     override fun scan(context: Context): List<Item> {
         //扫描图片
@@ -69,7 +69,7 @@ object ImageSource : ISource {
                 .appendPath(id.toString()).build()
 
             if (File(path).exists() || contentResolver.openFileDescriptor(uri, "r") != null) {
-                return Item(path, uri, mimeType, time, name, PickerType.Image)
+                return Item(path, uri, mimeType, time, name, MXPickerType.Image)
             }
         } catch (e: java.lang.Exception) {
         }

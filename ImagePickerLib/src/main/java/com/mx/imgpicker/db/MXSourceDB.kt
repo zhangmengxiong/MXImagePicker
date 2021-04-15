@@ -6,14 +6,14 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.mx.imgpicker.models.DbSourceItem
-import com.mx.imgpicker.models.PickerType
-import com.mx.imgpicker.utils.source_loader.ImageSource
-import com.mx.imgpicker.utils.source_loader.VideoSource
+import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.utils.source_loader.MXImageSource
+import com.mx.imgpicker.utils.source_loader.MXVideoSource
 import java.io.File
 
-class SourceDB(val context: Context) {
+class MXSourceDB(val context: Context) {
     private val dbHelp by lazy { DBHelp(context.applicationContext).writableDatabase }
-    fun addSource(file: File, type: PickerType): Boolean {
+    fun addSource(file: File, type: MXPickerType): Boolean {
         try {
             val values = ContentValues()
             values.put(DBHelp.DB_KEY_PATH, file.absolutePath)
@@ -27,7 +27,7 @@ class SourceDB(val context: Context) {
         return false
     }
 
-    fun getAllSource(type: PickerType): ArrayList<DbSourceItem> {
+    fun getAllSource(type: MXPickerType): ArrayList<DbSourceItem> {
         var cursor: Cursor? = null
         val sourceList = ArrayList<DbSourceItem>()
 
@@ -59,20 +59,20 @@ class SourceDB(val context: Context) {
         return sourceList
     }
 
-    private fun cursorToItem(type: PickerType, cursor: Cursor): DbSourceItem? {
+    private fun cursorToItem(type: MXPickerType, cursor: Cursor): DbSourceItem? {
         try {
-            val mimeType = if (type == PickerType.Video) {
-                VideoSource.MIME_TYPE
+            val mimeType = if (type == MXPickerType.Video) {
+                MXVideoSource.MIME_TYPE
             } else {
-                ImageSource.MIME_TYPE
+                MXImageSource.MIME_TYPE
             }
             val path = cursor.getString(cursor.getColumnIndex(DBHelp.DB_KEY_PATH))
             val time = cursor.getLong(cursor.getColumnIndex(DBHelp.DB_KEY_TIME))
             var video_length = cursor.getLong(cursor.getColumnIndex(DBHelp.DB_KEY_VIDEO_LENGTH))
 
             val file = File(path)
-            if (type == PickerType.Video && video_length <= 0 && file.exists()) {
-                video_length = VideoSource.getVideoLength(file)
+            if (type == MXPickerType.Video && video_length <= 0 && file.exists()) {
+                video_length = MXVideoSource.getVideoLength(file)
                 if (video_length > 0) {
                     dbHelp.update(DBHelp.DB_NAME, ContentValues().apply {
                         put(DBHelp.DB_KEY_VIDEO_LENGTH, video_length)

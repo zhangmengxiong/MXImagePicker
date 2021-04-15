@@ -13,10 +13,10 @@ import com.mx.imgpicker.R
 import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.ItemSelectCall
-import com.mx.imgpicker.models.PickerType
-import com.mx.imgpicker.utils.ImagePathBiz
-import com.mx.imgpicker.utils.PickerFormatBiz
-import com.mx.imgpicker.views.PickerTextView
+import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.utils.MXFileBiz
+import com.mx.imgpicker.utils.MXPickerFormatBiz
+import com.mx.imgpicker.views.MXPickerTextView
 
 class ImgLargeAdapt(
     private val list: ArrayList<Item>,
@@ -27,13 +27,13 @@ class ImgLargeAdapt(
 
     class ImgScanVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val photoView: PhotoView = itemView.findViewById(R.id.photoView)
-        val indexTxv: PickerTextView = itemView.findViewById(R.id.indexTxv)
+        val indexTxv: MXPickerTextView = itemView.findViewById(R.id.indexTxv)
         val indexLay: RelativeLayout = itemView.findViewById(R.id.indexLay)
     }
 
     class ImgScanVideoVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val img: ImageView = itemView.findViewById(R.id.img)
-        val indexTxv: PickerTextView = itemView.findViewById(R.id.indexTxv)
+        val indexTxv: MXPickerTextView = itemView.findViewById(R.id.indexTxv)
         val indexLay: RelativeLayout = itemView.findViewById(R.id.indexLay)
         val playBtn: ImageView = itemView.findViewById(R.id.playBtn)
         val videoLengthTxv: TextView = itemView.findViewById(R.id.videoLengthTxv)
@@ -78,13 +78,13 @@ class ImgLargeAdapt(
             val index = selectList.indexOf(item)
             holder.indexTxv.isChecked = isSelect
             holder.videoLengthTxv.text =
-                if (item.duration > 0) PickerFormatBiz.timeToString(item.duration) else ""
+                if (item.duration > 0) MXPickerFormatBiz.timeToString(item.duration) else ""
 
             holder.indexLay.setOnClickListener {
                 onSelectChange?.select(item)
             }
             holder.playBtn.setOnClickListener {
-                ImagePathBiz.openItem(it.context, item)
+                MXFileBiz.openItem(it.context, item)
             }
             if (isSelect) {
                 holder.indexTxv.text = (index + 1).toString()
@@ -100,6 +100,6 @@ class ImgLargeAdapt(
 
     override fun getItemViewType(position: Int): Int {
         val item = list.getOrNull(position)
-        return if (item?.type == PickerType.Video) 0 else 1
+        return if (item?.type == MXPickerType.Video) 0 else 1
     }
 }
