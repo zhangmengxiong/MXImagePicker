@@ -122,3 +122,23 @@ ImagePickerService.registerImageLoader(GlideImageLoader())
         }
     }
 ```
+
+
+
+### 调取摄像头单独拍摄照片
+```
+val builder = MXCaptureBuilder(this).setType(MXPickerType.Image)
+
+startActivityForResult(builder.createIntent(), 0x11)
+
+// 在onActivityResult获取结果
+val file = builder.getCaptureFile()
+```
+### 调取摄像头单独拍摄视频
+```
+val builder = MXCaptureBuilder(this).setType(MXPickerType.Video).setMaxVideoLength(10)
+startActivityForResult(builder.createIntent(), 0x11)
+
+// 在onActivityResult获取结果
+val file = builder.getCaptureFile()
+```

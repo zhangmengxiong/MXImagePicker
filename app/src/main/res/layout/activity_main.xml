@@ -8,18 +8,31 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
+    <Button
         android:id="@+id/imageBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="imageBtn"
+        android:text="选择图片"
         android:textSize="16sp" />
 
-    <TextView
+    <Button
         android:id="@+id/videoBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="videoBtn"
+        android:text="选择视频"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/imageCapBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="拍摄单张图片"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/videoCapBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="拍摄单个视频"
         android:textSize="16sp" />
 </LinearLayout>
