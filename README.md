@@ -132,3 +132,13 @@ startActivityForResult(builder.createIntent(), 0x11)
 // 在onActivityResult获取结果
 val file = builder.getCaptureFile()
 ```
+
+### 图片查看器
+```
+ImgShowActivity.open(
+    this, arrayListOf(
+        "http://videos.jzvd.org/v/饺子主动.jpg",
+        "http://videos.jzvd.org/v/饺子运动.jpg"
+    ), "图片详情"
+)
+```
