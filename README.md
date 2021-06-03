@@ -1,5 +1,6 @@
 # ImagePicker
-
+![Image text](https://gitee.com/zhangmengxiong/MXImagePicker/raw/master/imgs/screenshot1.png)
+![Image text](https://gitee.com/zhangmengxiong/MXImagePicker/raw/master/imgs/screenshot2.png)
 ## 介绍
 基于Kotlin，AndroidX的仿微信图片选择器
 [![](https://jitpack.io/v/com.gitee.zhangmengxiong/MXImagePicker.svg)](https://jitpack.io/#com.gitee.zhangmengxiong/MXImagePicker)
