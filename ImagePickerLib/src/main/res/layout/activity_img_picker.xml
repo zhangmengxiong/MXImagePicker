@@ -5,13 +5,6 @@
     android:background="@color/picker_color_background"
     android:orientation="vertical">
 
-
-    <com.mx.imgpicker.views.MXBarPlaceView
-        android:id="@+id/barPlaceView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/picker_bar_height">

@@ -10,7 +10,6 @@ import java.io.Serializable
 class PickerBuilder : Serializable {
     var _pickerType: MXPickerType = MXPickerType.Image
     var _maxSize: Int = 1 //选择最大数量
-    var _activityCall: ((AppCompatActivity) -> Unit)? = null // Activity在创建时会回调这个，可以设置样式等
     var _enableCamera: Boolean = true // 是否可以拍摄
     var _videoMaxLength: Int = -1 // 视频最大长度，单位：秒
 
@@ -45,17 +44,6 @@ class PickerBuilder : Serializable {
         _videoMaxLength = length
         return this
     }
-
-    /**
-     * Activity创建后回调，可以设置整体样式
-     * 一般搭配ImmersionBar设置导航栏和状态栏的颜色等
-     * 一次选择只会调用一次回调！
-     */
-    fun setActivityCallback(call: ((activity: AppCompatActivity) -> Unit)): PickerBuilder {
-        _activityCall = call
-        return this
-    }
-
 
     fun createIntent(context: Context): Intent {
         val intent = Intent()

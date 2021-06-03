@@ -39,7 +39,7 @@ class ImgPickerActivity : AppCompatActivity() {
     private val selectList = ArrayList<Item>()
 
     private val imgAdapt by lazy { ImgGridAdapt(imageList, selectList, builder) }
-    private val imgLargeAdapt by lazy { ImgLargeAdapt(imageList, selectList, builder) }
+    private val imgLargeAdapt by lazy { ImgLargeAdapt(imageList, selectList) }
     private val folderAdapt = FolderAdapt()
 
     private var returnBtn: ImageView? = null
@@ -51,7 +51,6 @@ class ImgPickerActivity : AppCompatActivity() {
     private var largeImgRecycleView: RecyclerView? = null
     private var folderMoreLay: View? = null
     private var folderMoreImg: View? = null
-    private var barPlaceView: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,7 +70,6 @@ class ImgPickerActivity : AppCompatActivity() {
         }
 
         initView()
-        initIntent()
     }
 
     override fun onRequestPermissionsResult(
@@ -81,26 +79,6 @@ class ImgPickerActivity : AppCompatActivity() {
     ) {
         if (requestCode == MXPermissionBiz.REQUEST_CODE && MXPermissionBiz.permissionResult(this)) {
             initView()
-            initIntent()
-        }
-    }
-
-    private fun initIntent() {
-        val activityCall = builder._activityCall ?: ImagePickerService.getGlobalActivityCall()
-        if (activityCall != null) {
-            barPlaceView?.visibility = View.GONE
-            activityCall.invoke(this)
-        } else {
-            // 默认设置
-            if (BarColorChangeBiz.setFullScreen(
-                    this,
-                    resources.getColor(R.color.picker_color_background)
-                )
-            ) {
-                barPlaceView?.visibility = View.VISIBLE
-            } else {
-                barPlaceView?.visibility = View.GONE
-            }
         }
     }
 
@@ -114,7 +92,7 @@ class ImgPickerActivity : AppCompatActivity() {
         folderMoreImg = findViewById(R.id.folderMoreImg)
         folderNameTxv = findViewById(R.id.folderNameTxv)
         selectBtn = findViewById(R.id.selectBtn)
-        barPlaceView = findViewById(R.id.barPlaceView)
+        ImagePickerService.getGlobalActivityCall()?.invoke(this)
 
         returnBtn?.setOnClickListener { onBackPressed() }
 

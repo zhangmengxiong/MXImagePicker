@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.chrisbanes.photoview.PhotoView
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
-import com.mx.imgpicker.builder.PickerBuilder
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.ItemSelectCall
 import com.mx.imgpicker.models.MXPickerType
@@ -20,8 +19,7 @@ import com.mx.imgpicker.views.MXPickerTextView
 
 class ImgLargeAdapt(
     private val list: ArrayList<Item>,
-    private val selectList: ArrayList<Item>,
-    builder: PickerBuilder
+    private val selectList: ArrayList<Item>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onSelectChange: ItemSelectCall? = null
 

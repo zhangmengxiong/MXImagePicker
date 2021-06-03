@@ -35,4 +35,11 @@
         android:layout_height="wrap_content"
         android:text="拍摄单个视频"
         android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/showImgsBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="图片显示器"
+        android:textSize="16sp" />
 </LinearLayout>

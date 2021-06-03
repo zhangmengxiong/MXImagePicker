@@ -12,9 +12,15 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/image_picker_file_paths" />
         </provider>
+
         <activity
             android:name="com.mx.imgpicker.app.ImgPickerActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+        <activity
+            android:name=".app.show.ImgShowActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+
     </application>
 </manifest>
