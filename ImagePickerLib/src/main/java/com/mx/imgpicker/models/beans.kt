@@ -19,7 +19,7 @@ data class Item(
     val uri: Uri,
     val mimeType: String,
     val time: Long,
-    val name: String,
+    val name: String?,
     val type: MXPickerType,
     val duration: Int = 0
 ) : Serializable {
