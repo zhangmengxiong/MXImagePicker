@@ -5,7 +5,6 @@ import android.content.Intent
 import com.mx.imgpicker.app.ImgPickerActivity
 import com.mx.imgpicker.models.MXPickerType
 import java.io.Serializable
-import java.lang.Exception
 
 class MXPickerBuilder : Serializable {
     private var _pickerType: MXPickerType = MXPickerType.Image
