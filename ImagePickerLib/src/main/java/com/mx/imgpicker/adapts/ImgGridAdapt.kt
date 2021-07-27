@@ -8,7 +8,7 @@ import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
-import com.mx.imgpicker.builder.PickerBuilder
+import com.mx.imgpicker.builder.MXPickerBuilder
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.ItemSelectCall
 import com.mx.imgpicker.models.MXPickerType
@@ -17,7 +17,7 @@ import com.mx.imgpicker.views.MXPickerTextView
 class ImgGridAdapt(
     private val list: ArrayList<Item>,
     private val selectList: ArrayList<Item>,
-    private val builder: PickerBuilder
+    private val builder: MXPickerBuilder
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onSelectClick: ItemSelectCall? = null
     var onItemClick: ((item: Item, list: ArrayList<Item>) -> Unit)? = null
@@ -47,7 +47,7 @@ class ImgGridAdapt(
         } else if (holder is ImgVH) {
             holder.indexTxv.visibility = View.VISIBLE
             holder.selectBG.visibility = View.VISIBLE
-            val position = if (builder._enableCamera) position - 1 else position
+            val position = if (builder.isEnableCamera()) position - 1 else position
             val item = list.getOrNull(position) ?: return
             ImagePickerService.getImageLoader().displayImage(item, holder.img)
             val isSelect = selectList.contains(item)
@@ -74,10 +74,10 @@ class ImgGridAdapt(
     }
 
     override fun getItemCount(): Int {
-        return if (builder._enableCamera) list.size + 1 else list.size
+        return if (builder.isEnableCamera()) list.size + 1 else list.size
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (builder._enableCamera && position == 0) 0 else 1
+        return if (builder.isEnableCamera() && position == 0) 0 else 1
     }
 }

@@ -12,29 +12,17 @@ import java.io.Serializable
 /**
  * 拍摄Intent生成器，自动绑定Provider
  */
-class MXCaptureBuilder(val context: Context) : Serializable {
+class MXCaptureBuilder : Serializable {
     private var _pickerType: MXPickerType = MXPickerType.Image
     private var _videoMaxLength: Int = -1 // 视频最大长度，单位：秒
-    private var _dstFile: File = MXFileBiz.createImageFile(context)
+    private var _dstFile: File? = null
 
     /**
      * 选择类型，默认=Image
      */
     fun setType(type: MXPickerType): MXCaptureBuilder {
         _pickerType = type
-        _dstFile = if (type == MXPickerType.Image) {
-            MXFileBiz.createImageFile(context)
-        } else {
-            MXFileBiz.createVideoFile(context)
-        }
         return this
-    }
-
-    /**
-     * 设置拍摄文件位置，不建议这么设置，默认位置在cache目录下
-     */
-    fun setCaptureFile(file: File) {
-        _dstFile = file
     }
 
     /**
@@ -45,8 +33,14 @@ class MXCaptureBuilder(val context: Context) : Serializable {
         return this
     }
 
-    fun createIntent(): Intent {
-        val file = _dstFile
+    fun createIntent(context: Context): Intent {
+        val file = if (_pickerType == MXPickerType.Image) {
+            MXFileBiz.createImageFile(context)
+        } else {
+            MXFileBiz.createVideoFile(context)
+        }
+        _dstFile = file
+
         val uri = MXImagePickerProvider.createUri(context, file)
         val intent = if (_pickerType == MXPickerType.Image) {
             Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -62,7 +56,10 @@ class MXCaptureBuilder(val context: Context) : Serializable {
         return intent
     }
 
+    /**
+     * 需要在 createIntent() 后调用，否则返回null
+     */
     fun getCaptureFile(): File {
-        return _dstFile
+        return _dstFile!!
     }
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_string_select">Select</string>
+    <string name="picker_string_all">All</string>
+    <string name="picker_string_all_image">All photos</string>
+    <string name="picker_string_pic_limit_tip">You can only select up to %s picture!</string>
+    <string name="picker_string_video_limit_length_tip">Only videos with less than %s can be selected</string>
+    <string name="picker_string_need_permission_storage_camera">Write storage、 camera permissions are required</string>
+    <string name="picker_string_need_permission_storage">Read storage permissions are required</string>
+    <string name="picker_string_open_failed">Failed to open!</string>
+</resources>

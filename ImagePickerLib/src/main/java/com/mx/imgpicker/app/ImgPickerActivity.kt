@@ -16,7 +16,7 @@ import com.mx.imgpicker.adapts.FolderAdapt
 import com.mx.imgpicker.adapts.ImgGridAdapt
 import com.mx.imgpicker.adapts.ImgLargeAdapt
 import com.mx.imgpicker.builder.MXCaptureBuilder
-import com.mx.imgpicker.builder.PickerBuilder
+import com.mx.imgpicker.builder.MXPickerBuilder
 import com.mx.imgpicker.db.MXSourceDB
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.Item
@@ -29,8 +29,8 @@ import com.mx.imgpicker.utils.*
 
 class ImgPickerActivity : AppCompatActivity() {
     private val builder by lazy {
-        (intent.getSerializableExtra(PickerBuilder.KEY_INTENT_BUILDER) as PickerBuilder?)
-            ?: PickerBuilder()
+        (intent.getSerializableExtra(MXPickerBuilder.KEY_INTENT_BUILDER) as MXPickerBuilder?)
+            ?: MXPickerBuilder()
     }
     private val sourceDB by lazy { MXSourceDB(this) }
     private val pickerVM by lazy { ImgPickerVM(this, builder, sourceDB) }
@@ -64,7 +64,11 @@ class ImgPickerActivity : AppCompatActivity() {
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
             )
         ) {
-            Toast.makeText(this, "需要读取存储权限", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.picker_string_need_permission_storage),
+                Toast.LENGTH_SHORT
+            ).show()
             finish()
             return
         }
@@ -131,15 +135,19 @@ class ImgPickerActivity : AppCompatActivity() {
                 Manifest.permission.CAMERA
             )
             if (!MXPermissionBiz.hasPermission(this, permissions)) {
-                Toast.makeText(this, "需要写入存储、相机权限", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.picker_string_need_permission_storage_camera),
+                    Toast.LENGTH_SHORT
+                ).show()
                 MXPermissionBiz.requestPermission(this, permissions)
             } else {
-                val captureBuilder = MXCaptureBuilder(this)
-                    .setType(builder._pickerType)
-                    .setMaxVideoLength(builder._videoMaxLength)
-                val intent = captureBuilder.createIntent()
+                val captureBuilder = MXCaptureBuilder()
+                    .setType(builder.getPickerType())
+                    .setMaxVideoLength(builder.getVideoMaxLength())
+                val intent = captureBuilder.createIntent(this)
                 val file = captureBuilder.getCaptureFile()
-                sourceDB.addSource(file, builder._pickerType)
+                sourceDB.addSource(file, builder.getPickerType())
 
                 startActivityForResult(intent, 0x12)
                 MXLog.log("PATH = ${file.absolutePath}")
@@ -154,17 +162,18 @@ class ImgPickerActivity : AppCompatActivity() {
             val paths = selectList.map { it.path }
             setResult(
                 RESULT_OK,
-                Intent().putExtra(PickerBuilder.KEY_INTENT_RESULT, ArrayList(paths))
+                Intent().putExtra(MXPickerBuilder.KEY_INTENT_RESULT, ArrayList(paths))
             )
             finish()
         }
 
         val onSelectChange = object : ItemSelectCall {
             override fun select(item: Item) {
-                if (builder._pickerType == MXPickerType.Video && builder._videoMaxLength > 0 && item.duration > builder._videoMaxLength) {
+                if (builder.getPickerType() == MXPickerType.Video && builder.getVideoMaxLength() > 0 && item.duration > builder.getVideoMaxLength()) {
+                    val format = getString(R.string.picker_string_video_limit_length_tip)
                     Toast.makeText(
                         this@ImgPickerActivity,
-                        "当前视频时长超出限制，可选择 ${builder._videoMaxLength} 秒以内的视频",
+                        String.format(format, builder.getVideoMaxLength()),
                         Toast.LENGTH_SHORT
                     ).show()
                     return
@@ -177,29 +186,31 @@ class ImgPickerActivity : AppCompatActivity() {
                 if (isSelect) {
                     selectList.remove(item)
                     selectIndexList.forEach { index ->
-                        imgAdapt.notifyItemChanged(if (builder._enableCamera) index + 1 else index)
+                        imgAdapt.notifyItemChanged(if (builder.isEnableCamera()) index + 1 else index)
                         imgLargeAdapt.notifyItemChanged(index)
                     }
                 } else {
-                    if (selectList.size >= builder._maxSize) {
+                    if (selectList.size >= builder.getMaxSize()) {
+                        val format = getString(R.string.picker_string_pic_limit_tip)
                         Toast.makeText(
                             this@ImgPickerActivity,
-                            "您最多只能选择${builder._maxSize}张图片！",
+                            String.format(format, builder.getMaxSize()),
                             Toast.LENGTH_SHORT
                         ).show()
                         return
                     }
                     selectList.add(item)
-                    imgAdapt.notifyItemChanged(if (builder._enableCamera) index + 1 else index)
+                    imgAdapt.notifyItemChanged(if (builder.isEnableCamera()) index + 1 else index)
                     imgLargeAdapt.notifyItemChanged(index)
                 }
 
                 if (selectList.isEmpty()) {
                     selectBtn?.visibility = View.GONE
-                    selectBtn?.text = "选择"
+                    selectBtn?.text = getString(R.string.picker_string_select)
                 } else {
                     selectBtn?.visibility = View.VISIBLE
-                    selectBtn?.text = "选择(${selectList.size}/${builder._maxSize})"
+                    selectBtn?.text =
+                        "${getString(R.string.picker_string_select)}(${selectList.size}/${builder.getMaxSize()})"
                 }
             }
         }
@@ -257,18 +268,18 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     private val imageChangeObserver = ImageChangeObserver {
-        if (builder._pickerType == MXPickerType.Image) {
+        if (builder.getPickerType() == MXPickerType.Image) {
             pickerVM.startScan()
         }
     }
     private val videoChangeObserver = VideoChangeObserver {
-        if (builder._pickerType == MXPickerType.Video) {
+        if (builder.getPickerType() == MXPickerType.Video) {
             pickerVM.startScan()
         }
     }
 
     private fun showFolder(folder: FolderItem?) {
-        folderNameTxv?.text = folder?.name ?: "全部照片"
+        folderNameTxv?.text = folder?.name ?: getString(R.string.picker_string_all_image)
         imageList.clear()
         if (folder != null) {
             imageList.addAll(folder.images)

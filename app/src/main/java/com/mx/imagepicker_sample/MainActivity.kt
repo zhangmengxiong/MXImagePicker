@@ -9,7 +9,7 @@ import com.gyf.immersionbar.ImmersionBar
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.app.show.ImgShowActivity
 import com.mx.imgpicker.builder.MXCaptureBuilder
-import com.mx.imgpicker.builder.PickerBuilder
+import com.mx.imgpicker.builder.MXPickerBuilder
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.starter.MXStarter
 
@@ -38,33 +38,33 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.imageBtn).setOnClickListener {
             MXStarter.start(
                 this,
-                PickerBuilder().setMaxSize(9).setCameraEnable(true).createIntent(this)
+                MXPickerBuilder().setMaxSize(9).setCameraEnable(true).createIntent(this)
             ) { resultCode, data ->
-                val list = PickerBuilder.getPickerResult(data)
+                val list = MXPickerBuilder.getPickerResult(data)
                 Toast.makeText(this, list.joinToString(","), Toast.LENGTH_SHORT).show()
             }
         }
         findViewById<View>(R.id.videoBtn).setOnClickListener {
             MXStarter.start(
                 this,
-                PickerBuilder().setMaxSize(3).setMaxVideoLength(15)
+                MXPickerBuilder().setMaxSize(3).setMaxVideoLength(15)
                     .setType(MXPickerType.Video)
                     .createIntent(this)
             ) { resultCode, data ->
-                val list = PickerBuilder.getPickerResult(data) ?: return@start
+                val list = MXPickerBuilder.getPickerResult(data) ?: return@start
                 Toast.makeText(this, list.joinToString(","), Toast.LENGTH_SHORT).show()
             }
         }
         findViewById<View>(R.id.imageCapBtn).setOnClickListener {
-            val builder = MXCaptureBuilder(this).setType(MXPickerType.Image)
-            MXStarter.start(this, builder.createIntent()) { resultCode, data ->
+            val builder = MXCaptureBuilder().setType(MXPickerType.Image)
+            MXStarter.start(this, builder.createIntent(this)) { resultCode, data ->
                 Toast.makeText(this, builder.getCaptureFile().absolutePath, Toast.LENGTH_SHORT)
                     .show()
             }
         }
         findViewById<View>(R.id.videoCapBtn).setOnClickListener {
-            val builder = MXCaptureBuilder(this).setType(MXPickerType.Video).setMaxVideoLength(10)
-            MXStarter.start(this, builder.createIntent()) { resultCode, data ->
+            val builder = MXCaptureBuilder().setType(MXPickerType.Video).setMaxVideoLength(10)
+            MXStarter.start(this, builder.createIntent(this)) { resultCode, data ->
                 Toast.makeText(this, builder.getCaptureFile().absolutePath, Toast.LENGTH_SHORT)
                     .show()
             }

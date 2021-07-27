@@ -31,10 +31,10 @@
 
 #### 第三步：启动选择页面
 ```
-val intent = PickerBuilder().setMaxSize(3).createIntent(this)
+val intent = MXPickerBuilder().setMaxSize(3).createIntent(this)
 startActivityForResult(intent,0x22)
 ```
-##### PickerBuilder参数说明
+##### MXPickerBuilder参数说明
 1. `setMaxSize(size: Int)` 设置最大选择文件个数
 2. `setType(type: PickerType)` 设置类型 
     * PickerType.Image = 图片
@@ -109,7 +109,7 @@ ImagePickerService.registerImageLoader(GlideImageLoader())
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && requestCode == 0x22) {
-            val paths = PickerBuilder.getPickerResult(data) //返回List<String>类型数据
+            val paths = MXPickerBuilder.getPickerResult(data) //返回List<String>类型数据
             println(paths)
         }
     }
@@ -119,17 +119,17 @@ ImagePickerService.registerImageLoader(GlideImageLoader())
 
 ### 调取摄像头单独拍摄照片
 ```
-val builder = MXCaptureBuilder(this).setType(MXPickerType.Image)
+val builder = MXCaptureBuilder().setType(MXPickerType.Image)
 
-startActivityForResult(builder.createIntent(), 0x11)
+startActivityForResult(builder.createIntent(this), 0x11)
 
 // 在onActivityResult获取结果
 val file = builder.getCaptureFile()
 ```
 ### 调取摄像头单独拍摄视频
 ```
-val builder = MXCaptureBuilder(this).setType(MXPickerType.Video).setMaxVideoLength(10)
-startActivityForResult(builder.createIntent(), 0x11)
+val builder = MXCaptureBuilder().setType(MXPickerType.Video).setMaxVideoLength(10)
+startActivityForResult(builder.createIntent(this), 0x11)
 
 // 在onActivityResult获取结果
 val file = builder.getCaptureFile()

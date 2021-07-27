@@ -3,6 +3,7 @@ package com.mx.imgpicker.utils
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import com.mx.imgpicker.R
 import com.mx.imgpicker.models.Item
 import java.io.File
 import java.text.SimpleDateFormat
@@ -53,7 +54,7 @@ object MXFileBiz {
             context.startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(context, "打开失败！", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.picker_string_open_failed), Toast.LENGTH_SHORT).show()
         }
     }
 }

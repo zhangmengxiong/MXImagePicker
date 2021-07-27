@@ -3,7 +3,8 @@ package com.mx.imgpicker.app
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import com.mx.imgpicker.builder.PickerBuilder
+import com.mx.imgpicker.R
+import com.mx.imgpicker.builder.MXPickerBuilder
 import com.mx.imgpicker.db.MXSourceDB
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.Item
@@ -18,7 +19,7 @@ import kotlin.concurrent.thread
 
 class ImgPickerVM(
     val context: Context,
-    private val builder: PickerBuilder,
+    private val builder: MXPickerBuilder,
     private val sourceDB: MXSourceDB
 ) {
     companion object {
@@ -36,22 +37,23 @@ class ImgPickerVM(
                 isInScan.set(true)
                 MXLog.log("扫描目录")
 
-                val savedSource = sourceDB.getAllSource(builder._pickerType).mapNotNull { item ->
-                    val file = File(item.path)
-                    if (!file.exists()) return@mapNotNull null
+                val savedSource =
+                    sourceDB.getAllSource(builder.getPickerType()).mapNotNull { item ->
+                        val file = File(item.path)
+                        if (!file.exists()) return@mapNotNull null
 
-                    return@mapNotNull Item(
-                        item.path,
-                        MXImagePickerProvider.createUri(context, file),
-                        item.mimeType,
-                        file.lastModified(),
-                        file.name,
-                        builder._pickerType,
-                        item.videoLength
-                    )
-                }
+                        return@mapNotNull Item(
+                            item.path,
+                            MXImagePickerProvider.createUri(context, file),
+                            item.mimeType,
+                            file.lastModified(),
+                            file.name,
+                            builder.getPickerType(),
+                            item.videoLength
+                        )
+                    }
 
-                val images = if (builder._pickerType == MXPickerType.Image) {
+                val images = if (builder.getPickerType() == MXPickerType.Image) {
                     (MXImageSource.scan(context) + savedSource).sortedByDescending { it.time }
                 } else {
                     MXVideoSource.scan(context) + savedSource.sortedByDescending { it.time }
@@ -64,7 +66,7 @@ class ImgPickerVM(
                     val allItems = imageList.sortedByDescending { it.time }
                     val folderList = (arrayOf(
                         FolderItem(
-                            "全部",
+                            context.getString(R.string.picker_string_all),
                             ArrayList(allItems)
                         )
                     ) + allItems.groupBy { it.getFolderName() }.map { entry ->
