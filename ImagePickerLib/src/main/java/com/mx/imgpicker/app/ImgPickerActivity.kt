@@ -191,7 +191,11 @@ class ImgPickerActivity : AppCompatActivity() {
                     }
                 } else {
                     if (selectList.size >= builder.getMaxSize()) {
-                        val format = getString(R.string.picker_string_pic_limit_tip)
+                        val format = if (builder.getPickerType() == MXPickerType.Video) {
+                            getString(R.string.picker_string_video_limit_tip)
+                        } else {
+                            getString(R.string.picker_string_image_limit_tip)
+                        }
                         Toast.makeText(
                             this@ImgPickerActivity,
                             String.format(format, builder.getMaxSize()),
@@ -279,7 +283,7 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     private fun showFolder(folder: FolderItem?) {
-        folderNameTxv?.text = folder?.name ?: getString(R.string.picker_string_all_image)
+        folderNameTxv?.text = folder?.name ?: getString(R.string.picker_string_all)
         imageList.clear()
         if (folder != null) {
             imageList.addAll(folder.images)

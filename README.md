@@ -67,6 +67,19 @@ ImagePickerService.registerActivityCallback { activity ->
     <color name="picker_color_select">#03CE65</color>
 ```
 
+##### 多语言设置
+将下面字符串定义放入对应的语言目录中，可以修改页面对应的文字提示
+```
+    <string name="picker_string_select">选择</string>
+    <string name="picker_string_all">全部</string>
+    <string name="picker_string_image_limit_tip">您最多只能选择 %s 张图片！</string>
+    <string name="picker_string_video_limit_tip">您最多只能选择 %s 个视频！</string>
+    <string name="picker_string_video_limit_length_tip">只能选择 %s 秒以内的视频</string>
+    <string name="picker_string_need_permission_storage_camera">需要写入存储、相机权限</string>
+    <string name="picker_string_need_permission_storage">需要读取存储权限</string>
+    <string name="picker_string_open_failed">打开失败！</string>
+```
+
 dimens.xml 资源
 ```
     <!--  顶部导航栏高度  -->  
