@@ -54,10 +54,10 @@ class ImgGridAdapt(
             val index = selectList.indexOf(item)
             holder.indexTxv.isChecked = isSelect
 
-            if (item.type == MXPickerType.Image) {
-                holder.videoTag.visibility = View.GONE
-            } else {
+            if (item.type == MXPickerType.Video) {
                 holder.videoTag.visibility = View.VISIBLE
+            } else {
+                holder.videoTag.visibility = View.GONE
             }
             holder.indexLay.setOnClickListener {
                 onSelectClick?.select(item)

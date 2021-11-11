@@ -30,19 +30,29 @@ class MXSourceDB(val context: Context) {
     fun getAllSource(type: MXPickerType): ArrayList<DbSourceItem> {
         var cursor: Cursor? = null
         val sourceList = ArrayList<DbSourceItem>()
+        var section: String? = null
+        var sectionArg: Array<String>? = null
+
+        if (type != MXPickerType.ImageAndVideo) {
+            section = "${DBHelp.DB_KEY_TYPE}=?"
+            sectionArg = arrayOf(type.name)
+        } else {
+            section = ""
+            sectionArg = emptyArray()
+        }
 
         try {
             cursor = dbHelp.query(
                 DBHelp.DB_NAME, arrayOf(
                     DBHelp.DB_KEY_PATH,
                     DBHelp.DB_KEY_TIME,
-                    DBHelp.DB_KEY_VIDEO_LENGTH
-                ), "${DBHelp.DB_KEY_TYPE}=?",
-                arrayOf(type.name), null, null, null
+                    DBHelp.DB_KEY_VIDEO_LENGTH,
+                    DBHelp.DB_KEY_TYPE
+                ), section, sectionArg, null, null, null
             )
             if (cursor != null && cursor.moveToFirst()) {
                 do {
-                    val item = cursorToItem(type, cursor)
+                    val item = cursorToItem(cursor)
                     if (item != null) {
                         sourceList.add(item)
                     }
@@ -59,8 +69,10 @@ class MXSourceDB(val context: Context) {
         return sourceList
     }
 
-    private fun cursorToItem(type: MXPickerType, cursor: Cursor): DbSourceItem? {
+    private fun cursorToItem(cursor: Cursor): DbSourceItem? {
         try {
+            val type =
+                MXPickerType.from(cursor.getString(cursor.getColumnIndex(DBHelp.DB_KEY_TYPE)))
             val mimeType = if (type == MXPickerType.Video) {
                 MXVideoSource.MIME_TYPE
             } else {

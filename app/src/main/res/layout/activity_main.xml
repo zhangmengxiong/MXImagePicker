@@ -9,6 +9,13 @@
     tools:context=".MainActivity">
 
     <Button
+        android:id="@+id/fixPickerBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="选择图片+视频"
+        android:textSize="16sp" />
+
+    <Button
         android:id="@+id/imageBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

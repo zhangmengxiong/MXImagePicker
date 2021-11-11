@@ -39,6 +39,7 @@ startActivityForResult(intent,0x22)
 2. `setType(type: PickerType)` 设置类型 
     * PickerType.Image = 图片
     * PickerType.Video = 视频
+    * PickerType.ImageAndVideo = 图片 + 视频  混合选择
 3. `setCameraEnable(enable: Boolean)` 设置是否启动拍摄功能，默认=true
 4. `setMaxVideoLength(length: Int)` 当类型=Video时，可以选择视频最大时长限制，单位：秒   默认=-1 无限制
 

@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.*
 import com.mx.imgpicker.ImagePickerService
@@ -142,15 +143,28 @@ class ImgPickerActivity : AppCompatActivity() {
                 ).show()
                 MXPermissionBiz.requestPermission(this, permissions)
             } else {
-                val captureBuilder = MXCaptureBuilder()
-                    .setType(builder.getPickerType())
-                    .setMaxVideoLength(builder.getVideoMaxLength())
-                val intent = captureBuilder.createIntent(this)
-                val file = captureBuilder.getCaptureFile()
-                sourceDB.addSource(file, builder.getPickerType())
+                val takeCall = { type: MXPickerType ->
+                    val captureBuilder = MXCaptureBuilder()
+                        .setType(type)
+                        .setMaxVideoLength(builder.getVideoMaxLength())
+                    val intent = captureBuilder.createIntent(this)
+                    val file = captureBuilder.getCaptureFile()
+                    sourceDB.addSource(file, type)
 
-                startActivityForResult(intent, 0x12)
-                MXLog.log("PATH = ${file.absolutePath}")
+                    startActivityForResult(intent, 0x12)
+                    MXLog.log("PATH = ${file.absolutePath}")
+                }
+
+                if (builder.getPickerType() == MXPickerType.ImageAndVideo) {
+                    AlertDialog.Builder(this).apply {
+                        setItems(arrayOf("拍摄图片", "拍摄视频")) { dialog, index ->
+                            val type = if (index == 0) MXPickerType.Image else MXPickerType.Video
+                            takeCall.invoke(type)
+                        }
+                    }.create().show()
+                } else {
+                    takeCall.invoke(builder.getPickerType())
+                }
             }
         }
         imgAdapt.onItemClick = { item, list ->

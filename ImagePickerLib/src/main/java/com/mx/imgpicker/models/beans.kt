@@ -8,7 +8,17 @@ import java.io.Serializable
  * 类型
  */
 enum class MXPickerType : Serializable {
-    Image, Video
+    Image, Video, ImageAndVideo;
+
+    companion object {
+        fun from(name: String): MXPickerType {
+            return when (name) {
+                Image.name -> Image
+                Video.name -> Video
+                else -> ImageAndVideo
+            }
+        }
+    }
 }
 
 /**

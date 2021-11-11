@@ -53,10 +53,16 @@ class ImgPickerVM(
                         )
                     }
 
-                val images = if (builder.getPickerType() == MXPickerType.Image) {
-                    (MXImageSource.scan(context) + savedSource).sortedByDescending { it.time }
-                } else {
-                    MXVideoSource.scan(context) + savedSource.sortedByDescending { it.time }
+                val images = when (builder.getPickerType()) {
+                    MXPickerType.Image -> {
+                        (MXImageSource.scan(context) + savedSource).sortedByDescending { it.time }
+                    }
+                    MXPickerType.Video -> {
+                        (MXVideoSource.scan(context) + savedSource).sortedByDescending { it.time }
+                    }
+                    MXPickerType.ImageAndVideo -> {
+                        (MXImageSource.scan(context) + MXVideoSource.scan(context) + savedSource).sortedByDescending { it.time }
+                    }
                 }
 
                 val hasChange = (!images.toTypedArray().contentEquals(imageList.toTypedArray()))

@@ -34,7 +34,16 @@ class MainActivity : AppCompatActivity() {
                 .navigationBarColor(R.color.picker_color_background)
                 .init()
         }
-
+        findViewById<View>(R.id.fixPickerBtn).setOnClickListener {
+            MXStarter.start(
+                this,
+                MXPickerBuilder().setType(MXPickerType.ImageAndVideo).setMaxSize(9)
+                    .setCameraEnable(true).createIntent(this)
+            ) { resultCode, data ->
+                val list = MXPickerBuilder.getPickerResult(data)
+                Toast.makeText(this, list.joinToString(","), Toast.LENGTH_SHORT).show()
+            }
+        }
         findViewById<View>(R.id.imageBtn).setOnClickListener {
             MXStarter.start(
                 this,
