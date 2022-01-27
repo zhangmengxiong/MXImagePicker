@@ -14,6 +14,7 @@ import com.mx.imgpicker.utils.MXLog
 import com.mx.imgpicker.utils.source_loader.MXImageSource
 import com.mx.imgpicker.utils.source_loader.MXVideoSource
 import java.io.File
+import java.lang.Exception
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
@@ -36,53 +37,57 @@ class ImgPickerVM(
             synchronized(this) {
                 isInScan.set(true)
                 MXLog.log("扫描目录")
+                try {
+                    val savedSource =
+                        sourceDB.getAllSource(builder.getPickerType()).mapNotNull { item ->
+                            val file = File(item.path)
+                            if (!file.exists()) return@mapNotNull null
 
-                val savedSource =
-                    sourceDB.getAllSource(builder.getPickerType()).mapNotNull { item ->
-                        val file = File(item.path)
-                        if (!file.exists()) return@mapNotNull null
+                            return@mapNotNull Item(
+                                item.path,
+                                MXImagePickerProvider.createUri(context, file),
+                                item.mimeType,
+                                file.lastModified() ?: 0L,
+                                file.name,
+                                builder.getPickerType(),
+                                item.videoLength
+                            )
+                        }
 
-                        return@mapNotNull Item(
-                            item.path,
-                            MXImagePickerProvider.createUri(context, file),
-                            item.mimeType,
-                            file.lastModified() ?: 0L,
-                            file.name,
-                            builder.getPickerType(),
-                            item.videoLength
-                        )
+                    val images = when (builder.getPickerType()) {
+                        MXPickerType.Image -> {
+                            (MXImageSource.scan(context) + savedSource).sortedByDescending { it.time }
+                        }
+                        MXPickerType.Video -> {
+                            (MXVideoSource.scan(context) + savedSource).sortedByDescending { it.time }
+                        }
+                        MXPickerType.ImageAndVideo -> {
+                            (MXImageSource.scan(context) + MXVideoSource.scan(context) + savedSource).sortedByDescending { it.time }
+                        }
                     }
 
-                val images = when (builder.getPickerType()) {
-                    MXPickerType.Image -> {
-                        (MXImageSource.scan(context) + savedSource).sortedByDescending { it.time }
+                    val hasChange = (!images.toTypedArray().contentEquals(imageList.toTypedArray()))
+                    if (hasChange) {
+                        imageList.clear()
+                        imageList.addAll(images)
+                        val allItems = imageList.sortedByDescending { it.time }
+                        val folderList = (arrayOf(
+                            FolderItem(
+                                context.getString(R.string.picker_string_all),
+                                ArrayList(allItems)
+                            )
+                        ) + allItems.groupBy { it.getFolderName() }.map { entry ->
+                            FolderItem(entry.key, ArrayList(entry.value))
+                        }).toList()
+                        mHandler.post {
+                            scanResult?.invoke(folderList)
+                        }
                     }
-                    MXPickerType.Video -> {
-                        (MXVideoSource.scan(context) + savedSource).sortedByDescending { it.time }
-                    }
-                    MXPickerType.ImageAndVideo -> {
-                        (MXImageSource.scan(context) + MXVideoSource.scan(context) + savedSource).sortedByDescending { it.time }
-                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    isInScan.set(false)
                 }
-
-                val hasChange = (!images.toTypedArray().contentEquals(imageList.toTypedArray()))
-                if (hasChange) {
-                    imageList.clear()
-                    imageList.addAll(images)
-                    val allItems = imageList.sortedByDescending { it.time }
-                    val folderList = (arrayOf(
-                        FolderItem(
-                            context.getString(R.string.picker_string_all),
-                            ArrayList(allItems)
-                        )
-                    ) + allItems.groupBy { it.getFolderName() }.map { entry ->
-                        FolderItem(entry.key, ArrayList(entry.value))
-                    }).toList()
-                    mHandler.post {
-                        scanResult?.invoke(folderList)
-                    }
-                }
-                isInScan.set(false)
             }
         }
     }
