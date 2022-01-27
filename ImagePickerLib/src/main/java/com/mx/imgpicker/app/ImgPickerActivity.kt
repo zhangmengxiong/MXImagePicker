@@ -246,7 +246,7 @@ class ImgPickerActivity : AppCompatActivity() {
             true,
             videoChangeObserver
         )
-        pickerVM.scanResult = { list ->
+        pickerVM.setOnScanResult { list ->
             if (!isFinishing && !isDestroyed) {
                 folderAdapt.list.clear()
                 folderAdapt.list.addAll(list)

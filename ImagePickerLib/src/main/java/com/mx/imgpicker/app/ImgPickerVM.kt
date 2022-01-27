@@ -29,7 +29,11 @@ class ImgPickerVM(
 
     private val isInScan = AtomicBoolean(false)
     private val mHandler = Handler(Looper.getMainLooper())
-    var scanResult: ((List<FolderItem>) -> Unit)? = null
+    private var scanResult: ((List<FolderItem>) -> Unit)? = null
+
+    fun setOnScanResult(call: ((List<FolderItem>) -> Unit)?) {
+        scanResult = call
+    }
 
     fun startScan() {
         if (isInScan.get()) return
