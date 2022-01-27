@@ -46,7 +46,7 @@ class ImgPickerVM(
                             item.path,
                             MXImagePickerProvider.createUri(context, file),
                             item.mimeType,
-                            file.lastModified(),
+                            file.lastModified() ?: 0L,
                             file.name,
                             builder.getPickerType(),
                             item.videoLength

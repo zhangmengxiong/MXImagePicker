@@ -49,19 +49,19 @@ object MXImageSource : IMXSource {
         mCursor: Cursor
     ): Item? {
         try { // 获取图片的路径
-            val id = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.Media._ID))
-            val path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA))
+            val id = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
+            val path = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA))
             //获取图片名称
             val name =
-                mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME))
+                mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME))
             //获取图片时间
-            var time = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED))
+            var time = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED))
             if (time.toString().length < 13) {
                 time *= 1000
             }
             //获取图片类型
             val mimeType =
-                mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE))
+                mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE))
 
             if (path.endsWith("downloading")) return null
             //获取图片uri

@@ -72,15 +72,15 @@ class MXSourceDB(val context: Context) {
     private fun cursorToItem(cursor: Cursor): DbSourceItem? {
         try {
             val type =
-                MXPickerType.from(cursor.getString(cursor.getColumnIndex(DBHelp.DB_KEY_TYPE)))
+                MXPickerType.from(cursor.getString(cursor.getColumnIndexOrThrow(DBHelp.DB_KEY_TYPE)))
             val mimeType = if (type == MXPickerType.Video) {
                 MXVideoSource.MIME_TYPE
             } else {
                 MXImageSource.MIME_TYPE
             }
-            val path = cursor.getString(cursor.getColumnIndex(DBHelp.DB_KEY_PATH))
-            val time = cursor.getLong(cursor.getColumnIndex(DBHelp.DB_KEY_TIME))
-            var video_length = cursor.getLong(cursor.getColumnIndex(DBHelp.DB_KEY_VIDEO_LENGTH))
+            val path = cursor.getString(cursor.getColumnIndexOrThrow(DBHelp.DB_KEY_PATH))
+            val time = cursor.getLong(cursor.getColumnIndexOrThrow(DBHelp.DB_KEY_TIME))
+            var video_length = cursor.getLong(cursor.getColumnIndexOrThrow(DBHelp.DB_KEY_VIDEO_LENGTH))
 
             val file = File(path)
             if (type == MXPickerType.Video && video_length <= 0 && file.exists()) {

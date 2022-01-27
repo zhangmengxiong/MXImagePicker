@@ -53,22 +53,23 @@ object MXVideoSource : IMXSource {
         mCursor: Cursor
     ): Item? {
         try { // 获取图片的路径
-            val id = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Video.Media._ID))
-            val path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Video.Media.DATA))
+            val id = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID))
+            val path = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA))
             val duration =
-                mCursor.getString(mCursor.getColumnIndex(MediaStore.Video.Media.DURATION))
+                mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION))
                     .toIntOrNull() ?: 0
             //获取图片名称
             val name =
-                mCursor.getString(mCursor.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME))
+                mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME))
             //获取图片时间
-            var time = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Video.Media.DATE_ADDED))
+            var time =
+                mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED))
             if (time.toString().length < 13) {
                 time *= 1000
             }
             //获取图片类型
             val mimeType =
-                mCursor.getString(mCursor.getColumnIndex(MediaStore.Video.Media.MIME_TYPE))
+                mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE))
 
             if (path.endsWith("downloading")) return null
             //获取图片uri
@@ -108,13 +109,13 @@ object MXVideoSource : IMXSource {
     /**
      * 获取视屏长度，返回毫秒
      */
-      fun getVideoLength(file: File): Long {
+    fun getVideoLength(file: File): Long {
         val retriever = MediaMetadataRetriever()
         var length = 0L
         try {
             retriever.setDataSource(file.absolutePath)
             length = (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-                .toLongOrNull() ?: 0L)
+                ?.toLongOrNull() ?: 0L)
         } catch (e: java.lang.Exception) {
         } finally {
             kotlin.runCatching { retriever.release() }
