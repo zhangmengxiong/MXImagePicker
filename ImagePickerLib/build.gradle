@@ -34,7 +34,7 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
 
-                groupId = 'com.gitee.zhangmengxiong.MXImagePicker'
+                groupId = 'com.mx.imgpicker'
                 artifactId = 'final'
                 version = '1.0.0'
             }
