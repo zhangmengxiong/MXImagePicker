@@ -54,6 +54,7 @@ class ImgPickerVM(
                                     folderList.firstOrNull {
                                         it.name == oldName
                                     } ?: folderList.firstOrNull()
+                                sourceGroup.folderList = folderList
                             }
 
                             notifyChanged()
