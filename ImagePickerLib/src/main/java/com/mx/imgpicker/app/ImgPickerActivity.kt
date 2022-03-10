@@ -10,7 +10,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.FolderAdapt
@@ -19,13 +22,11 @@ import com.mx.imgpicker.adapts.ImgLargeAdapt
 import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.builder.MXPickerBuilder
 import com.mx.imgpicker.db.MXSourceDB
-import com.mx.imgpicker.models.FolderItem
-import com.mx.imgpicker.models.Item
-import com.mx.imgpicker.models.ItemSelectCall
-import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.models.*
 import com.mx.imgpicker.observer.ImageChangeObserver
 import com.mx.imgpicker.observer.VideoChangeObserver
-import com.mx.imgpicker.utils.*
+import com.mx.imgpicker.utils.MXLog
+import com.mx.imgpicker.utils.MXPermissionBiz
 
 
 class ImgPickerActivity : AppCompatActivity() {
@@ -33,15 +34,14 @@ class ImgPickerActivity : AppCompatActivity() {
         (intent.getSerializableExtra(MXPickerBuilder.KEY_INTENT_BUILDER) as MXPickerBuilder?)
             ?: MXPickerBuilder()
     }
+
+    private val sourceGroup = SourceGroup()
     private val sourceDB by lazy { MXSourceDB(this) }
-    private val pickerVM by lazy { ImgPickerVM(this, builder, sourceDB) }
+    private val pickerVM by lazy { ImgPickerVM(this, builder, sourceDB, sourceGroup) }
 
-    private val imageList = ArrayList<Item>()
-    private val selectList = ArrayList<Item>()
-
-    private val imgAdapt by lazy { ImgGridAdapt(imageList, selectList, builder) }
-    private val imgLargeAdapt by lazy { ImgLargeAdapt(imageList, selectList) }
-    private val folderAdapt = FolderAdapt()
+    private val imgAdapt by lazy { ImgGridAdapt(sourceGroup, builder) }
+    private val imgLargeAdapt by lazy { ImgLargeAdapt(sourceGroup) }
+    private val folderAdapt = FolderAdapt(sourceGroup)
 
     private var returnBtn: ImageView? = null
     private var selectBtn: TextView? = null
@@ -82,6 +82,7 @@ class ImgPickerActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == MXPermissionBiz.REQUEST_CODE && MXPermissionBiz.permissionResult(this)) {
             initView()
         }
@@ -126,7 +127,8 @@ class ImgPickerActivity : AppCompatActivity() {
             if (folderRecycleView?.isShown == true) {
                 showFolderList(false)
             } else {
-                if (folderAdapt.list.size <= 1) return@setOnClickListener
+                val folderList = sourceGroup.folderList ?: return@setOnClickListener
+                if (folderList.size <= 1) return@setOnClickListener
                 showFolderList(true)
             }
         }
@@ -173,7 +175,7 @@ class ImgPickerActivity : AppCompatActivity() {
         }
 
         selectBtn?.setOnClickListener {
-            val paths = selectList.map { it.path }
+            val paths = sourceGroup.selectList.map { it.path }
             setResult(
                 RESULT_OK,
                 Intent().putExtra(MXPickerBuilder.KEY_INTENT_RESULT, ArrayList(paths))
@@ -193,18 +195,18 @@ class ImgPickerActivity : AppCompatActivity() {
                     return
                 }
 
-                val index = imageList.indexOf(item)
-                val isSelect = selectList.contains(item)
-                val selectIndexList = selectList.map { imageList.indexOf(it) }
+                val index = sourceGroup.itemIndexOf(item)
+                val isSelect = sourceGroup.selectList.contains(item)
+                val selectIndexList = sourceGroup.selectList.map { sourceGroup.itemIndexOf(it) }
 
                 if (isSelect) {
-                    selectList.remove(item)
+                    sourceGroup.selectList.remove(item)
                     selectIndexList.forEach { index ->
                         imgAdapt.notifyItemChanged(if (builder.isEnableCamera()) index + 1 else index)
                         imgLargeAdapt.notifyItemChanged(index)
                     }
                 } else {
-                    if (selectList.size >= builder.getMaxSize()) {
+                    if (sourceGroup.selectList.size >= builder.getMaxSize()) {
                         val format = if (builder.getPickerType() == MXPickerType.Video) {
                             getString(R.string.picker_string_video_limit_tip)
                         } else {
@@ -217,18 +219,18 @@ class ImgPickerActivity : AppCompatActivity() {
                         ).show()
                         return
                     }
-                    selectList.add(item)
+                    sourceGroup.selectList.add(item)
                     imgAdapt.notifyItemChanged(if (builder.isEnableCamera()) index + 1 else index)
                     imgLargeAdapt.notifyItemChanged(index)
                 }
 
-                if (selectList.isEmpty()) {
+                if (sourceGroup.selectList.isEmpty()) {
                     selectBtn?.visibility = View.GONE
                     selectBtn?.text = getString(R.string.picker_string_select)
                 } else {
                     selectBtn?.visibility = View.VISIBLE
                     selectBtn?.text =
-                        "${getString(R.string.picker_string_select)}(${selectList.size}/${builder.getMaxSize()})"
+                        "${getString(R.string.picker_string_select)}(${sourceGroup.selectList.size}/${builder.getMaxSize()})"
                 }
             }
         }
@@ -246,19 +248,23 @@ class ImgPickerActivity : AppCompatActivity() {
             true,
             videoChangeObserver
         )
-        pickerVM.setOnScanResult { list ->
-            if (!isFinishing && !isDestroyed) {
-                folderAdapt.list.clear()
-                folderAdapt.list.addAll(list)
-                showFolder(folderAdapt.list.firstOrNull())
-                folderAdapt.notifyDataSetChanged()
-            }
-        }
-        folderAdapt.onItemClick = { item ->
-            showFolder(item)
+        pickerVM.addObserver {
+            folderNameTxv?.text =
+                sourceGroup.selectFolder?.name ?: resources.getString(R.string.picker_string_all)
+            imgAdapt.notifyDataSetChanged()
+            imgLargeAdapt.notifyDataSetChanged()
             folderAdapt.notifyDataSetChanged()
+            MXLog.log("数据刷新：${sourceGroup.getItemSize()}")
+        }
+        folderAdapt.onItemClick = { folder ->
+            folderNameTxv?.text = folder.name
+            sourceGroup.selectFolder = folder
+            emptyTxv?.visibility = if (imgAdapt.itemCount <= 0) View.VISIBLE else View.GONE
             showFolderList(false)
 
+            imgAdapt.notifyDataSetChanged()
+            imgLargeAdapt.notifyDataSetChanged()
+            folderAdapt.notifyDataSetChanged()
         }
         pickerVM.startScan()
     }
@@ -277,7 +283,7 @@ class ImgPickerActivity : AppCompatActivity() {
     private fun showLargeView(show: Boolean, target: Item? = null) {
         if (show) {
             showFolderList(false)
-            val index = imageList.indexOf(target)
+            val index = sourceGroup.itemIndexOf(target)
             largeImgRecycleView?.visibility = View.VISIBLE
             largeImgRecycleView?.scrollToPosition(index)
         } else {
@@ -294,18 +300,6 @@ class ImgPickerActivity : AppCompatActivity() {
         if (builder.getPickerType() == MXPickerType.Video) {
             pickerVM.startScan()
         }
-    }
-
-    private fun showFolder(folder: FolderItem?) {
-        folderNameTxv?.text = folder?.name ?: getString(R.string.picker_string_all)
-        imageList.clear()
-        if (folder != null) {
-            imageList.addAll(folder.images)
-        }
-        folderAdapt.selectItem = folder
-        imgAdapt.notifyDataSetChanged()
-        imgLargeAdapt.notifyDataSetChanged()
-        emptyTxv?.visibility = if (imgAdapt.itemCount <= 0) View.VISIBLE else View.GONE
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

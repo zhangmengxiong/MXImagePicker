@@ -12,7 +12,7 @@ import java.io.File
 
 object MXImageSource : IMXSource {
     const val MIME_TYPE = "image/*"
-    override fun scan(context: Context): List<Item> {
+    override fun scan(context: Context, page: Int, pageSize: Int): List<Item> {
         //扫描图片
         val mContentResolver = context.contentResolver ?: return emptyList()
 
@@ -27,7 +27,7 @@ object MXImageSource : IMXSource {
             ),
             MediaStore.Images.Media.SIZE + ">0",
             null,
-            MediaStore.Images.Media.DATE_ADDED + " DESC"
+            MediaStore.Images.Media.DATE_ADDED + " DESC LIMIT $pageSize OFFSET ${page * pageSize}"
         )
         val images = ArrayList<Item>()
 
@@ -50,12 +50,14 @@ object MXImageSource : IMXSource {
     ): Item? {
         try { // 获取图片的路径
             val id = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
-            val path = mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA))
+            val path =
+                mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA))
             //获取图片名称
             val name =
                 mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME))
             //获取图片时间
-            var time = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED))
+            var time =
+                mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED))
             if (time.toString().length < 13) {
                 time *= 1000
             }

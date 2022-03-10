@@ -1,6 +1,7 @@
 package com.mx.imgpicker.models
 
 import android.net.Uri
+import com.mx.imgpicker.observer.MXBaseObservable
 import java.io.File
 import java.io.Serializable
 
@@ -54,6 +55,19 @@ data class DbSourceItem(
  * 分组对象
  */
 data class FolderItem(val name: String, val images: ArrayList<Item> = ArrayList()) : Serializable
+
+class SourceGroup : MXBaseObservable() {
+    var folderList: ArrayList<FolderItem>? = null
+    var selectFolder: FolderItem? = null
+    val selectList = ArrayList<Item>()
+
+    fun getItemSize() = selectFolder?.images?.size ?: 0
+    fun getItem(index: Int) = selectFolder?.images?.getOrNull(index)
+    fun itemIndexOf(item: Item?): Int {
+        if (item == null) return -1
+        return selectFolder?.images?.indexOf(item) ?: -1
+    }
+}
 
 /**
  * 图片选择回调

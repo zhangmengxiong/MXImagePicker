@@ -13,8 +13,7 @@ import java.io.File
 
 object MXVideoSource : IMXSource {
     const val MIME_TYPE = "video/*"
-
-    override fun scan(context: Context): List<Item> {
+    override fun scan(context: Context, page: Int, pageSize: Int): List<Item> {
         //扫描图片
         val mImageUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
         val mContentResolver = context.contentResolver ?: return emptyList()
@@ -31,7 +30,7 @@ object MXVideoSource : IMXSource {
             ),
             MediaStore.MediaColumns.SIZE + ">0",
             null,
-            MediaStore.Video.Media.DATE_ADDED + " DESC"
+            MediaStore.Video.Media.DATE_ADDED + " DESC LIMIT $pageSize OFFSET ${page * pageSize}"
         )
         val images = ArrayList<Item>()
 

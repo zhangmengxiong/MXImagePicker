@@ -9,9 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
 import com.mx.imgpicker.models.FolderItem
+import com.mx.imgpicker.models.SourceGroup
 
-class FolderAdapt(val list: ArrayList<FolderItem> = ArrayList()) : RecyclerView.Adapter<FolderAdapt.FolderVH>() {
-    var selectItem: FolderItem? = null
+class FolderAdapt(private val sourceGroup: SourceGroup) :
+    RecyclerView.Adapter<FolderAdapt.FolderVH>() {
     var onItemClick: ((item: FolderItem) -> Unit)? = null
 
     class FolderVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -22,12 +23,14 @@ class FolderAdapt(val list: ArrayList<FolderItem> = ArrayList()) : RecyclerView.
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FolderVH {
-        return FolderVH(LayoutInflater.from(parent.context).inflate(R.layout.adapt_folder_item, parent, false))
+        return FolderVH(
+            LayoutInflater.from(parent.context).inflate(R.layout.adapt_folder_item, parent, false)
+        )
     }
 
     override fun onBindViewHolder(holder: FolderVH, position: Int) {
-        val item = list.getOrNull(position) ?: return
-        val isSelect = item.name == selectItem?.name
+        val item = sourceGroup.folderList?.getOrNull(position) ?: return
+        val isSelect = (item.name == sourceGroup.selectFolder?.name)
         item.images.firstOrNull()?.let {
             ImagePickerService.getImageLoader().displayImage(it, holder.img)
         }
@@ -38,6 +41,6 @@ class FolderAdapt(val list: ArrayList<FolderItem> = ArrayList()) : RecyclerView.
     }
 
     override fun getItemCount(): Int {
-        return list.size
+        return sourceGroup.folderList?.size ?: 0
     }
 }

@@ -10,17 +10,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.chrisbanes.photoview.PhotoView
 import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
-import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.ItemSelectCall
 import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.models.SourceGroup
 import com.mx.imgpicker.utils.MXFileBiz
 import com.mx.imgpicker.utils.MXPickerFormatBiz
 import com.mx.imgpicker.views.MXPickerTextView
 
-class ImgLargeAdapt(
-    private val list: ArrayList<Item>,
-    private val selectList: ArrayList<Item>
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ImgLargeAdapt(private val sourceGroup: SourceGroup) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onSelectChange: ItemSelectCall? = null
 
     class ImgScanVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -55,11 +53,11 @@ class ImgLargeAdapt(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = list.getOrNull(position) ?: return
+        val item = sourceGroup.getItem(position) ?: return
         if (holder is ImgScanVH) {
             ImagePickerService.getImageLoader().displayImage(item, holder.photoView)
-            val isSelect = selectList.contains(item)
-            val index = selectList.indexOf(item)
+            val isSelect = sourceGroup.selectList.contains(item)
+            val index = sourceGroup.selectList.indexOf(item)
             holder.indexTxv.isChecked = isSelect
 
             holder.indexLay.setOnClickListener {
@@ -72,8 +70,8 @@ class ImgLargeAdapt(
             }
         } else if (holder is ImgScanVideoVH) {
             ImagePickerService.getImageLoader().displayImage(item, holder.img)
-            val isSelect = selectList.contains(item)
-            val index = selectList.indexOf(item)
+            val isSelect = sourceGroup.selectList.contains(item)
+            val index = sourceGroup.selectList.indexOf(item)
             holder.indexTxv.isChecked = isSelect
             holder.videoLengthTxv.text =
                 if (item.duration > 0) MXPickerFormatBiz.timeToString(item.duration) else ""
@@ -93,11 +91,11 @@ class ImgLargeAdapt(
     }
 
     override fun getItemCount(): Int {
-        return list.size
+        return sourceGroup.getItemSize()
     }
 
     override fun getItemViewType(position: Int): Int {
-        val item = list.getOrNull(position)
+        val item = sourceGroup.getItem(position)
         return if (item?.type == MXPickerType.Video) 0 else 1
     }
 }

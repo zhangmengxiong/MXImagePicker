@@ -12,11 +12,11 @@ import com.mx.imgpicker.builder.MXPickerBuilder
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.ItemSelectCall
 import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.models.SourceGroup
 import com.mx.imgpicker.views.MXPickerTextView
 
 class ImgGridAdapt(
-    private val list: ArrayList<Item>,
-    private val selectList: ArrayList<Item>,
+    private val sourceGroup: SourceGroup,
     private val builder: MXPickerBuilder
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onSelectClick: ItemSelectCall? = null
@@ -48,10 +48,10 @@ class ImgGridAdapt(
             holder.indexTxv.visibility = View.VISIBLE
             holder.selectBG.visibility = View.VISIBLE
             val position = if (builder.isEnableCamera()) position - 1 else position
-            val item = list.getOrNull(position) ?: return
+            val item = sourceGroup.getItem(position) ?: return
             ImagePickerService.getImageLoader().displayImage(item, holder.img)
-            val isSelect = selectList.contains(item)
-            val index = selectList.indexOf(item)
+            val isSelect = sourceGroup.selectList.contains(item)
+            val index = sourceGroup.selectList.indexOf(item)
             holder.indexTxv.isChecked = isSelect
 
             if (item.type == MXPickerType.Video) {
@@ -69,12 +69,18 @@ class ImgGridAdapt(
                 holder.selectBG.alpha = 0.2f
                 holder.indexTxv.text = ""
             }
-            holder.itemView.setOnClickListener { onItemClick?.invoke(item, ArrayList(selectList)) }
+            holder.itemView.setOnClickListener {
+                onItemClick?.invoke(
+                    item,
+                    ArrayList(sourceGroup.selectList)
+                )
+            }
         }
     }
 
     override fun getItemCount(): Int {
-        return if (builder.isEnableCamera()) list.size + 1 else list.size
+        val size = sourceGroup.getItemSize()
+        return if (builder.isEnableCamera()) size + 1 else size
     }
 
     override fun getItemViewType(position: Int): Int {
