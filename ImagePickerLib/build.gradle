@@ -35,7 +35,7 @@ afterEvaluate {
                 from components.release
 
                 groupId = 'com.mx.imgpicker'
-                artifactId = 'final'
+                artifactId = 'MXImagePicker'
                 version = '1.0.0'
             }
         }
