@@ -30,23 +30,31 @@ internal object MXVideoSource : IMXSource {
             columns.add(MediaStore.Video.Media.RELATIVE_PATH)
         }
 
-        val mCursor = resolver.query(
-            SOURCE_URI, columns.toTypedArray(),
-            MediaStore.Video.Media.SIZE + " > 0 ",
-            null,
-            MediaStore.Video.Media.DATE_ADDED + " DESC LIMIT $pageSize OFFSET ${page * pageSize} "
-        )
         val images = ArrayList<Item>()
-
-        //读取扫描到的图片
-        if (mCursor != null) {
-            while (mCursor.moveToNext()) {
-                val item = cursorToImageItem(resolver, mCursor)
-                if (item != null) {
-                    images.add(item)
-                }
+        var mCursor: Cursor? = null
+        try {
+            mCursor = resolver.query(
+                SOURCE_URI, columns.toTypedArray(),
+                MediaStore.Video.Media.SIZE + " > 0 ",
+                null,
+                MediaStore.Video.Media.DATE_ADDED + " DESC LIMIT $pageSize OFFSET ${page * pageSize} "
+            )
+            //读取扫描到的图片
+            if (mCursor != null && mCursor.moveToFirst()) {
+                do {
+                    val item = cursorToImageItem(resolver, mCursor)
+                    if (item != null) {
+                        images.add(item)
+                    }
+                } while (mCursor.moveToNext())
             }
-            mCursor.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try {
+                mCursor?.close()
+            } catch (e: Exception) {
+            }
         }
         return images
     }
@@ -58,22 +66,7 @@ internal object MXVideoSource : IMXSource {
         try { // 获取视频的路径
             val id = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID))
             val uri = ContentUris.withAppendedId(SOURCE_URI, id)
-            var path = uri.path
-
-            if (path != null && !File(path).exists()) path = null
-            if (path == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                path = mCursor.getString(
-                    mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.RELATIVE_PATH)
-                )
-            }
-
-            if (path != null && !File(path).exists()) path = null
-            if (path == null) {
-                path = mCursor.getString(
-                    mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
-                )
-            }
-            if (path == null) return null
+            val path = getFilePath(uri, mCursor)
 
             val duration =
                 mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION))
@@ -92,12 +85,29 @@ internal object MXVideoSource : IMXSource {
                 mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE))
 
             if (path.endsWith("downloading")) return null
-            if (File(path).exists() || contentResolver.openFileDescriptor(uri, "r") != null) {
+            if (contentResolver.openFileDescriptor(uri, "r") != null) {
                 return Item(path, uri, mimeType, time, name, MXPickerType.Video, duration / 1000)
             }
         } catch (e: Exception) {
         }
         return null
+    }
+
+    private fun getFilePath(uri: Uri, mCursor: Cursor): String {
+        var path = uri.path
+        if (path != null && File(path).exists() && File(path).canRead()) return path
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            path = mCursor.getString(
+                mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.RELATIVE_PATH)
+            )
+        }
+        if (path != null && File(path).exists() && File(path).canRead()) return path
+
+        path = mCursor.getString(
+            mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
+        )
+        return path
     }
 
     override fun save(context: Context, file: File): Boolean {

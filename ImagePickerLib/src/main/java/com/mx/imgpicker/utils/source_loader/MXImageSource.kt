@@ -6,6 +6,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import com.mx.imgpicker.models.Item
@@ -27,24 +28,31 @@ internal object MXImageSource : IMXSource {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             columns.add(MediaStore.Images.Media.RELATIVE_PATH)
         }
-
-        val mCursor = resolver.query(
-            SOURCE_URI, columns.toTypedArray(),
-            MediaStore.Images.Media.SIZE + " > 0 ",
-            null,
-            MediaStore.Images.Media.DATE_ADDED + " DESC LIMIT $pageSize OFFSET ${page * pageSize} "
-        )
         val images = ArrayList<Item>()
-
-        //读取扫描到的图片
-        if (mCursor != null) {
-            while (mCursor.moveToNext()) {
-                val item = cursorToImageItem(resolver, mCursor)
-                if (item != null) {
-                    images.add(item)
-                }
+        var mCursor: Cursor? = null
+        try {
+            mCursor = resolver.query(
+                SOURCE_URI, columns.toTypedArray(),
+                MediaStore.Images.Media.SIZE + " > 0 ",
+                null,
+                MediaStore.Images.Media.DATE_ADDED + " DESC LIMIT $pageSize OFFSET ${page * pageSize} "
+            )
+            //读取扫描到的图片
+            if (mCursor != null && mCursor.moveToFirst()) {
+                do {
+                    val item = cursorToImageItem(resolver, mCursor)
+                    if (item != null) {
+                        images.add(item)
+                    }
+                } while (mCursor.moveToNext())
             }
-            mCursor.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try {
+                mCursor?.close()
+            } catch (e: Exception) {
+            }
         }
         return images
     }
@@ -56,22 +64,8 @@ internal object MXImageSource : IMXSource {
         try { // 获取图片的路径
             val id = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
             val uri = ContentUris.withAppendedId(SOURCE_URI, id)
-            var path = uri.path
+            val path = getFilePath(uri, mCursor)
 
-            if (path != null && !File(path).exists()) path = null
-            if (path == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                path = mCursor.getString(
-                    mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)
-                )
-            }
-
-            if (path != null && !File(path).exists()) path = null
-            if (path == null) {
-                path = mCursor.getString(
-                    mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                )
-            }
-            if (path == null) return null
             //获取图片名称
             val name =
                 mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME))
@@ -86,13 +80,30 @@ internal object MXImageSource : IMXSource {
                 mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE))
 
             if (path.endsWith("downloading")) return null
-
-            if (File(path).exists() || contentResolver.openFileDescriptor(uri, "r") != null) {
+            if (contentResolver.openFileDescriptor(uri, "r") != null) {
                 return Item(path, uri, mimeType, time, name, MXPickerType.Image)
             }
         } catch (e: java.lang.Exception) {
         }
         return null
+    }
+
+
+    private fun getFilePath(uri: Uri, mCursor: Cursor): String {
+        var path = uri.path
+        if (path != null && File(path).exists()) return path
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            path = mCursor.getString(
+                mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)
+            )
+        }
+        if (path != null && File(path).exists()) return path
+
+        path = mCursor.getString(
+            mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+        )
+        return path
     }
 
     override fun save(context: Context, file: File): Boolean {

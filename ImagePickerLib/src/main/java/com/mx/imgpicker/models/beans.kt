@@ -32,7 +32,8 @@ data class Item(
     val time: Long,
     val name: String?,
     val type: MXPickerType,
-    val duration: Int = 0
+    val duration: Int = 0,
+    val fromSystemUri: Boolean = true
 ) : Serializable {
     fun getFolderName(): String {
         val paths = path.split(File.separator)

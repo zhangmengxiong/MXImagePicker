@@ -142,7 +142,8 @@ internal class MXSourceScanner(
                 file.lastModified() ?: 0L,
                 file.name,
                 item.type,
-                item.videoLength
+                item.videoLength,
+                false
             )
         }
     }

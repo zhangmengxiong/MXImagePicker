@@ -12,6 +12,8 @@ import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.utils.MXImagePickerProvider
+import com.mx.imgpicker.utils.MXLog
 import java.io.File
 import java.util.*
 
@@ -30,7 +32,11 @@ class GlideImageLoader : IMXImageLoader {
         if (item.type == MXPickerType.Image) {
             Glide.with(imageView).load(item.uri).into(imageView)
         } else {
-            Glide.with(imageView).load(Uri.fromFile(File(item.path))).into(imageView)
+            if (item.fromSystemUri) {
+                Glide.with(imageView).load(item.uri).into(imageView)
+            } else {
+                Glide.with(imageView).load(File(item.path)).into(imageView)
+            }
         }
     }
 }
