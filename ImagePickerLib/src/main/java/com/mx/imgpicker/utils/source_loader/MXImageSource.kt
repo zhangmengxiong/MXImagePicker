@@ -57,11 +57,15 @@ internal object MXImageSource : IMXSource {
             val id = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
             val uri = ContentUris.withAppendedId(SOURCE_URI, id)
             var path = uri.path
+
+            if (path != null && !File(path).exists()) path = null
             if (path == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 path = mCursor.getString(
                     mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)
                 )
             }
+
+            if (path != null && !File(path).exists()) path = null
             if (path == null) {
                 path = mCursor.getString(
                     mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)

@@ -41,6 +41,17 @@ data class Item(
         }
         return ""
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Item
+
+        if (path != other.path) return false
+
+        return true
+    }
 }
 
 internal data class DbSourceItem(
@@ -54,7 +65,8 @@ internal data class DbSourceItem(
 /**
  * 分组对象
  */
-internal data class FolderItem(val name: String, val images: ArrayList<Item> = ArrayList()) : Serializable
+internal data class FolderItem(val name: String, val images: ArrayList<Item> = ArrayList()) :
+    Serializable
 
 internal class SourceGroup : MXBaseObservable() {
     var folderList: ArrayList<FolderItem>? = null
