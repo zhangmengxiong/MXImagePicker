@@ -72,9 +72,9 @@ class ImgPickerActivity : AppCompatActivity() {
             ).show()
             finish()
             return
+        } else {
+            initView()
         }
-
-        initView()
     }
 
     override fun onRequestPermissionsResult(

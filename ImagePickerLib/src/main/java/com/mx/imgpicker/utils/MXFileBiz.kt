@@ -11,7 +11,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
 
-object MXFileBiz {
+internal object MXFileBiz {
     private val fileIndex = AtomicLong(1000)
 
     /**

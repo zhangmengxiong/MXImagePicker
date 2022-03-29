@@ -15,7 +15,7 @@ import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.models.SourceGroup
 import com.mx.imgpicker.views.MXPickerTextView
 
-class ImgGridAdapt(
+internal class ImgGridAdapt(
     private val sourceGroup: SourceGroup,
     private val builder: MXPickerBuilder
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {

@@ -7,7 +7,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
-object MXPermissionBiz {
+internal object MXPermissionBiz {
     const val REQUEST_CODE = 0x21
     private var permissions: Array<String>? = null
     fun requestPermission(activity: Activity, array: Array<String>) {

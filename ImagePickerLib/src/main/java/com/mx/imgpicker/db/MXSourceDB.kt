@@ -11,7 +11,7 @@ import com.mx.imgpicker.utils.source_loader.MXImageSource
 import com.mx.imgpicker.utils.source_loader.MXVideoSource
 import java.io.File
 
-class MXSourceDB(val context: Context) {
+internal class MXSourceDB(val context: Context) {
     private val dbHelp by lazy { DBHelp(context.applicationContext).writableDatabase }
     fun addSource(file: File, type: MXPickerType): Boolean {
         try {
@@ -80,7 +80,8 @@ class MXSourceDB(val context: Context) {
             }
             val path = cursor.getString(cursor.getColumnIndexOrThrow(DBHelp.DB_KEY_PATH))
             val time = cursor.getLong(cursor.getColumnIndexOrThrow(DBHelp.DB_KEY_TIME))
-            var video_length = cursor.getLong(cursor.getColumnIndexOrThrow(DBHelp.DB_KEY_VIDEO_LENGTH))
+            var video_length =
+                cursor.getLong(cursor.getColumnIndexOrThrow(DBHelp.DB_KEY_VIDEO_LENGTH))
 
             val file = File(path)
             if (type == MXPickerType.Video && video_length <= 0 && file.exists()) {
@@ -107,21 +108,26 @@ class MXSourceDB(val context: Context) {
         return null
     }
 
-    private class DBHelp(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 1) {
+    private class DBHelp(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 3) {
         companion object {
-            const val DB_NAME = "picker_db"
-            const val DB_KEY_PATH = "picker_path"
-            const val DB_KEY_TYPE = "picker_type"
-            const val DB_KEY_TIME = "create_time"
-            const val DB_KEY_VIDEO_LENGTH = "video_length"
+            internal const val DB_NAME = "mx_image_picker_db_v1"
+            internal const val DB_KEY_PATH = "picker_path"
+            internal const val DB_KEY_TYPE = "picker_type"
+            internal const val DB_KEY_TIME = "create_time"
+            internal const val DB_KEY_VIDEO_LENGTH = "video_length"
+
+            private const val DB_CREATE =
+                "create table $DB_NAME($DB_KEY_PATH varchar(500) , $DB_KEY_TYPE varchar(20) , $DB_KEY_TIME long, $DB_KEY_VIDEO_LENGTH long)"
+            private const val DB_DROP = "DROP TABLE $DB_NAME"
         }
 
         override fun onCreate(db: SQLiteDatabase?) {
-            db?.execSQL("create table $DB_NAME($DB_KEY_PATH varchar(500) , $DB_KEY_TYPE varchar(20) , $DB_KEY_TIME long, $DB_KEY_VIDEO_LENGTH long)")
+            db?.execSQL(DB_CREATE)
         }
 
         override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-
+            db?.execSQL(DB_DROP)
+            db?.execSQL(DB_CREATE)
         }
     }
 }

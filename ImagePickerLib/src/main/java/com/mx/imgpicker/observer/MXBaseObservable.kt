@@ -3,12 +3,12 @@ package com.mx.imgpicker.observer
 import android.os.Handler
 import android.os.Looper
 
-open class MXBaseObservable {
+internal open class MXBaseObservable {
     /**
      * 主线程Handler
      */
-    protected val mHandler = Handler(Looper.getMainLooper())
-    protected val lock = Object()
+    private val mHandler = Handler(Looper.getMainLooper())
+    private val lock = Object()
     private val observerList = ArrayList<(() -> Unit)>()
 
     fun notifyChanged() {

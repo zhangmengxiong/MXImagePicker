@@ -9,7 +9,7 @@ import com.mx.imgpicker.ImagePickerService
 import com.mx.imgpicker.R
 import com.mx.imgpicker.models.Item
 
-class ImgShowAdapt(private val list: ArrayList<Item>) :
+internal class ImgShowAdapt(private val list: ArrayList<Item>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     class ImgShowVH(itemView: View) : RecyclerView.ViewHolder(itemView) {

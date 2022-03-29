@@ -1,40 +1,45 @@
 package com.mx.imgpicker.utils.source_loader
 
 import android.content.ContentResolver
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.provider.MediaStore
 import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.MXPickerType
 import java.io.File
 
-object MXImageSource : IMXSource {
+internal object MXImageSource : IMXSource {
     const val MIME_TYPE = "image/*"
+    private val SOURCE_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
     override fun scan(context: Context, page: Int, pageSize: Int): List<Item> {
         //扫描图片
-        val mContentResolver = context.contentResolver ?: return emptyList()
+        val resolver = context.contentResolver ?: return emptyList()
+        val columns = arrayListOf(
+            MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME,
+            MediaStore.Images.Media.DATE_ADDED, MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.MIME_TYPE, MediaStore.Images.Media.SIZE
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            columns.add(MediaStore.Images.Media.RELATIVE_PATH)
+        }
 
-        val mCursor = mContentResolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, arrayOf(
-                MediaStore.Images.Media.DATA,
-                MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.DATE_ADDED,
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.MIME_TYPE,
-                MediaStore.Images.Media.SIZE
-            ),
-            MediaStore.Images.Media.SIZE + ">0",
+        val mCursor = resolver.query(
+            SOURCE_URI, columns.toTypedArray(),
+            MediaStore.Images.Media.SIZE + " > 0 ",
             null,
-            MediaStore.Images.Media.DATE_ADDED + " DESC LIMIT $pageSize OFFSET ${page * pageSize}"
+            MediaStore.Images.Media.DATE_ADDED + " DESC LIMIT $pageSize OFFSET ${page * pageSize} "
         )
         val images = ArrayList<Item>()
 
         //读取扫描到的图片
         if (mCursor != null) {
             while (mCursor.moveToNext()) {
-                val item = cursorToImageItem(mContentResolver, mCursor)
+                val item = cursorToImageItem(resolver, mCursor)
                 if (item != null) {
                     images.add(item)
                 }
@@ -50,8 +55,19 @@ object MXImageSource : IMXSource {
     ): Item? {
         try { // 获取图片的路径
             val id = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
-            val path =
-                mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA))
+            val uri = ContentUris.withAppendedId(SOURCE_URI, id)
+            var path = uri.path
+            if (path == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                path = mCursor.getString(
+                    mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)
+                )
+            }
+            if (path == null) {
+                path = mCursor.getString(
+                    mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                )
+            }
+            if (path == null) return null
             //获取图片名称
             val name =
                 mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME))
@@ -66,9 +82,6 @@ object MXImageSource : IMXSource {
                 mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE))
 
             if (path.endsWith("downloading")) return null
-            //获取图片uri
-            val uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI.buildUpon()
-                .appendPath(id.toString()).build()
 
             if (File(path).exists() || contentResolver.openFileDescriptor(uri, "r") != null) {
                 return Item(path, uri, mimeType, time, name, MXPickerType.Image)
@@ -89,10 +102,7 @@ object MXImageSource : IMXSource {
             contentValues.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis())
             contentValues.put(MediaStore.Images.Media.DATA, file.absolutePath)
             contentValues.put(MediaStore.Images.Media.SIZE, file.length())
-            context.contentResolver.insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                contentValues
-            )
+            context.contentResolver.insert(SOURCE_URI, contentValues)
             return true
         } catch (e: Exception) {
             e.printStackTrace()

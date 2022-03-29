@@ -43,7 +43,7 @@ data class Item(
     }
 }
 
-data class DbSourceItem(
+internal data class DbSourceItem(
     val path: String, // 路径
     val type: MXPickerType, //类型
     val mimeType: String, // mime类型
@@ -54,9 +54,9 @@ data class DbSourceItem(
 /**
  * 分组对象
  */
-data class FolderItem(val name: String, val images: ArrayList<Item> = ArrayList()) : Serializable
+internal data class FolderItem(val name: String, val images: ArrayList<Item> = ArrayList()) : Serializable
 
-class SourceGroup : MXBaseObservable() {
+internal class SourceGroup : MXBaseObservable() {
     var folderList: ArrayList<FolderItem>? = null
     var selectFolder: FolderItem? = null
     val selectList = ArrayList<Item>()
@@ -72,6 +72,6 @@ class SourceGroup : MXBaseObservable() {
 /**
  * 图片选择回调
  */
-interface ItemSelectCall {
+internal interface ItemSelectCall {
     fun select(item: Item)
 }

@@ -1,6 +1,6 @@
 package com.mx.imgpicker.utils
 
-object MXPickerFormatBiz {
+internal object MXPickerFormatBiz {
     fun timeToString(second: Int): String {
         val hour = second / (60 * 60)
         val minute = (second / 60) % 60

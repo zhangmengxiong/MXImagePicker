@@ -17,7 +17,7 @@ import com.mx.imgpicker.utils.MXFileBiz
 import com.mx.imgpicker.utils.MXPickerFormatBiz
 import com.mx.imgpicker.views.MXPickerTextView
 
-class ImgLargeAdapt(private val sourceGroup: SourceGroup) :
+internal class ImgLargeAdapt(private val sourceGroup: SourceGroup) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onSelectChange: ItemSelectCall? = null
 

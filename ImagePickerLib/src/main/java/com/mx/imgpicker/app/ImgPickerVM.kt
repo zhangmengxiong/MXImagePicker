@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 import kotlin.math.abs
 
-class ImgPickerVM(
+internal class ImgPickerVM(
     val context: Context,
     private val builder: MXPickerBuilder,
     private val sourceDB: MXSourceDB,
@@ -50,10 +50,9 @@ class ImgPickerVM(
                         if (newSize > 0) {
                             if (page == PAGE_START) {
                                 val oldName = sourceGroup.selectFolder?.name
-                                sourceGroup.selectFolder =
-                                    folderList.firstOrNull {
-                                        it.name == oldName
-                                    } ?: folderList.firstOrNull()
+                                sourceGroup.selectFolder = folderList.firstOrNull {
+                                    it.name == oldName
+                                } ?: folderList.firstOrNull()
                                 sourceGroup.folderList = folderList
                             }
 

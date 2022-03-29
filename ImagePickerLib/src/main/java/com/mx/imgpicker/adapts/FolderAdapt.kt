@@ -11,7 +11,7 @@ import com.mx.imgpicker.R
 import com.mx.imgpicker.models.FolderItem
 import com.mx.imgpicker.models.SourceGroup
 
-class FolderAdapt(private val sourceGroup: SourceGroup) :
+internal class FolderAdapt(private val sourceGroup: SourceGroup) :
     RecyclerView.Adapter<FolderAdapt.FolderVH>() {
     var onItemClick: ((item: FolderItem) -> Unit)? = null
 
