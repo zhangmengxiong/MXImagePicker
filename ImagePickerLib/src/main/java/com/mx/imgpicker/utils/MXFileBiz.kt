@@ -16,15 +16,16 @@ import java.util.concurrent.atomic.AtomicLong
 
 
 internal object MXFileBiz {
+    const val PREFIX_IMAGE = "MX_IMG"
+    const val PREFIX_VIDEO = "MX_VIDEO"
     private val fileIndex = AtomicLong(1000)
 
     /**
      * 生成缓存图片路径
      */
     fun createImageFile(context: Context): File {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val imageFileName =
-            String.format("IMG_%s_${fileIndex.incrementAndGet()}.jpg", timeStamp)
+        val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val imageFileName = "${PREFIX_IMAGE}_${time}_${fileIndex.incrementAndGet()}.jpg"
         return File(getExistExtDir(context), imageFileName)
     }
 
@@ -32,12 +33,12 @@ internal object MXFileBiz {
      * 生成缓存视频路径
      */
     fun createVideoFile(context: Context): File {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val imageFileName = String.format("VIDEO_%s_${fileIndex.incrementAndGet()}.mp4", timeStamp)
+        val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val imageFileName = "${PREFIX_VIDEO}_${time}_${fileIndex.incrementAndGet()}.mp4"
         return File(getExistExtDir(context), imageFileName)
     }
 
-    private fun getExistExtDir(context: Context): File {
+    fun getExistExtDir(context: Context): File {
         val file = context.externalCacheDir
         if (file != null && file.exists() && file.canWrite()) { //判断文件目录是否存在
             return file
