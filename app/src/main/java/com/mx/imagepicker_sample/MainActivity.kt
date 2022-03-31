@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
                 if (!agree) return@requestPermission
                 val builder = MXCaptureBuilder().setType(MXPickerType.Image)
                 MXStarter.start(this, builder.createIntent(this)) { resultCode, data ->
+                    if (!builder.getCaptureFile().exists()) return@start
                     MXImgShowActivity.open(this, listOf(builder.getCaptureFile().absolutePath))
                 }
             }
@@ -95,6 +96,7 @@ class MainActivity : AppCompatActivity() {
                 if (!agree) return@requestPermission
                 val builder = MXCaptureBuilder().setType(MXPickerType.Video).setMaxVideoLength(10)
                 MXStarter.start(this, builder.createIntent(this)) { resultCode, data ->
+                    if (!builder.getCaptureFile().exists()) return@start
                     MXImgShowActivity.open(this, listOf(builder.getCaptureFile().absolutePath))
                 }
             }
