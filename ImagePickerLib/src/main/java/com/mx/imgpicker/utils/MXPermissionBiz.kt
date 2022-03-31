@@ -8,18 +8,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 internal object MXPermissionBiz {
-    const val REQUEST_CODE = 0x21
-    private var permissions: Array<String>? = null
-    fun requestPermission(activity: Activity, array: Array<String>) {
-        ActivityCompat.requestPermissions(activity, array, REQUEST_CODE)
+    const val REQUEST_CODE_READ = 0x21
+    const val REQUEST_CODE_CAMERA = 0x22
+
+    fun requestPermission(activity: Activity, array: Array<String>, requestCode: Int) {
+        ActivityCompat.requestPermissions(activity, array, requestCode)
     }
 
-    fun permissionResult(activity: Activity): Boolean {
-        val permissions = permissions ?: return false
-        return hasPermission(activity, permissions)
-    }
-
-    fun hasPermission(context: Context, array: Array<String>): Boolean {
+    fun hasPermission(context: Context, array: Array<out String>): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true
         }

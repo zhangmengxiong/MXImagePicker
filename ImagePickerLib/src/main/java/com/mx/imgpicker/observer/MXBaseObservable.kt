@@ -3,15 +3,17 @@ package com.mx.imgpicker.observer
 import android.os.Handler
 import android.os.Looper
 
-internal open class MXBaseObservable {
+internal open class MXBaseObservable<T> {
     /**
      * 主线程Handler
      */
     private val mHandler = Handler(Looper.getMainLooper())
     private val lock = Object()
-    private val observerList = ArrayList<(() -> Unit)>()
+    private val observerList = ArrayList<((T?) -> Unit)>()
+    private var _value: T? = null
 
-    fun notifyChanged() {
+    open fun notifyChanged(value: T?) {
+        _value = value
         mHandler.removeCallbacks(notifyAll)
         mHandler.post(notifyAll)
     }
@@ -21,18 +23,18 @@ internal open class MXBaseObservable {
             observerList.toMutableList()
         }
         if (list.isEmpty()) return@Runnable
-        list.forEach { it.invoke() }
+        list.forEach { it.invoke(_value) }
     }
 
-    fun addObserver(o: (() -> Unit)?) {
+    fun addObserver(o: ((T?) -> Unit)?) {
         o ?: return
         synchronized(lock) {
             observerList.add(o)
         }
-        mHandler.post { o.invoke() }
+        mHandler.post { o.invoke(_value) }
     }
 
-    fun deleteObserver(o: (() -> Unit)?) {
+    fun deleteObserver(o: ((T?) -> Unit)?) {
         o ?: return
         synchronized(lock) {
             observerList.remove(o)

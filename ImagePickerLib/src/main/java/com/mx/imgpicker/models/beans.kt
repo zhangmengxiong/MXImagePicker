@@ -1,6 +1,5 @@
 package com.mx.imgpicker.models
 
-import android.net.Uri
 import com.mx.imgpicker.observer.MXBaseObservable
 import java.io.File
 import java.io.Serializable
@@ -24,17 +23,14 @@ enum class MXPickerType : Serializable {
 
 /**
  * 类型对象
+ * @property path 绝对路径
+ * @property time 创建时间
+ * @property type 对象类型  图片/视频
+ * @property duration 视频长度  单位：秒
+ *
  */
-data class Item(
-    val path: String,
-    val uri: Uri,
-    val mimeType: String,
-    val time: Long,
-    val name: String?,
-    val type: MXPickerType,
-    val duration: Int = 0,
-    val fromSystemUri: Boolean = true
-) : Serializable {
+data class MXItem(val path: String, val time: Long, val type: MXPickerType, val duration: Int = 0) :
+    Serializable {
     fun getFolderName(): String {
         val paths = path.split(File.separator)
         if (paths.size >= 2) {
@@ -47,38 +43,37 @@ data class Item(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Item
+        other as MXItem
 
         if (path != other.path) return false
 
         return true
     }
-}
 
-internal data class DbSourceItem(
-    val path: String, // 路径
-    val type: MXPickerType, //类型
-    val mimeType: String, // mime类型
-    val time: Long, // 创建时间
-    val videoLength: Int // 视频时长,单位：秒
-)
+    override fun hashCode(): Int {
+        var result = path.hashCode()
+        result = 31 * result + time.hashCode()
+        result = 31 * result + type.hashCode()
+        result = 31 * result + duration
+        return result
+    }
+}
 
 /**
  * 分组对象
  */
-internal data class FolderItem(val name: String, val images: ArrayList<Item> = ArrayList()) :
-    Serializable
+internal data class MXFolderItem(val name: String, val items: List<MXItem> = ArrayList())
 
-internal class SourceGroup : MXBaseObservable() {
-    var folderList: ArrayList<FolderItem>? = null
-    var selectFolder: FolderItem? = null
-    val selectList = ArrayList<Item>()
+internal class SourceGroup {
+    var folderList: ArrayList<MXFolderItem>? = null
+    var selectFolder: MXFolderItem? = null
+    val selectList = ArrayList<MXItem>()
 
-    fun getItemSize() = selectFolder?.images?.size ?: 0
-    fun getItem(index: Int) = selectFolder?.images?.getOrNull(index)
-    fun itemIndexOf(item: Item?): Int {
+    fun getItemSize() = selectFolder?.items?.size ?: 0
+    fun getItem(index: Int) = selectFolder?.items?.getOrNull(index)
+    fun itemIndexOf(item: MXItem?): Int {
         if (item == null) return -1
-        return selectFolder?.images?.indexOf(item) ?: -1
+        return selectFolder?.items?.indexOf(item) ?: -1
     }
 }
 
@@ -86,5 +81,5 @@ internal class SourceGroup : MXBaseObservable() {
  * 图片选择回调
  */
 internal interface ItemSelectCall {
-    fun select(item: Item)
+    fun select(item: MXItem)
 }

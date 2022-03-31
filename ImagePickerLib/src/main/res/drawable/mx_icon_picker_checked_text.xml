@@ -3,8 +3,8 @@
     <item android:state_checked="true">
         <shape>
             <corners android:radius="100dp" />
-            <solid android:color="@color/picker_color_select" />
-            <stroke android:width="1.3dp" android:color="@color/picker_color_select" />
+            <solid android:color="@color/mx_picker_color_select" />
+            <stroke android:width="1.3dp" android:color="@color/mx_picker_color_select" />
         </shape>
     </item>
     <item>

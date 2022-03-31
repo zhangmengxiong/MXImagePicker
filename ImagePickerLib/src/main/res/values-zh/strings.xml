@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="picker_string_select">选择</string>
-    <string name="picker_string_all">全部</string>
-    <string name="picker_string_image_limit_tip">您最多只能选择 %s 张图片！</string>
-    <string name="picker_string_video_limit_tip">您最多只能选择 %s 个视频！</string>
-    <string name="picker_string_video_limit_length_tip">只能选择 %s 秒以内的视频</string>
-    <string name="picker_string_need_permission_storage_camera">需要写入存储、相机权限</string>
-    <string name="picker_string_need_permission_storage">需要读取存储权限</string>
-    <string name="picker_string_open_failed">打开失败！</string>
+    <string name="mx_picker_string_select">选择</string>
+    <string name="mx_picker_string_all">全部</string>
+    <string name="mx_picker_string_image_limit_tip">您最多只能选择 %s 张图片！</string>
+    <string name="mx_picker_string_video_limit_tip">您最多只能选择 %s 个视频！</string>
+    <string name="mx_picker_string_video_limit_length_tip">只能选择 %s 秒以内的视频</string>
+    <string name="mx_picker_string_need_permission_storage_camera">需要写入存储、相机权限</string>
+    <string name="mx_picker_string_need_permission_storage">需要读取存储权限</string>
+    <string name="mx_picker_string_open_failed">打开失败！</string>
 </resources>

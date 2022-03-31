@@ -10,38 +10,33 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
-import androidx.recyclerview.widget.RecyclerView
-import com.mx.imgpicker.ImagePickerService
+import androidx.recyclerview.widget.*
+import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.FolderAdapt
 import com.mx.imgpicker.adapts.ImgGridAdapt
 import com.mx.imgpicker.adapts.ImgLargeAdapt
 import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.builder.MXPickerBuilder
-import com.mx.imgpicker.db.MXSourceDB
 import com.mx.imgpicker.models.*
-import com.mx.imgpicker.observer.ImageChangeObserver
-import com.mx.imgpicker.observer.VideoChangeObserver
+import com.mx.imgpicker.observer.MXSysImageObserver
+import com.mx.imgpicker.observer.MXSysVideoObserver
 import com.mx.imgpicker.utils.MXLog
 import com.mx.imgpicker.utils.MXPermissionBiz
 
 
-class ImgPickerActivity : AppCompatActivity() {
+class MXImgPickerActivity : AppCompatActivity() {
     private val builder by lazy {
         (intent.getSerializableExtra(MXPickerBuilder.KEY_INTENT_BUILDER) as MXPickerBuilder?)
             ?: MXPickerBuilder()
     }
 
     private val sourceGroup = SourceGroup()
-    private val sourceDB by lazy { MXSourceDB(this) }
-    private val pickerVM by lazy { ImgPickerVM(this, builder, sourceDB, sourceGroup) }
+    private val mxItemSource by lazy { MXSource(this, builder.getPickerType()) }
 
-    private val imgAdapt by lazy { ImgGridAdapt(sourceGroup, builder) }
-    private val imgLargeAdapt by lazy { ImgLargeAdapt(sourceGroup) }
-    private val folderAdapt = FolderAdapt(sourceGroup)
+    private val imgAdapt by lazy { ImgGridAdapt(this, sourceGroup, builder) }
+    private val imgLargeAdapt by lazy { ImgLargeAdapt(this, sourceGroup) }
+    private val folderAdapt by lazy { FolderAdapt(this, sourceGroup) }
 
     private var returnBtn: ImageView? = null
     private var selectBtn: TextView? = null
@@ -55,22 +50,20 @@ class ImgPickerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_img_picker)
+        setContentView(R.layout.mx_picker_activity_img_picker)
+        MXImagePicker.init(application)
         supportActionBar?.hide()
         actionBar?.hide()
 
         MXLog.log("启动")
-        if (!MXPermissionBiz.hasPermission(
-                this,
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-            )
-        ) {
+        val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (!MXPermissionBiz.hasPermission(this, permissions)) {
             Toast.makeText(
                 this,
-                getString(R.string.picker_string_need_permission_storage),
+                getString(R.string.mx_picker_string_need_permission_storage),
                 Toast.LENGTH_SHORT
             ).show()
-            finish()
+            MXPermissionBiz.requestPermission(this, permissions, MXPermissionBiz.REQUEST_CODE_READ)
             return
         } else {
             initView()
@@ -83,8 +76,17 @@ class ImgPickerActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == MXPermissionBiz.REQUEST_CODE && MXPermissionBiz.permissionResult(this)) {
-            initView()
+        if (requestCode == MXPermissionBiz.REQUEST_CODE_READ) {
+            if (MXPermissionBiz.hasPermission(this, permissions)) {
+                initView()
+            } else {
+                finish()
+            }
+        }
+        if (requestCode == MXPermissionBiz.REQUEST_CODE_CAMERA) {
+            if (MXPermissionBiz.hasPermission(this, permissions)) {
+                imgAdapt.onTakePictureClick?.invoke()
+            }
         }
     }
 
@@ -98,11 +100,14 @@ class ImgPickerActivity : AppCompatActivity() {
         folderMoreImg = findViewById(R.id.folderMoreImg)
         folderNameTxv = findViewById(R.id.folderNameTxv)
         selectBtn = findViewById(R.id.selectBtn)
-        ImagePickerService.getGlobalActivityCall()?.invoke(this)
 
         returnBtn?.setOnClickListener { onBackPressed() }
 
         recycleView?.let {
+            val animator = it.itemAnimator
+            if (animator is SimpleItemAnimator) {
+                animator.supportsChangeAnimations = false
+            }
             it.itemAnimator = null
             it.setHasFixedSize(true)
             it.layoutManager = GridLayoutManager(this, 4)
@@ -110,12 +115,20 @@ class ImgPickerActivity : AppCompatActivity() {
         }
 
         folderRecycleView?.let {
+            val animator = it.itemAnimator
+            if (animator is SimpleItemAnimator) {
+                animator.supportsChangeAnimations = false
+            }
             it.itemAnimator = null
             it.setHasFixedSize(true)
             it.layoutManager = LinearLayoutManager(this)
             it.adapter = folderAdapt
         }
         largeImgRecycleView?.let {
+            val animator = it.itemAnimator
+            if (animator is SimpleItemAnimator) {
+                animator.supportsChangeAnimations = false
+            }
             it.itemAnimator = null
             PagerSnapHelper().attachToRecyclerView(it)
             it.setHasFixedSize(true)
@@ -133,17 +146,17 @@ class ImgPickerActivity : AppCompatActivity() {
             }
         }
         imgAdapt.onTakePictureClick = {
-            val permissions = arrayOf(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA
-            )
+            val permissions = arrayOf(Manifest.permission.CAMERA)
             if (!MXPermissionBiz.hasPermission(this, permissions)) {
                 Toast.makeText(
                     this,
-                    getString(R.string.picker_string_need_permission_storage_camera),
+                    getString(R.string.mx_picker_string_need_permission_storage_camera),
                     Toast.LENGTH_SHORT
                 ).show()
-                MXPermissionBiz.requestPermission(this, permissions)
+                MXPermissionBiz.requestPermission(
+                    this, permissions,
+                    MXPermissionBiz.REQUEST_CODE_CAMERA
+                )
             } else {
                 val takeCall = { type: MXPickerType ->
                     val captureBuilder = MXCaptureBuilder()
@@ -151,7 +164,7 @@ class ImgPickerActivity : AppCompatActivity() {
                         .setMaxVideoLength(builder.getVideoMaxLength())
                     val intent = captureBuilder.createIntent(this)
                     val file = captureBuilder.getCaptureFile()
-                    sourceDB.addSource(file, type)
+                    mxItemSource.addPrivateSource(file, type)
 
                     startActivityForResult(intent, 0x12)
                     MXLog.log("PATH = ${file.absolutePath}")
@@ -184,11 +197,11 @@ class ImgPickerActivity : AppCompatActivity() {
         }
 
         val onSelectChange = object : ItemSelectCall {
-            override fun select(item: Item) {
+            override fun select(item: MXItem) {
                 if (builder.getPickerType() == MXPickerType.Video && builder.getVideoMaxLength() > 0 && item.duration > builder.getVideoMaxLength()) {
-                    val format = getString(R.string.picker_string_video_limit_length_tip)
+                    val format = getString(R.string.mx_picker_string_video_limit_length_tip)
                     Toast.makeText(
-                        this@ImgPickerActivity,
+                        this@MXImgPickerActivity,
                         String.format(format, builder.getVideoMaxLength()),
                         Toast.LENGTH_SHORT
                     ).show()
@@ -208,12 +221,12 @@ class ImgPickerActivity : AppCompatActivity() {
                 } else {
                     if (sourceGroup.selectList.size >= builder.getMaxSize()) {
                         val format = if (builder.getPickerType() == MXPickerType.Video) {
-                            getString(R.string.picker_string_video_limit_tip)
+                            getString(R.string.mx_picker_string_video_limit_tip)
                         } else {
-                            getString(R.string.picker_string_image_limit_tip)
+                            getString(R.string.mx_picker_string_image_limit_tip)
                         }
                         Toast.makeText(
-                            this@ImgPickerActivity,
+                            this@MXImgPickerActivity,
                             String.format(format, builder.getMaxSize()),
                             Toast.LENGTH_SHORT
                         ).show()
@@ -226,11 +239,11 @@ class ImgPickerActivity : AppCompatActivity() {
 
                 if (sourceGroup.selectList.isEmpty()) {
                     selectBtn?.visibility = View.GONE
-                    selectBtn?.text = getString(R.string.picker_string_select)
+                    selectBtn?.text = getString(R.string.mx_picker_string_select)
                 } else {
                     selectBtn?.visibility = View.VISIBLE
                     selectBtn?.text =
-                        "${getString(R.string.picker_string_select)}(${sourceGroup.selectList.size}/${builder.getMaxSize()})"
+                        "${getString(R.string.mx_picker_string_select)}(${sourceGroup.selectList.size}/${builder.getMaxSize()})"
                 }
             }
         }
@@ -248,9 +261,16 @@ class ImgPickerActivity : AppCompatActivity() {
             true,
             videoChangeObserver
         )
-        pickerVM.addObserver {
+        mxItemSource.addObserver { group ->
+            if (group == null) return@addObserver
+            sourceGroup.folderList = ArrayList(group)
+            val selectName = sourceGroup.selectFolder?.name
+            sourceGroup.selectFolder = group.firstOrNull {
+                it.name == selectName
+            } ?: group.firstOrNull()
+
             folderNameTxv?.text =
-                sourceGroup.selectFolder?.name ?: resources.getString(R.string.picker_string_all)
+                sourceGroup.selectFolder?.name ?: resources.getString(R.string.mx_picker_string_all)
             imgAdapt.notifyDataSetChanged()
             imgLargeAdapt.notifyDataSetChanged()
             folderAdapt.notifyDataSetChanged()
@@ -266,7 +286,7 @@ class ImgPickerActivity : AppCompatActivity() {
             imgLargeAdapt.notifyDataSetChanged()
             folderAdapt.notifyDataSetChanged()
         }
-        pickerVM.startScan()
+        mxItemSource.startScan()
     }
 
     private fun showFolderList(show: Boolean) {
@@ -280,7 +300,7 @@ class ImgPickerActivity : AppCompatActivity() {
         }
     }
 
-    private fun showLargeView(show: Boolean, target: Item? = null) {
+    private fun showLargeView(show: Boolean, target: MXItem? = null) {
         if (show) {
             showFolderList(false)
             val index = sourceGroup.itemIndexOf(target)
@@ -291,20 +311,20 @@ class ImgPickerActivity : AppCompatActivity() {
         }
     }
 
-    private val imageChangeObserver = ImageChangeObserver {
-        if (builder.getPickerType() == MXPickerType.Image) {
-            pickerVM.startScan()
+    private val imageChangeObserver = MXSysImageObserver {
+        if (builder.getPickerType() in arrayOf(MXPickerType.Image, MXPickerType.ImageAndVideo)) {
+            mxItemSource.startScan()
         }
     }
-    private val videoChangeObserver = VideoChangeObserver {
-        if (builder.getPickerType() == MXPickerType.Video) {
-            pickerVM.startScan()
+    private val videoChangeObserver = MXSysVideoObserver {
+        if (builder.getPickerType() in arrayOf(MXPickerType.Video, MXPickerType.ImageAndVideo)) {
+            mxItemSource.startScan()
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        pickerVM.startScan()
+        mxItemSource.startScan()
     }
 
     override fun onBackPressed() {
@@ -320,7 +340,7 @@ class ImgPickerActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        pickerVM.destroy()
+        mxItemSource.release()
         try {
             contentResolver.unregisterContentObserver(imageChangeObserver)
             contentResolver.unregisterContentObserver(videoChangeObserver)

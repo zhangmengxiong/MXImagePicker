@@ -21,11 +21,13 @@
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 ```
 
-#### 第二步：使用前需要添加相册、存储权限
+#### 第二步：使用前需要修改‘AndroidManifest.xml’配置：添加相册、存储权限
 ```
     Manifest.permission.CAMERA
     Manifest.permission.READ_EXTERNAL_STORAGE
-    Manifest.permission.WRITE_EXTERNAL_STORAGE
+
+    // targetSdkVersion >= 29 的应用需要在application节点添加以下属性
+    android:requestLegacyExternalStorage="true"
 ```
 注意：`没有权限进入选择页面会报错！`
 
@@ -45,7 +47,7 @@ startActivityForResult(intent,0x22)
 
 ```
 // 在图片选择器Activity创建时会回调这个方法，一般会通过这个来改变导航栏、状态栏的Theme,demo中搭配`ImmersionBar`来实现沉浸式效果
-ImagePickerService.registerActivityCallback { activity ->
+MXImagePicker.registerActivityCallback { activity ->
     ImmersionBar.with(activity)
             .autoDarkModeEnable(true)
             .statusBarColorInt(activity.resources.getColor(R.color.picker_color_background))
@@ -53,19 +55,20 @@ ImagePickerService.registerActivityCallback { activity ->
             .navigationBarColor(R.color.picker_color_background)
             .init()
 }
+
 ```
 
 ##### 页面颜色设置
 将下面颜色值放如主项目的资源xml中，可以修改页面对应的颜色显示
 ```
     <!--  页面背景色  -->
-    <color name="picker_color_background">#333333</color>
+    <color name="mx_picker_color_background">#333333</color>
    
     <!--  字体、icon颜色  --> 
-    <color name="picker_color_important">#F1F1F1</color>
+    <color name="mx_picker_color_important">#F1F1F1</color>
 
     <!--  选中状态颜色  -->  
-    <color name="picker_color_select">#03CE65</color>
+    <color name="mx_picker_color_select">#03CE65</color>
 ```
 
 ##### 多语言设置
@@ -84,49 +87,40 @@ ImagePickerService.registerActivityCallback { activity ->
 dimens.xml 资源
 ```
     <!--  顶部导航栏高度  -->  
-    <dimen name="picker_bar_height">50dp</dimen>
+    <dimen name="mx_picker_bar_height">50dp</dimen>
 ```
 
 ##### 自定义图片加载器（默认使用Glide）
 
-通过继承实现接口`IImageLoader` ,并注册到服务`ImagePickerService`即可
+通过继承实现接口`IImageLoader` ,并注册到服务`MXImagePicker`即可
 ```
 // 数据对象
-data class Item(val path: String, val uri: Uri, val mimeType: String, val time: Long, val name: String, val type: PickerType)
-
-/**
- * 图片显示接口
- */
-interface IImageLoader {
-    fun displayImage(item: Item, imageView: ImageView)
-}
-
-/**
- * 提供默认Glide显示图片
- */
-class GlideImageLoader : IImageLoader {
-    override fun displayImage(item: Item, imageView: ImageView) {
-        if (item.type == PickerType.Image) {
-            Glide.with(imageView).load(item.uri).into(imageView)
-        } else {
-            Glide.with(imageView).load(Uri.fromFile(File(item.path))).into(imageView)
-        }
-    }
-}
+data class MXItem(val path: String, val time: Long, val type: MXPickerType, val duration: Int = 0)
 
 // 全局注册加载器，可以卸载Application里面，不影响启动速度
-ImagePickerService.registerImageLoader(GlideImageLoader())
+MXImagePicker.registerImageLoader { activity, item, imageView ->
+    if (File(item.path).exists()) {
+        Glide.with(activity).load(File(item.path))
+            .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
+    } else if (item.path.startsWith("http")) {
+        Glide.with(activity).load(item.path)
+            .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
+    } else {
+        Glide.with(activity).load(item.uri)
+            .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
+    }
+}
 ```
 
 #### 第四步：获取返回结果
 ```
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK && requestCode == 0x22) {
-            val paths = MXPickerBuilder.getPickerResult(data) //返回List<String>类型数据
-            println(paths)
-        }
+override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    if (resultCode == RESULT_OK && requestCode == 0x22) {
+        val paths = MXPickerBuilder.getPickerResult(data) ?: return //返回List<String>类型数据
+        println(paths)
     }
+}
 ```
 
 
@@ -153,7 +147,7 @@ val file = builder.getCaptureFile()
 ### 图片查看器
 ![Image text](https://gitee.com/zhangmengxiong/MXImagePicker/raw/master/imgs/screenshot3.png)
 ```
-ImgShowActivity.open(
+MXImgShowActivity.open(
     this, arrayListOf(
         "http://videos.jzvd.org/v/饺子主动.jpg",
         "http://videos.jzvd.org/v/饺子运动.jpg"

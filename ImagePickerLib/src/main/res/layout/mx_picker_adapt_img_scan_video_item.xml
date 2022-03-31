@@ -26,7 +26,7 @@
             android:id="@+id/playBtn"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@drawable/icon_picker_play"
+            android:src="@drawable/mx_icon_picker_play"
             android:tint="@android:color/white" />
 
         <TextView
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:textColor="@android:color/white"
-            android:textSize="14sp"  />
+            android:textSize="14sp" />
     </LinearLayout>
 
     <RelativeLayout
@@ -51,7 +51,7 @@
             android:layout_width="23dp"
             android:layout_height="23dp"
             android:layout_margin="12dp"
-            android:background="@drawable/icon_picker_checked_text"
+            android:background="@drawable/mx_icon_picker_checked_text"
             android:gravity="center"
             android:text="1"
             android:textColor="@android:color/white"

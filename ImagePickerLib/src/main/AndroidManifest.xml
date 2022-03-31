@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mx.imgpicker">
 
-    <application>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application android:requestLegacyExternalStorage="true">
         <provider
             android:name="com.mx.imgpicker.utils.MXImagePickerProvider"
             android:authorities="${applicationId}.imagePickerProvider"
@@ -10,15 +13,16 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/image_picker_file_paths" />
+                android:resource="@xml/mx_image_picker_file_paths" />
         </provider>
 
         <activity
-            android:name="com.mx.imgpicker.app.ImgPickerActivity"
+            android:name="com.mx.imgpicker.app.MXImgPickerActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity
-            android:name=".app.show.ImgShowActivity"
+            android:name=".app.MXImgShowActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
 

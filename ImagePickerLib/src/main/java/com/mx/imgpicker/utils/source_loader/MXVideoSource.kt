@@ -9,44 +9,66 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import com.mx.imgpicker.models.Item
+import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
 import java.io.File
 
 internal object MXVideoSource : IMXSource {
     const val MIME_TYPE = "video/*"
     private val SOURCE_URI = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-
-    override fun scan(context: Context, page: Int, pageSize: Int): List<Item> {
+    override fun scan(
+        context: Context,
+        page: Int,
+        pageSize: Int,
+        minTime: Long?,
+        maxTime: Long?
+    ): List<MXItem> {
         //扫描图片
         val resolver = context.contentResolver ?: return emptyList()
         val columns = arrayListOf(
-            MediaStore.Video.Media.DATA, MediaStore.Video.Media.DISPLAY_NAME,
-            MediaStore.Video.Media.DATE_ADDED, MediaStore.Video.Media._ID,
-            MediaStore.Video.Media.MIME_TYPE, MediaStore.Video.Media.DURATION,
-            MediaStore.Video.Media.SIZE
+            MediaStore.Video.Media.DATA,
+            MediaStore.Video.Media._ID,
+            MediaStore.Video.Media.DURATION,
+            MediaStore.Video.Media.DATE_MODIFIED
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             columns.add(MediaStore.Video.Media.RELATIVE_PATH)
         }
 
-        val images = ArrayList<Item>()
+        var where = MediaStore.Video.Media.SIZE + " > ? "
+        val whereArgs = arrayListOf("0")
+        if (maxTime != null && minTime != null) {
+            where += " and (" + MediaStore.Video.Media.DATE_MODIFIED + "<? or " + MediaStore.Video.Media.DATE_MODIFIED + ">?)"
+            whereArgs.add(minTime.toString())
+            whereArgs.add(maxTime.toString())
+        } else if (minTime != null) {
+            where += " and " + MediaStore.Video.Media.DATE_MODIFIED + "<?"
+            whereArgs.add(minTime.toString())
+        } else if (maxTime != null) {
+            where += " and " + MediaStore.Video.Media.DATE_MODIFIED + ">?"
+            whereArgs.add(maxTime.toString())
+        }
+
+        val images = ArrayList<MXItem>()
         var mCursor: Cursor? = null
         try {
-            mCursor = resolver.query(
-                SOURCE_URI, columns.toTypedArray(),
-                MediaStore.Video.Media.SIZE + " > 0 ",
-                null,
-                MediaStore.Video.Media.DATE_ADDED + " DESC LIMIT $pageSize OFFSET ${page * pageSize} "
+            mCursor = MXContentProvide.createCursor(
+                resolver, SOURCE_URI, columns.toTypedArray(),
+                where, whereArgs.toTypedArray(),
+                MediaStore.Video.Media.DATE_MODIFIED,
+                false, pageSize, page * pageSize
             )
+
             //读取扫描到的图片
             if (mCursor != null && mCursor.moveToFirst()) {
+                var count = 0
                 do {
                     val item = cursorToImageItem(resolver, mCursor)
                     if (item != null) {
                         images.add(item)
+                        count++
                     }
-                } while (mCursor.moveToNext())
+                } while (mCursor.moveToNext() && count < pageSize)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -59,34 +81,23 @@ internal object MXVideoSource : IMXSource {
         return images
     }
 
-    private fun cursorToImageItem(
-        contentResolver: ContentResolver,
-        mCursor: Cursor
-    ): Item? {
+    private fun cursorToImageItem(contentResolver: ContentResolver, mCursor: Cursor): MXItem? {
         try { // 获取视频的路径
             val id = mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID))
+            val modify =
+                mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED))
             val uri = ContentUris.withAppendedId(SOURCE_URI, id)
             val path = getFilePath(uri, mCursor)
 
-            val duration =
-                mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION))
-                    .toIntOrNull() ?: 0
-            //获取图片名称
-            val name =
-                mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME))
-            //获取图片时间
-            var time =
-                mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED))
-            if (time.toString().length < 13) {
-                time *= 1000
-            }
-            //获取图片类型
-            val mimeType =
-                mCursor.getString(mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE))
+            val duration = mCursor.getInt(
+                mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+            )
 
+            //获取图片时间
+            val time = File(path).lastModified() / 1000 // 单位：秒
             if (path.endsWith("downloading")) return null
             if (contentResolver.openFileDescriptor(uri, "r") != null) {
-                return Item(path, uri, mimeType, time, name, MXPickerType.Video, duration / 1000)
+                return MXItem(path, time, MXPickerType.Video, duration / 1000)
             }
         } catch (e: Exception) {
         }

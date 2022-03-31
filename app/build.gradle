@@ -5,7 +5,6 @@ plugins {
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
         applicationId "com.mx.imagepicker_sample"
         minSdkVersion rootProject.ext.minSdkVersion

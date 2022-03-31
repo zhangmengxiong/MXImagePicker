@@ -2,7 +2,7 @@ package com.mx.imgpicker.builder
 
 import android.content.Context
 import android.content.Intent
-import com.mx.imgpicker.app.ImgPickerActivity
+import com.mx.imgpicker.app.MXImgPickerActivity
 import com.mx.imgpicker.models.MXPickerType
 import java.io.Serializable
 
@@ -56,7 +56,7 @@ class MXPickerBuilder : Serializable {
     fun createIntent(context: Context): Intent {
         val intent = Intent()
         intent.putExtra(KEY_INTENT_BUILDER, this)
-        intent.setClass(context, ImgPickerActivity::class.java)
+        intent.setClass(context, MXImgPickerActivity::class.java)
         return intent
     }
 

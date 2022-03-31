@@ -2,20 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/picker_color_background"
+    android:background="@color/mx_picker_color_background"
     android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/picker_bar_height">
+        android:layout_height="@dimen/mx_picker_bar_height">
 
         <ImageView
             android:id="@+id/returnBtn"
-            android:layout_width="@dimen/picker_bar_height"
-            android:layout_height="@dimen/picker_bar_height"
+            android:layout_width="@dimen/mx_picker_bar_height"
+            android:layout_height="@dimen/mx_picker_bar_height"
             android:padding="12dp"
-            android:src="@drawable/icon_picker_return"
-            android:tint="@color/picker_color_important" />
+            android:src="@drawable/mx_icon_picker_return"
+            android:tint="@color/mx_picker_color_important" />
 
         <TextView
             android:id="@+id/titleTxv"
@@ -26,7 +26,7 @@
             android:maxEms="8"
             android:singleLine="true"
             android:text=""
-            android:textColor="@color/picker_color_important"
+            android:textColor="@color/mx_picker_color_important"
             android:textSize="15sp" />
 
     </RelativeLayout>
@@ -35,7 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="0.5dp"
         android:alpha="0.1"
-        android:background="@color/picker_color_important" />
+        android:background="@color/mx_picker_color_important" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycleView"

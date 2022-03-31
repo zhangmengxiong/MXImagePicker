@@ -5,22 +5,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.mx.imgpicker.ImagePickerService
+import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
 import com.mx.imgpicker.builder.MXPickerBuilder
-import com.mx.imgpicker.models.Item
 import com.mx.imgpicker.models.ItemSelectCall
+import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.models.SourceGroup
 import com.mx.imgpicker.views.MXPickerTextView
 
 internal class ImgGridAdapt(
+    private val activity: AppCompatActivity,
     private val sourceGroup: SourceGroup,
     private val builder: MXPickerBuilder
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onSelectClick: ItemSelectCall? = null
-    var onItemClick: ((item: Item, list: ArrayList<Item>) -> Unit)? = null
+    var onItemClick: ((item: MXItem, list: ArrayList<MXItem>) -> Unit)? = null
     var onTakePictureClick: (() -> Unit)? = null
 
     class ImgVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -35,9 +37,11 @@ internal class ImgGridAdapt(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == 0) CameraVH(
-            LayoutInflater.from(parent.context).inflate(R.layout.adapt_img_camera, parent, false)
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.mx_picker_adapt_img_camera, parent, false)
         ) else ImgVH(
-            LayoutInflater.from(parent.context).inflate(R.layout.adapt_img_item, parent, false)
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.mx_picker_adapt_img_item, parent, false)
         )
     }
 
@@ -49,7 +53,8 @@ internal class ImgGridAdapt(
             holder.selectBG.visibility = View.VISIBLE
             val position = if (builder.isEnableCamera()) position - 1 else position
             val item = sourceGroup.getItem(position) ?: return
-            ImagePickerService.getImageLoader().displayImage(item, holder.img)
+            holder.img.setImageResource(R.drawable.mx_icon_picker_image_place_holder)
+            MXImagePicker.getImageLoader()?.invoke(activity,item, holder.img)
             val isSelect = sourceGroup.selectList.contains(item)
             val index = sourceGroup.selectList.indexOf(item)
             holder.indexTxv.isChecked = isSelect

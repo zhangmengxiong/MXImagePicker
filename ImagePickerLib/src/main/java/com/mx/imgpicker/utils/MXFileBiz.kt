@@ -2,9 +2,13 @@ package com.mx.imgpicker.utils
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import com.mx.imgpicker.R
-import com.mx.imgpicker.models.Item
+import com.mx.imgpicker.models.MXItem
+import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.utils.source_loader.MXImageSource
+import com.mx.imgpicker.utils.source_loader.MXVideoSource
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -45,16 +49,24 @@ internal object MXFileBiz {
     /**
      * 打开视频或者图片
      */
-    fun openItem(context: Context, item: Item) {
+    fun openItem(context: Context, item: MXItem) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
-            intent.setDataAndType(item.uri, item.mimeType)
+            val mimeType = when (item.type) {
+                MXPickerType.Video -> MXVideoSource.MIME_TYPE
+                else -> MXImageSource.MIME_TYPE
+            }
+            intent.setDataAndType(Uri.parse(item.path), mimeType)
             intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(context, context.getString(R.string.picker_string_open_failed), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.mx_picker_string_open_failed),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 }

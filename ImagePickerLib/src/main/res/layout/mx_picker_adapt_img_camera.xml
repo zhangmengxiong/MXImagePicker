@@ -8,7 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="1dp"
+        android:background="@color/mx_picker_color_item_background"
         android:scaleType="centerCrop"
-        android:src="@drawable/icon_picker_camera"
-        android:tint="@color/picker_color_important" />
+        android:src="@drawable/mx_icon_picker_camera"
+        android:tint="@color/mx_picker_color_important" />
 </FrameLayout>
