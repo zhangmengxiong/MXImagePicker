@@ -5,7 +5,6 @@ import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
 import com.mx.imgpicker.db.MXDBSource
 import com.mx.imgpicker.models.MXFolderItem
-import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.observer.MXBaseObservable
 import com.mx.imgpicker.utils.MXLog

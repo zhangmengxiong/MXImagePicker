@@ -1,20 +1,19 @@
 package com.mx.imgpicker.models
 
-import com.mx.imgpicker.observer.MXBaseObservable
 import java.io.File
 import java.io.Serializable
 
 /**
  * 类型
  */
-enum class MXPickerType : Serializable {
-    Image, Video, ImageAndVideo;
+enum class MXPickerType(val value: String) : Serializable {
+    Image("Image"), Video("Video"), ImageAndVideo("ImageAndVideo");
 
     companion object {
-        fun from(name: String): MXPickerType {
-            return when (name) {
-                Image.name -> Image
-                Video.name -> Video
+        fun from(value: String): MXPickerType {
+            return when (value) {
+                Image.value -> Image
+                Video.value -> Video
                 else -> ImageAndVideo
             }
         }

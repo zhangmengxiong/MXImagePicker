@@ -21,7 +21,7 @@ internal class MXDBSource(val context: Context) {
             try {
                 val values = ContentValues()
                 values.put(MXSQLiteOpenHelper.DB_KEY_PATH, file.absolutePath)
-                values.put(MXSQLiteOpenHelper.DB_KEY_TYPE, type.name)
+                values.put(MXSQLiteOpenHelper.DB_KEY_TYPE, type.value)
                 values.put(MXSQLiteOpenHelper.DB_KEY_PRIVATE, MXSQLiteOpenHelper.VALUE_PRIVATE_APP)
                 values.put(MXSQLiteOpenHelper.DB_KEY_TIME, (System.currentTimeMillis() / 1000))
                 values.put(MXSQLiteOpenHelper.DB_KEY_VIDEO_LENGTH, 0)
@@ -49,7 +49,7 @@ internal class MXDBSource(val context: Context) {
             try {
                 for (item in list) {
                     stat.bindString(1, item.path)
-                    stat.bindString(2, item.type.name)
+                    stat.bindString(2, item.type.value)
                     stat.bindString(3, MXSQLiteOpenHelper.VALUE_PRIVATE_SYS)
                     stat.bindLong(4, item.time)
                     stat.bindLong(5, item.duration.toLong())
@@ -78,7 +78,7 @@ internal class MXDBSource(val context: Context) {
                             "${MXSQLiteOpenHelper.DB_KEY_TYPE} = ? and ${MXSQLiteOpenHelper.DB_KEY_PRIVATE} = ? "
                 cursor = database.rawQuery(
                     selectSql, arrayOf(
-                        type.name, MXSQLiteOpenHelper.VALUE_PRIVATE_SYS
+                        type.value, MXSQLiteOpenHelper.VALUE_PRIVATE_SYS
                     )
                 )
 
@@ -109,7 +109,7 @@ internal class MXDBSource(val context: Context) {
 
         if (type != MXPickerType.ImageAndVideo) {
             section = "${MXSQLiteOpenHelper.DB_KEY_TYPE}=?"
-            sectionArg = arrayOf(type.name)
+            sectionArg = arrayOf(type.value)
         } else {
             section = ""
             sectionArg = emptyArray()
