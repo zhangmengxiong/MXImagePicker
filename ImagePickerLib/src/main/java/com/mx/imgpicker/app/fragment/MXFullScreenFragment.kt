@@ -104,6 +104,8 @@ internal class MXFullScreenFragment(
     fun setItemList(items: List<MXItem>?) {
         imgList.clear()
         items?.let { imgList.addAll(it) }
+
+        if (recycleView == null) return
         imgLargeAdapt.notifyDataSetChanged()
     }
 
