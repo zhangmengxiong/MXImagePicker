@@ -71,11 +71,11 @@ class MXImageScale internal constructor(val build: MXScaleBuild) {
      */
     private fun saveToCacheFile(bitmap: Bitmap): File {
         val stream = ByteArrayOutputStream()
-        val format = if (build.compressFormat == Bitmap.CompressFormat.PNG) {
+        val format = if (build.supportAlpha == true) {
             Bitmap.CompressFormat.PNG
         } else Bitmap.CompressFormat.JPEG
-        val extension = if (format == Bitmap.CompressFormat.PNG) "png" else "jpeg"
-        bitmap.compress(format, 60, stream)
+        val extension = if (format == Bitmap.CompressFormat.PNG) "png" else "jpg"
+        bitmap.compress(format, 70, stream)
         bitmap.recycle()
         val cacheImg = MXFileBiz.createCacheImageFile(build.context, build.cacheDir, extension)
         val fos = FileOutputStream(cacheImg)

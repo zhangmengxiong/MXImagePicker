@@ -1,20 +1,19 @@
 package com.mx.imgpicker.scale
 
 import android.content.Context
-import android.graphics.Bitmap
 import java.io.File
 
 class MXScaleBuild(val context: Context) {
-    internal var compressFormat: Bitmap.CompressFormat? = null
+    internal var supportAlpha: Boolean? = null
     internal var ignoreSize: Int = 100
     internal var cacheDir: File? = null
 
     /**
-     * 设置图片格式
-     * 仅支持JPG、PGN两种格式
+     * 支持透明通道(’.png‘格式)
+     * 默认=’.jpg‘格式
      */
-    fun setCompressFormat(fmt: Bitmap.CompressFormat): MXScaleBuild {
-        this.compressFormat = fmt
+    fun setSupportAlpha(support: Boolean): MXScaleBuild {
+        this.supportAlpha = support
         return this
     }
 
