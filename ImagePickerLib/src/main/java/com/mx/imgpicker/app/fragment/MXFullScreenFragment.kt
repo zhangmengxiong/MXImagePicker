@@ -122,7 +122,7 @@ internal class MXFullScreenFragment(
     private fun refreshViews() {
         if (recycleView == null) return
         val item = firstShowItem
-        val index = data.itemIndexOf(item)
+        val index = imgList.indexOf(item)
         if (index < 0) {
             titleTxv?.text = "1 / ${imgList.size}"
             recycleView?.scrollToPosition(0)
