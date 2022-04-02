@@ -1,6 +1,6 @@
 package com.mx.imgpicker.models
 
-import com.mx.imgpicker.observer.MXBaseObservable
+import com.mx.imgpicker.observer.MXValueObservable
 import java.io.File
 import java.io.Serializable
 
@@ -65,10 +65,10 @@ data class MXItem(val path: String, val time: Long, val type: MXPickerType, val 
 internal data class MXFolderItem(val name: String, val items: List<MXItem> = ArrayList())
 
 internal class MXDataSet {
-    val folderList = MXBaseObservable<List<MXFolderItem>>(ArrayList()) // 文件夹列表
-    val selectFolder = MXBaseObservable<MXFolderItem?>(null) // 当前选择文件夹
-    val selectList = MXBaseObservable<List<MXItem>>(ArrayList()) // 选中的文件列表
-    val willNotResize = MXBaseObservable(false) // 是否选中原图
+    val folderList = MXValueObservable<List<MXFolderItem>>(ArrayList()) // 文件夹列表
+    val selectFolder = MXValueObservable<MXFolderItem?>(null) // 当前选择文件夹
+    val selectList = MXValueObservable<List<MXItem>>(ArrayList()) // 选中的文件列表
+    val willNotResize = MXValueObservable(false) // 是否选中原图
 
     fun getItemSize() = selectFolder.getValue()?.items?.size ?: 0
     fun getItem(index: Int) = selectFolder.getValue()?.items?.getOrNull(index)

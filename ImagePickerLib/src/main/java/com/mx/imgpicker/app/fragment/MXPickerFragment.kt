@@ -47,6 +47,7 @@ internal class MXPickerFragment(
     private var bottomLay: View? = null
     private var willResizeLay: View? = null
     private var willResizeImg: ImageView? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -156,6 +157,9 @@ internal class MXPickerFragment(
         }
         willResizeLay?.setOnClickListener {
             data.willNotResize.notifyChanged(!data.willNotResize.getValue())
+        }
+        if (builder.getPickerType() == MXPickerType.Video) {
+            willResizeLay?.visibility = View.GONE
         }
 
         data.willNotResize.addObserver { resize ->

@@ -205,23 +205,29 @@ class MXImgPickerActivity : AppCompatActivity() {
     }
 
     fun onSelectFinish() {
-        val paths = data.selectList.getValue().map { it.path }
-        if (data.willNotResize.getValue()) {
+        val setResult = { list: List<String> ->
             setResult(
-                RESULT_OK,
-                Intent().putExtra(MXPickerBuilder.KEY_INTENT_RESULT, ArrayList(paths))
+                RESULT_OK, Intent().putExtra(
+                    MXPickerBuilder.KEY_INTENT_RESULT,
+                    ArrayList(list)
+                )
             )
             finish()
+        }
+
+        val paths = data.selectList.getValue()
+        if (data.willNotResize.getValue()) {
+            setResult.invoke(paths.map { it.path })
         } else {
             val scale = MXImageScale.from(this)
             thread {
-                val paths = paths.map { scale.compress(it).absolutePath }
+                val compressPath = paths.map { item ->
+                    if (item.type == MXPickerType.Image) {
+                        scale.compress(item.path).absolutePath
+                    } else item.path
+                }
                 runOnUiThread {
-                    setResult(
-                        RESULT_OK,
-                        Intent().putExtra(MXPickerBuilder.KEY_INTENT_RESULT, ArrayList(paths))
-                    )
-                    finish()
+                    setResult.invoke(compressPath)
                 }
             }
         }

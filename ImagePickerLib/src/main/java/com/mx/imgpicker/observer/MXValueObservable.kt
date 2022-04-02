@@ -3,7 +3,7 @@ package com.mx.imgpicker.observer
 import android.os.Handler
 import android.os.Looper
 
-internal open class MXBaseObservable<T>(defaultValue: T) {
+internal open class MXValueObservable<T>(defaultValue: T) {
     /**
      * 主线程Handler
      */
