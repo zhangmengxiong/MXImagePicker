@@ -9,9 +9,4 @@
     <color name="white">#FFFFFFFF</color>
 
 
-
-    <!--  图片选取器 颜色覆盖  -->
-    <color name="mx_picker_color_background">#F9F9F9</color>
-    <color name="mx_picker_color_important">#FF0000</color>
-    <color name="mx_picker_color_select">#008EFF</color>
 </resources>

@@ -86,13 +86,6 @@
             android:layout_height="match_parent"
             android:paddingHorizontal="1dp" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/folderRecycleView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/mx_picker_color_background"
-            android:visibility="gone" />
-
         <TextView
             android:id="@+id/emptyTxv"
             android:layout_width="wrap_content"
@@ -101,6 +94,66 @@
             android:text="暂无数据！"
             android:textColor="@color/mx_picker_color_important"
             android:textSize="16sp"
+            android:visibility="gone" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@color/mx_picker_color_background">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:alpha="0.1"
+                android:background="@color/mx_picker_color_important" />
+
+            <TextView
+                android:id="@+id/previewBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="10dp"
+                android:text="@string/mx_picker_string_preview"
+                android:textColor="@color/mx_picker_color_important"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:id="@+id/willResizeLay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="10dp">
+
+                <ImageView
+                    android:id="@+id/willResizeImg"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/mx_picker_radio_select"
+                    android:tint="@color/mx_picker_color_important" />
+
+                <TextView
+                    android:id="@+id/emptyTxv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/mx_picker_string_not_compress"
+                    android:textColor="@color/mx_picker_color_important"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/folderRecycleView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/mx_picker_color_background"
             android:visibility="gone" />
     </FrameLayout>
 </LinearLayout>

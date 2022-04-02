@@ -17,7 +17,7 @@ import com.mx.imgpicker.utils.MXFileBiz
 import com.mx.imgpicker.utils.MXUtils
 import com.mx.imgpicker.views.MXPickerTextView
 
-internal class ImgLargeAdapt(private val MXDataSet: MXDataSet) :
+internal class ImgLargeAdapt(private val data: MXDataSet) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onSelectClick: ((item: MXItem, isSelect: Boolean) -> Unit)? = null
 
@@ -53,12 +53,12 @@ internal class ImgLargeAdapt(private val MXDataSet: MXDataSet) :
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = MXDataSet.getItem(position) ?: return
+        val item = data.getItem(position) ?: return
         if (holder is ImgScanVH) {
             holder.photoView.setImageResource(R.drawable.mx_icon_picker_image_place_holder)
             MXImagePicker.getImageLoader()?.invoke(item, holder.photoView)
-            val isSelect = MXDataSet.selectList.getValue().contains(item)
-            val index = MXDataSet.selectList.getValue().indexOf(item)
+            val isSelect = data.selectList.getValue().contains(item)
+            val index = data.selectList.getValue().indexOf(item)
             holder.indexTxv.isChecked = isSelect
 
             holder.indexLay.setOnClickListener {
@@ -72,8 +72,8 @@ internal class ImgLargeAdapt(private val MXDataSet: MXDataSet) :
         } else if (holder is ImgScanVideoVH) {
             holder.img.setImageResource(R.drawable.mx_icon_picker_image_place_holder)
             MXImagePicker.getImageLoader()?.invoke(item, holder.img)
-            val isSelect = MXDataSet.selectList.getValue().contains(item)
-            val index = MXDataSet.selectList.getValue().indexOf(item)
+            val isSelect = data.selectList.getValue().contains(item)
+            val index = data.selectList.getValue().indexOf(item)
             holder.indexTxv.isChecked = isSelect
             holder.videoLengthTxv.text =
                 if (item.duration > 0) MXUtils.timeToString(item.duration) else ""
@@ -93,11 +93,11 @@ internal class ImgLargeAdapt(private val MXDataSet: MXDataSet) :
     }
 
     override fun getItemCount(): Int {
-        return MXDataSet.getItemSize()
+        return data.getItemSize()
     }
 
     override fun getItemViewType(position: Int): Int {
-        val item = MXDataSet.getItem(position)
+        val item = data.getItem(position)
         return if (item?.type == MXPickerType.Video) 0 else 1
     }
 }

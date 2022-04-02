@@ -1,13 +1,11 @@
 package com.mx.imgpicker.app.fragment
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -52,12 +50,7 @@ internal class MXFullScreenFragment(
             (requireActivity() as? MXImgPickerActivity)?.showLargeView(false)
         }
         selectBtn?.setOnClickListener {
-            val paths = data.selectList.getValue().map { it.path }
-            requireActivity().setResult(
-                AppCompatActivity.RESULT_OK,
-                Intent().putExtra(MXPickerBuilder.KEY_INTENT_RESULT, ArrayList(paths))
-            )
-            requireActivity().finish()
+            (requireActivity() as? MXImgPickerActivity)?.onSelectFinish()
         }
         recycleView?.let { recycleView ->
             val animator = recycleView.itemAnimator

@@ -17,7 +17,9 @@ import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.observer.MXSysImageObserver
 import com.mx.imgpicker.observer.MXSysVideoObserver
+import com.mx.imgpicker.scale.MXImageScale
 import com.mx.imgpicker.utils.MXUtils
+import kotlin.concurrent.thread
 
 
 class MXImgPickerActivity : AppCompatActivity() {
@@ -102,6 +104,10 @@ class MXImgPickerActivity : AppCompatActivity() {
         } else {
             gotoFragment(pickerFragment)
         }
+    }
+
+    fun showLargeSelectView() {
+        gotoFragment(pickerFullScreenFragment)
     }
 
     private val imageChangeObserver = MXSysImageObserver {
@@ -190,5 +196,28 @@ class MXImgPickerActivity : AppCompatActivity() {
             list.add(item)
         }
         data.selectList.notifyChanged(list)
+    }
+
+    fun onSelectFinish() {
+        val paths = data.selectList.getValue().map { it.path }
+        if (data.willNotResize.getValue()) {
+            setResult(
+                RESULT_OK,
+                Intent().putExtra(MXPickerBuilder.KEY_INTENT_RESULT, ArrayList(paths))
+            )
+            finish()
+        } else {
+            val scale = MXImageScale.from(this)
+            thread {
+                val paths = paths.map { scale.compress(it).absolutePath }
+                runOnUiThread {
+                    setResult(
+                        RESULT_OK,
+                        Intent().putExtra(MXPickerBuilder.KEY_INTENT_RESULT, ArrayList(paths))
+                    )
+                    finish()
+                }
+            }
+        }
     }
 }

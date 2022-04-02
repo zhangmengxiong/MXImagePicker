@@ -1,7 +1,7 @@
 package com.mx.imgpicker.app.fragment
 
 import android.Manifest
-import android.content.Intent
+import android.graphics.ColorFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +10,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,12 +37,15 @@ internal class MXPickerFragment(
 
     private var returnBtn: ImageView? = null
     private var selectBtn: TextView? = null
+    private var previewBtn: TextView? = null
     private var folderNameTxv: TextView? = null
     private var emptyTxv: TextView? = null
     private var recycleView: RecyclerView? = null
     private var folderRecycleView: RecyclerView? = null
     private var folderMoreLay: View? = null
     private var folderMoreImg: View? = null
+    private var willResizeLay: View? = null
+    private var willResizeImg: ImageView? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -63,6 +65,9 @@ internal class MXPickerFragment(
         folderMoreImg = view.findViewById(R.id.folderMoreImg)
         folderNameTxv = view.findViewById(R.id.folderNameTxv)
         selectBtn = view.findViewById(R.id.selectBtn)
+        previewBtn = view.findViewById(R.id.previewBtn)
+        willResizeLay = view.findViewById(R.id.willResizeLay)
+        willResizeImg = view.findViewById(R.id.willResizeImg)
 
         returnBtn?.setOnClickListener { requireActivity().onBackPressed() }
 
@@ -87,12 +92,10 @@ internal class MXPickerFragment(
         }
 
         selectBtn?.setOnClickListener {
-            val paths = data.selectList.getValue().map { it.path }
-            requireActivity().setResult(
-                AppCompatActivity.RESULT_OK,
-                Intent().putExtra(MXPickerBuilder.KEY_INTENT_RESULT, ArrayList(paths))
-            )
-            requireActivity().finish()
+            (requireActivity() as MXImgPickerActivity).onSelectFinish()
+        }
+        previewBtn?.setOnClickListener {
+            (requireActivity() as MXImgPickerActivity).showLargeSelectView()
         }
 
         recycleView?.let {
@@ -126,7 +129,6 @@ internal class MXPickerFragment(
                     val intent = captureBuilder.createIntent(requireContext())
                     val file = captureBuilder.getCaptureFile()
                     source.addPrivateSource(file, type)
-
                     startActivityForResult(intent, 0x12)
                     MXUtils.log("PATH = ${file.absolutePath}")
                 }
@@ -149,15 +151,30 @@ internal class MXPickerFragment(
         imgAdapt.onSelectClick = { item, _ ->
             (requireActivity() as? MXImgPickerActivity)?.onSelectChange(item)
         }
+        willResizeLay?.setOnClickListener {
+            data.willNotResize.notifyChanged(!data.willNotResize.getValue())
+        }
 
+        data.willNotResize.addObserver { resize ->
+            if (resize) {
+                willResizeImg?.setImageResource(R.drawable.mx_picker_radio_select)
+                willResizeImg?.setColorFilter(resources.getColor(R.color.mx_picker_color_select))
+            } else {
+                willResizeImg?.setImageResource(R.drawable.mx_picker_radio_unselect)
+                willResizeImg?.setColorFilter(resources.getColor(R.color.mx_picker_color_important))
+            }
+        }
         data.selectList.addObserver { list ->
             if (list.isEmpty()) {
                 selectBtn?.visibility = View.GONE
                 selectBtn?.text = getString(R.string.mx_picker_string_select)
+                previewBtn?.text = getString(R.string.mx_picker_string_preview)
             } else {
                 selectBtn?.visibility = View.VISIBLE
                 selectBtn?.text =
                     "${getString(R.string.mx_picker_string_select)}(${data.selectList.getValue().size}/${builder.getMaxSize()})"
+                previewBtn?.text =
+                    "${getString(R.string.mx_picker_string_preview)} ${data.selectList.getValue().size}"
             }
             val oldIdx = selectItemIndex?.toList() ?: emptyList()
             val newIdx = list.map { data.itemIndexOf(it) }
