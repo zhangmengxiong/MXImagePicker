@@ -27,7 +27,7 @@
             android:singleLine="true"
             android:text="1 / 1"
             android:textColor="@color/mx_picker_color_important"
-            android:textSize="16sp" />
+            android:textSize="@dimen/mx_img_picker_text_size_normal" />
 
         <TextView
             android:id="@+id/selectBtn"
@@ -41,7 +41,7 @@
             android:paddingVertical="5dp"
             android:text="选择"
             android:textColor="@color/mx_picker_color_select"
-            android:textSize="14sp"
+            android:textSize="@dimen/mx_img_picker_text_size_small"
             android:visibility="gone" />
     </RelativeLayout>
 

@@ -31,7 +31,7 @@
             android:gravity="center"
             android:text="1"
             android:textColor="@android:color/white"
-            android:textSize="14sp" />
+            android:textSize="@dimen/mx_img_picker_text_size_small" />
     </RelativeLayout>
 
 </FrameLayout>

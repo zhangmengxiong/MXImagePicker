@@ -27,7 +27,7 @@
             android:singleLine="true"
             android:text=""
             android:textColor="@color/mx_picker_color_important"
-            android:textSize="15sp" />
+            android:textSize="@dimen/mx_img_picker_text_size_normal" />
 
     </RelativeLayout>
 
