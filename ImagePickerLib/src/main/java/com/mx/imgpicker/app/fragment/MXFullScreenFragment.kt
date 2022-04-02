@@ -24,8 +24,9 @@ internal class MXFullScreenFragment(
     private val source: MXSource,
     private val builder: MXPickerBuilder
 ) : Fragment() {
+    private val imgList = ArrayList<MXItem>()
+    private val imgLargeAdapt by lazy { ImgLargeAdapt(imgList, data) }
     private var firstShowItem: MXItem? = null
-    private val imgLargeAdapt by lazy { ImgLargeAdapt(data) }
     private var returnBtn: ImageView? = null
     private var titleTxv: TextView? = null
     private var selectBtn: TextView? = null
@@ -68,7 +69,7 @@ internal class MXFullScreenFragment(
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         val index = layoutManager.findFirstCompletelyVisibleItemPosition()
-                        titleTxv?.text = "${index + 1} / ${data.getItemSize()}"
+                        titleTxv?.text = "${index + 1} / ${imgList.size}"
                     }
                 }
             })
@@ -77,7 +78,7 @@ internal class MXFullScreenFragment(
         imgLargeAdapt.onSelectClick = { item, _ ->
             (requireActivity() as? MXImgPickerActivity)?.onSelectChange(item)
         }
-        titleTxv?.text = "1 / ${data.getItemSize()}"
+        titleTxv?.text = "1 / ${imgList.size}"
 
         data.selectFolder.addObserver {
             imgLargeAdapt.notifyDataSetChanged()
@@ -93,20 +94,41 @@ internal class MXFullScreenFragment(
                     "${getString(R.string.mx_picker_string_select)}(${data.selectList.getValue().size}/${builder.getMaxSize()})"
             }
         }
-        scrollToTarget()
-    }
-
-    private fun scrollToTarget() {
-        if (recycleView == null) return
-        val item = firstShowItem ?: return
-        val index = data.itemIndexOf(item)
-        recycleView?.scrollToPosition(index)
-        firstShowItem = null
-        titleTxv?.text = "${index + 1} / ${data.getItemSize()}"
     }
 
     fun setTargetItem(target: MXItem?) {
         firstShowItem = target
-        scrollToTarget()
+        refreshViews()
+    }
+
+    fun setItemList(items: List<MXItem>?) {
+        imgList.clear()
+        items?.let { imgList.addAll(it) }
+        imgLargeAdapt.notifyDataSetChanged()
+    }
+
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden) {
+            refreshViews()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshViews()
+    }
+
+    private fun refreshViews() {
+        if (recycleView == null) return
+        val item = firstShowItem
+        val index = data.itemIndexOf(item)
+        if (index < 0) {
+            titleTxv?.text = "1 / ${imgList.size}"
+            recycleView?.scrollToPosition(0)
+        } else {
+            recycleView?.scrollToPosition(index)
+            titleTxv?.text = "${index + 1} / ${imgList.size}"
+        }
     }
 }

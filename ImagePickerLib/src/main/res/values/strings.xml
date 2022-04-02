@@ -9,5 +9,5 @@
     <string name="mx_picker_string_need_permission_storage">Read storage permissions are required</string>
     <string name="mx_picker_string_open_failed">Failed to open!</string>
     <string name="mx_picker_string_preview">Preview</string>
-    <string name="mx_picker_string_not_compress">原图</string>
+    <string name="mx_picker_string_not_compress">Original</string>
 </resources>

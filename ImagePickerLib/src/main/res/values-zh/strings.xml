@@ -9,4 +9,5 @@
     <string name="mx_picker_string_need_permission_storage">需要读取存储权限</string>
     <string name="mx_picker_string_open_failed">打开失败！</string>
     <string name="mx_picker_string_preview">预览</string>
+    <string name="mx_picker_string_not_compress">原图</string>
 </resources>

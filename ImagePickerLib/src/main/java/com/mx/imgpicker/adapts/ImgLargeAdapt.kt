@@ -17,7 +17,7 @@ import com.mx.imgpicker.utils.MXFileBiz
 import com.mx.imgpicker.utils.MXUtils
 import com.mx.imgpicker.views.MXPickerTextView
 
-internal class ImgLargeAdapt(private val data: MXDataSet) :
+internal class ImgLargeAdapt(private val list: List<MXItem>, private val data: MXDataSet) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onSelectClick: ((item: MXItem, isSelect: Boolean) -> Unit)? = null
 
@@ -53,7 +53,7 @@ internal class ImgLargeAdapt(private val data: MXDataSet) :
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = data.getItem(position) ?: return
+        val item = list.getOrNull(position) ?: return
         if (holder is ImgScanVH) {
             holder.photoView.setImageResource(R.drawable.mx_icon_picker_image_place_holder)
             MXImagePicker.getImageLoader()?.invoke(item, holder.photoView)
@@ -93,11 +93,11 @@ internal class ImgLargeAdapt(private val data: MXDataSet) :
     }
 
     override fun getItemCount(): Int {
-        return data.getItemSize()
+        return list.size
     }
 
     override fun getItemViewType(position: Int): Int {
-        val item = data.getItem(position)
+        val item = list.getOrNull(position)
         return if (item?.type == MXPickerType.Video) 0 else 1
     }
 }

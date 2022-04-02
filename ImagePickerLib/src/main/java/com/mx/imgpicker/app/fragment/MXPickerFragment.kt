@@ -44,6 +44,7 @@ internal class MXPickerFragment(
     private var folderRecycleView: RecyclerView? = null
     private var folderMoreLay: View? = null
     private var folderMoreImg: View? = null
+    private var bottomLay: View? = null
     private var willResizeLay: View? = null
     private var willResizeImg: ImageView? = null
     override fun onCreateView(
@@ -66,9 +67,11 @@ internal class MXPickerFragment(
         folderNameTxv = view.findViewById(R.id.folderNameTxv)
         selectBtn = view.findViewById(R.id.selectBtn)
         previewBtn = view.findViewById(R.id.previewBtn)
+        bottomLay = view.findViewById(R.id.bottomLay)
         willResizeLay = view.findViewById(R.id.willResizeLay)
         willResizeImg = view.findViewById(R.id.willResizeImg)
 
+        bottomLay?.setOnClickListener { }
         returnBtn?.setOnClickListener { requireActivity().onBackPressed() }
 
         folderRecycleView?.let {
@@ -168,13 +171,16 @@ internal class MXPickerFragment(
             if (list.isEmpty()) {
                 selectBtn?.visibility = View.GONE
                 selectBtn?.text = getString(R.string.mx_picker_string_select)
+                previewBtn?.alpha = 0.5f
                 previewBtn?.text = getString(R.string.mx_picker_string_preview)
             } else {
                 selectBtn?.visibility = View.VISIBLE
                 selectBtn?.text =
                     "${getString(R.string.mx_picker_string_select)}(${data.selectList.getValue().size}/${builder.getMaxSize()})"
+
+                previewBtn?.alpha = 1f
                 previewBtn?.text =
-                    "${getString(R.string.mx_picker_string_preview)} ${data.selectList.getValue().size}"
+                    "${getString(R.string.mx_picker_string_preview)}(${data.selectList.getValue().size})"
             }
             val oldIdx = selectItemIndex?.toList() ?: emptyList()
             val newIdx = list.map { data.itemIndexOf(it) }

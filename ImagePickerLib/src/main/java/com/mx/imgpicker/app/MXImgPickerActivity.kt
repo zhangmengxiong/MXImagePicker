@@ -99,6 +99,7 @@ class MXImgPickerActivity : AppCompatActivity() {
 
     fun showLargeView(show: Boolean, target: MXItem? = null) {
         if (show) {
+            pickerFullScreenFragment.setItemList(data.selectFolder.getValue()?.items)
             pickerFullScreenFragment.setTargetItem(target)
             gotoFragment(pickerFullScreenFragment)
         } else {
@@ -107,6 +108,11 @@ class MXImgPickerActivity : AppCompatActivity() {
     }
 
     fun showLargeSelectView() {
+        val list = data.selectList.getValue()
+        if (list.isEmpty()) return
+
+        pickerFullScreenFragment.setItemList(data.selectList.getValue())
+        pickerFullScreenFragment.setTargetItem(list.firstOrNull())
         gotoFragment(pickerFullScreenFragment)
     }
 
