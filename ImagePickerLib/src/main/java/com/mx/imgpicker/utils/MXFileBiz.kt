@@ -23,7 +23,7 @@ internal object MXFileBiz {
     /**
      * 生成缓存图片路径
      */
-    fun createImageFile(context: Context): File {
+    internal fun createImageFile(context: Context): File {
         val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val imageFileName = "${PREFIX_IMAGE}_${time}_${fileIndex.incrementAndGet()}.jpg"
         return File(getExistExtDir(context), imageFileName)
@@ -32,13 +32,28 @@ internal object MXFileBiz {
     /**
      * 生成缓存视频路径
      */
-    fun createVideoFile(context: Context): File {
+    internal fun createVideoFile(context: Context): File {
         val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val imageFileName = "${PREFIX_VIDEO}_${time}_${fileIndex.incrementAndGet()}.mp4"
         return File(getExistExtDir(context), imageFileName)
     }
 
-    fun getExistExtDir(context: Context): File {
+    /**
+     * 创建一个缓存图片文件
+     * @param targetDir 目标文件夹
+     * @param extension 文件后缀
+     */
+    internal fun createCacheImageFile(context: Context, targetDir: File?, extension: String): File {
+        val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val imageFileName = "${PREFIX_IMAGE}_${time}_${fileIndex.incrementAndGet()}.$extension"
+        if (targetDir != null && !targetDir.exists()) {
+            targetDir.mkdirs()
+        }
+
+        return File(targetDir ?: context.cacheDir, imageFileName)
+    }
+
+    private fun getExistExtDir(context: Context): File {
         val file = context.externalCacheDir
         if (file != null && file.exists() && file.canWrite()) { //判断文件目录是否存在
             return file
@@ -50,7 +65,7 @@ internal object MXFileBiz {
     /**
      * 打开视频或者图片
      */
-    fun openItem(context: Context, item: MXItem) {
+    internal fun openItem(context: Context, item: MXItem) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
             val mimeType = when (item.type) {
