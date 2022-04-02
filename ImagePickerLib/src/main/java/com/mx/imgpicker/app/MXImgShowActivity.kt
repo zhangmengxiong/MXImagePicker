@@ -14,7 +14,7 @@ import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.ImgShowAdapt
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
-import com.mx.imgpicker.utils.MXLog
+import com.mx.imgpicker.utils.MXUtils
 
 class MXImgShowActivity : AppCompatActivity() {
     companion object {
@@ -64,7 +64,7 @@ class MXImgShowActivity : AppCompatActivity() {
             finish()
             return
         }
-        MXLog.log("显示图片：${imgList.joinToString(",") { it.path }}")
+        MXUtils.log("显示图片：${imgList.joinToString(",") { it.path }}")
         adapt.notifyDataSetChanged()
     }
 }

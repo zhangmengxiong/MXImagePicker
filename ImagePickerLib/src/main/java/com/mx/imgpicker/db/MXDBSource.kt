@@ -8,7 +8,6 @@ import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.utils.source_loader.MXVideoSource
 import java.io.File
-import kotlin.math.abs
 
 internal class MXDBSource(val context: Context) {
     companion object {

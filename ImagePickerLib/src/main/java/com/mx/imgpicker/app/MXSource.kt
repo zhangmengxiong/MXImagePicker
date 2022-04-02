@@ -7,7 +7,7 @@ import com.mx.imgpicker.db.MXDBSource
 import com.mx.imgpicker.models.MXFolderItem
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.observer.MXBaseObservable
-import com.mx.imgpicker.utils.MXLog
+import com.mx.imgpicker.utils.MXUtils
 import com.mx.imgpicker.utils.source_loader.MXImageSource
 import com.mx.imgpicker.utils.source_loader.MXVideoSource
 import java.io.File
@@ -53,7 +53,7 @@ internal class MXSource(val context: Context, val type: MXPickerType) :
             if (page == PAGE_START || page % 4 == 0) {
                 notifyChanged(getFolderGroup())
             }
-            MXLog.log("扫描完第${page}页 --> ${list.size}")
+            MXUtils.log("扫描完第${page}页 --> ${list.size}")
             page++
         }
     }
@@ -71,7 +71,7 @@ internal class MXSource(val context: Context, val type: MXPickerType) :
             if (page == PAGE_START || page % 3 == 0) {
                 notifyChanged(getFolderGroup())
             }
-            MXLog.log("扫描完第${page}页 --> ${list.size}")
+            MXUtils.log("扫描完第${page}页 --> ${list.size}")
             page++
         }
     }

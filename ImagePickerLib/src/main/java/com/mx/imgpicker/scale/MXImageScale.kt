@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.mx.imgpicker.utils.MXFileBiz
-import com.mx.imgpicker.utils.MXLog
+import com.mx.imgpicker.utils.MXUtils
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -17,19 +17,30 @@ class MXImageScale internal constructor(val build: MXScaleBuild) {
         }
     }
 
-    fun compress(target: File): File {
-        // 阈值判断
-        if (target.length() <= build.ignoreSize * 1024) return target
-        val (width, height) = readImageSize(target)
-        val tagBitmap = decodeBitmapFromFile(target, width, height)
+    fun compress(source: File): File {
+        if (!source.exists()) {
+            MXUtils.log("缩放图片失败，返回原文件:${source.absolutePath}")
+            return source
+        }
+        if (source.length() <= build.ignoreSize * 1024) {
+            MXUtils.log("缩放图片触发阈值限制: ${build.ignoreSize}Kb , 源文件大小：${source.length()}")
+            return source
+        }
+        val (width, height) = readImageSize(source)
+        if (width <= 0 || height <= 0) {
+            MXUtils.log("缩放图片失败:读取源文件错误(Size)，返回原文件:${source.absolutePath}")
+            return source
+        }
+
+        val tagBitmap = decodeBitmapFromFile(source, width, height)
         if (tagBitmap == null) {
-            MXLog.log("缩放图片失败，返回原文件:${target.absolutePath}")
-            return target
+            MXUtils.log("缩放图片失败:读取源文件错误(File->Bitmap)，返回原文件:${source.absolutePath}")
+            return source
         }
 
         val cacheImg = saveToCacheFile(tagBitmap)
-        val (new_width, new_height) = readImageSize(target)
-        MXLog.log("缩放图片：($width,$height,${target.length() / 1024}Kb) -> ($new_width,$new_height,${cacheImg.length() / 1024}Kb)")
+        val (new_width, new_height) = readImageSize(source)
+        MXUtils.log("缩放图片：($width,$height,${source.length() / 1024}Kb) -> ($new_width,$new_height,${cacheImg.length() / 1024}Kb)")
         return cacheImg
     }
 
@@ -55,6 +66,9 @@ class MXImageScale internal constructor(val build: MXScaleBuild) {
         return BitmapFactory.decodeStream(target.inputStream(), null, options)
     }
 
+    /**
+     * 保存文件
+     */
     private fun saveToCacheFile(bitmap: Bitmap): File {
         val stream = ByteArrayOutputStream()
         val format = if (build.compressFormat == Bitmap.CompressFormat.PNG) {

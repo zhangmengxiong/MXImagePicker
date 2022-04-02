@@ -24,8 +24,7 @@ import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.models.SourceGroup
 import com.mx.imgpicker.observer.MXSysImageObserver
 import com.mx.imgpicker.observer.MXSysVideoObserver
-import com.mx.imgpicker.utils.MXLog
-import com.mx.imgpicker.utils.MXPermissionBiz
+import com.mx.imgpicker.utils.MXUtils
 
 
 class MXImgPickerActivity : AppCompatActivity() {
@@ -58,15 +57,15 @@ class MXImgPickerActivity : AppCompatActivity() {
         supportActionBar?.hide()
         actionBar?.hide()
 
-        MXLog.log("启动")
+        MXUtils.log("启动")
         val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-        if (!MXPermissionBiz.hasPermission(this, permissions)) {
+        if (!MXUtils.hasPermission(this, permissions)) {
             Toast.makeText(
                 this,
                 getString(R.string.mx_picker_string_need_permission_storage),
                 Toast.LENGTH_SHORT
             ).show()
-            MXPermissionBiz.requestPermission(this, permissions, MXPermissionBiz.REQUEST_CODE_READ)
+            MXUtils.requestPermission(this, permissions, MXUtils.REQUEST_CODE_READ)
             return
         } else {
             initView()
@@ -79,15 +78,15 @@ class MXImgPickerActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == MXPermissionBiz.REQUEST_CODE_READ) {
-            if (MXPermissionBiz.hasPermission(this, permissions)) {
+        if (requestCode == MXUtils.REQUEST_CODE_READ) {
+            if (MXUtils.hasPermission(this, permissions)) {
                 initView()
             } else {
                 finish()
             }
         }
-        if (requestCode == MXPermissionBiz.REQUEST_CODE_CAMERA) {
-            if (MXPermissionBiz.hasPermission(this, permissions)) {
+        if (requestCode == MXUtils.REQUEST_CODE_CAMERA) {
+            if (MXUtils.hasPermission(this, permissions)) {
                 imgAdapt.onTakePictureClick?.invoke()
             }
         }
@@ -150,15 +149,15 @@ class MXImgPickerActivity : AppCompatActivity() {
         }
         imgAdapt.onTakePictureClick = {
             val permissions = arrayOf(Manifest.permission.CAMERA)
-            if (!MXPermissionBiz.hasPermission(this, permissions)) {
+            if (!MXUtils.hasPermission(this, permissions)) {
                 Toast.makeText(
                     this,
                     getString(R.string.mx_picker_string_need_permission_storage_camera),
                     Toast.LENGTH_SHORT
                 ).show()
-                MXPermissionBiz.requestPermission(
+                MXUtils.requestPermission(
                     this, permissions,
-                    MXPermissionBiz.REQUEST_CODE_CAMERA
+                    MXUtils.REQUEST_CODE_CAMERA
                 )
             } else {
                 val takeCall = { type: MXPickerType ->
@@ -170,7 +169,7 @@ class MXImgPickerActivity : AppCompatActivity() {
                     mxItemSource.addPrivateSource(file, type)
 
                     startActivityForResult(intent, 0x12)
-                    MXLog.log("PATH = ${file.absolutePath}")
+                    MXUtils.log("PATH = ${file.absolutePath}")
                 }
 
                 if (builder.getPickerType() == MXPickerType.ImageAndVideo) {
@@ -277,7 +276,7 @@ class MXImgPickerActivity : AppCompatActivity() {
             imgAdapt.notifyDataSetChanged()
             imgLargeAdapt.notifyDataSetChanged()
             folderAdapt.notifyDataSetChanged()
-            MXLog.log("数据刷新：${sourceGroup.getItemSize()}")
+            MXUtils.log("数据刷新：${sourceGroup.getItemSize()}")
         }
         folderAdapt.onItemClick = { folder ->
             folderNameTxv?.text = folder.name

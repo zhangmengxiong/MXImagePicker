@@ -15,7 +15,7 @@ import com.mx.imgpicker.models.ItemSelectCall
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.models.SourceGroup
 import com.mx.imgpicker.utils.MXFileBiz
-import com.mx.imgpicker.utils.MXPickerFormatBiz
+import com.mx.imgpicker.utils.MXUtils
 import com.mx.imgpicker.views.MXPickerTextView
 
 internal class ImgLargeAdapt(
@@ -79,7 +79,7 @@ internal class ImgLargeAdapt(
             val index = sourceGroup.selectList.indexOf(item)
             holder.indexTxv.isChecked = isSelect
             holder.videoLengthTxv.text =
-                if (item.duration > 0) MXPickerFormatBiz.timeToString(item.duration) else ""
+                if (item.duration > 0) MXUtils.timeToString(item.duration) else ""
 
             holder.indexLay.setOnClickListener {
                 onSelectChange?.select(item)

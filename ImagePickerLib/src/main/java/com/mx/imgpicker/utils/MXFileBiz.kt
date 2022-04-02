@@ -16,8 +16,8 @@ import java.util.concurrent.atomic.AtomicLong
 
 
 internal object MXFileBiz {
-    const val PREFIX_IMAGE = "MX_IMG"
-    const val PREFIX_VIDEO = "MX_VIDEO"
+    private const val PREFIX_IMAGE = "MX_IMG"
+    private const val PREFIX_VIDEO = "MX_VIDEO"
     private val fileIndex = AtomicLong(1000)
 
     /**
