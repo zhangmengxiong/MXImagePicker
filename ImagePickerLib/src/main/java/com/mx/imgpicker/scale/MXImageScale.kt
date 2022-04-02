@@ -1,68 +1,41 @@
-package com.mx.imgpicker.utils
+package com.mx.imgpicker.scale
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import com.mx.imgpicker.utils.MXFileBiz
+import com.mx.imgpicker.utils.MXLog
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import kotlin.math.ceil
 
-object MXImageScale {
+class MXImageScale internal constructor(val build: MXScaleBuild) {
+    companion object {
+        fun from(context: Context): MXScaleBuild {
+            return MXScaleBuild(context)
+        }
+    }
 
-    /**
-     * 对文件大小压缩
-     * @param target 源文件
-     * @param focusAlpha 是否保留透明通道
-     * @param ignoreBy 压缩阈值，低于这个值直接返回源文件
-     */
-    @Throws(IOException::class)
-    fun scaleFileSize(
-        context: Context,
-        target: File,
-        focusAlpha: Boolean = false,
-        ignoreBy: Int = 400,
-        targetDir: File? = null
-    ): File {
+    fun compress(target: File): File {
         // 阈值判断
-        if (target.length() <= ignoreBy * 1024) return target
-
+        if (target.length() <= build.ignoreSize * 1024) return target
         val (width, height) = readImageSize(target)
-
-        val options = BitmapFactory.Options()
-        options.inSampleSize = computeSampleSize(width, height)
-
-        val tagBitmap = BitmapFactory.decodeStream(
-            target.inputStream(),
-            null, options
-        )
+        val tagBitmap = decodeBitmapFromFile(target, width, height)
         if (tagBitmap == null) {
             MXLog.log("缩放图片失败，返回原文件:${target.absolutePath}")
             return target
         }
-        val stream = ByteArrayOutputStream()
 
-//        if (Checker.SINGLE.isJPG(srcImg.open())) {
-//            tagBitmap = rotatingImage(tagBitmap, Checker.SINGLE.getOrientation(srcImg.open()))
-//        }
-        val format = if (focusAlpha) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG
-        val extension = if (focusAlpha) "png" else "jpeg"
-        tagBitmap.compress(format, 60, stream)
-        tagBitmap.recycle()
-        val cacheImg = MXFileBiz.createCacheImageFile(context, targetDir, extension)
-        val fos = FileOutputStream(cacheImg)
-        fos.write(stream.toByteArray())
-        fos.flush()
-        fos.close()
-        stream.close()
-
+        val cacheImg = saveToCacheFile(tagBitmap)
         val (new_width, new_height) = readImageSize(target)
         MXLog.log("缩放图片：($width,$height,${target.length() / 1024}Kb) -> ($new_width,$new_height,${cacheImg.length() / 1024}Kb)")
-
         return cacheImg
     }
 
+    /**
+     * 读取文件大小
+     */
     private fun readImageSize(file: File): Pair<Int, Int> {
         val options = BitmapFactory.Options()
         options.inJustDecodeBounds = true
@@ -72,6 +45,38 @@ object MXImageScale {
         return Pair(options.outWidth, options.outHeight)
     }
 
+    /**
+     * 文件->Bitmap，这里要设置采样率防止OOM
+     */
+    private fun decodeBitmapFromFile(target: File, width: Int, height: Int): Bitmap? {
+        val options = BitmapFactory.Options()
+        options.inSampleSize = computeSampleSize(width, height)
+
+        return BitmapFactory.decodeStream(target.inputStream(), null, options)
+    }
+
+    private fun saveToCacheFile(bitmap: Bitmap): File {
+        val stream = ByteArrayOutputStream()
+        val format = if (build.compressFormat == Bitmap.CompressFormat.PNG) {
+            Bitmap.CompressFormat.PNG
+        } else Bitmap.CompressFormat.JPEG
+        val extension = if (format == Bitmap.CompressFormat.PNG) "png" else "jpeg"
+        bitmap.compress(format, 60, stream)
+        bitmap.recycle()
+        val cacheImg = MXFileBiz.createCacheImageFile(build.context, build.cacheDir, extension)
+        val fos = FileOutputStream(cacheImg)
+        fos.write(stream.toByteArray())
+        fos.flush()
+        fos.close()
+        stream.close()
+        return cacheImg
+    }
+
+    /**
+     * 获取图片读取采样率
+     * 采样率影响生成bitmap的文件大小
+     * 生成大小等于源文件大小的 1/(sampleSize * sampleSize)
+     */
     private fun computeSampleSize(width: Int, height: Int): Int {
         val srcWidth = if (width % 2 == 1) width + 1 else width
         val srcHeight = if (height % 2 == 1) height + 1 else height
