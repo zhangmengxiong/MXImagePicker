@@ -36,11 +36,11 @@ class MXScaleBuild(val context: Context) {
         return this
     }
 
-    fun get(file: File): File {
+    fun compress(file: File): File {
         return MXImageScale(this).compress(file)
     }
 
-    fun get(path: String): File {
+    fun compress(path: String): File {
         return MXImageScale(this).compress(File(path))
     }
 }

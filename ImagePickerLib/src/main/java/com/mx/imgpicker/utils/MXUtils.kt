@@ -7,11 +7,15 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.mx.imgpicker.BuildConfig
 
 internal object MXUtils {
+    private var isDebug = false
+    fun setDebug(debug: Boolean) {
+        isDebug = debug
+    }
+
     fun log(any: Any) {
-        if (BuildConfig.DEBUG) {
+        if (isDebug) {
             Log.v(MXUtils::class.java.simpleName, any.toString())
         }
     }

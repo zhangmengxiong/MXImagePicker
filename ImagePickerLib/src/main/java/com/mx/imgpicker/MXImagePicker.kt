@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mx.imgpicker.app.MXImgPickerActivity
 import com.mx.imgpicker.app.MXImgShowActivity
 import com.mx.imgpicker.models.MXItem
+import com.mx.imgpicker.utils.MXUtils
 import java.util.concurrent.atomic.AtomicBoolean
 
 object MXImagePicker {
@@ -34,6 +35,10 @@ object MXImagePicker {
     }
 
     internal fun getImageLoader() = _imageLoader
+
+    fun setDebug(debug: Boolean) {
+        MXUtils.setDebug(debug)
+    }
 
     /**
      * 注册全局页面启动回调

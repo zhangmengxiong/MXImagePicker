@@ -22,7 +22,7 @@ class MXImageScale internal constructor(val build: MXScaleBuild) {
             MXUtils.log("缩放图片失败，返回原文件:${source.absolutePath}")
             return source
         }
-        if (source.length() <= build.ignoreSize * 1024) {
+        if (build.ignoreSize > 0 && source.length() <= build.ignoreSize * 1024) {
             MXUtils.log("缩放图片触发阈值限制: ${build.ignoreSize}Kb , 源文件大小：${source.length()}")
             return source
         }
