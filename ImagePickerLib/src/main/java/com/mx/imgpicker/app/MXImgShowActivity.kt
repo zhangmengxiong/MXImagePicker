@@ -28,10 +28,18 @@ class MXImgShowActivity : AppCompatActivity() {
                     .putExtra(EXTRAS_TITLE, title)
             )
         }
+
+        fun open(context: Context, list: List<MXItem>) {
+            if (list.isEmpty()) return
+            context.startActivity(
+                Intent(context, MXImgShowActivity::class.java)
+                    .putExtra(EXTRAS_LIST, ArrayList(list))
+            )
+        }
     }
 
     private val imgList = ArrayList<MXItem>()
-    private val adapt by lazy { ImgShowAdapt(this, imgList) }
+    private val adapt by lazy { ImgShowAdapt(imgList) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.mx_picker_activity_img_show)

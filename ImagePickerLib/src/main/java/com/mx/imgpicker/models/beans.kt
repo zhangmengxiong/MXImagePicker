@@ -1,5 +1,6 @@
 package com.mx.imgpicker.models
 
+import com.mx.imgpicker.observer.MXBaseObservable
 import java.io.File
 import java.io.Serializable
 
@@ -63,16 +64,22 @@ data class MXItem(val path: String, val time: Long, val type: MXPickerType, val 
  */
 internal data class MXFolderItem(val name: String, val items: List<MXItem> = ArrayList())
 
-internal class SourceGroup {
-    var folderList: ArrayList<MXFolderItem>? = null
-    var selectFolder: MXFolderItem? = null
-    val selectList = ArrayList<MXItem>()
+internal class MXDataSet {
+    val folderList = MXBaseObservable<List<MXFolderItem>>(ArrayList())
+    val selectFolder = MXBaseObservable<MXFolderItem?>(null)
+    val selectList = MXBaseObservable<List<MXItem>>(ArrayList())
 
-    fun getItemSize() = selectFolder?.items?.size ?: 0
-    fun getItem(index: Int) = selectFolder?.items?.getOrNull(index)
+    fun getItemSize() = selectFolder.getValue()?.items?.size ?: 0
+    fun getItem(index: Int) = selectFolder.getValue()?.items?.getOrNull(index)
     fun itemIndexOf(item: MXItem?): Int {
         if (item == null) return -1
-        return selectFolder?.items?.indexOf(item) ?: -1
+        return selectFolder.getValue()?.items?.indexOf(item) ?: -1
+    }
+
+    fun release() {
+        folderList.deleteObservers()
+        selectFolder.deleteObservers()
+        selectList.deleteObservers()
     }
 }
 

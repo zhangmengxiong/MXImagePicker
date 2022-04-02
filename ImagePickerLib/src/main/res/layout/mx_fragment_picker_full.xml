@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/mx_picker_color_background"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/mx_picker_bar_height">
+
+        <ImageView
+            android:id="@+id/returnBtn"
+            android:layout_width="@dimen/mx_picker_bar_height"
+            android:layout_height="@dimen/mx_picker_bar_height"
+            android:padding="12dp"
+            android:src="@drawable/mx_icon_picker_return"
+            android:tint="@color/mx_picker_color_important" />
+
+        <TextView
+            android:id="@+id/titleTxv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:ellipsize="end"
+            android:maxEms="8"
+            android:singleLine="true"
+            android:text="1 / 1"
+            android:textColor="@color/mx_picker_color_important"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/selectBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="14dp"
+            android:background="@drawable/mx_bg_picker_check_button"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:text="选择"
+            android:textColor="@color/mx_picker_color_select"
+            android:textSize="14sp"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:alpha="0.1"
+        android:background="@color/mx_picker_color_important" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycleView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="1dp" />
+    </FrameLayout>
+</LinearLayout>

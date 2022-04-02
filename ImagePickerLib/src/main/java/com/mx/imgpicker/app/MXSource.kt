@@ -4,17 +4,20 @@ import android.content.Context
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
 import com.mx.imgpicker.db.MXDBSource
+import com.mx.imgpicker.models.MXDataSet
 import com.mx.imgpicker.models.MXFolderItem
 import com.mx.imgpicker.models.MXPickerType
-import com.mx.imgpicker.observer.MXBaseObservable
 import com.mx.imgpicker.utils.MXUtils
 import com.mx.imgpicker.utils.source_loader.MXImageSource
 import com.mx.imgpicker.utils.source_loader.MXVideoSource
 import java.io.File
 import kotlin.concurrent.thread
 
-internal class MXSource(val context: Context, val type: MXPickerType) :
-    MXBaseObservable<ArrayList<MXFolderItem>>() {
+internal class MXSource(
+    private val context: Context,
+    private val data: MXDataSet,
+    private val type: MXPickerType
+) {
     companion object {
         private const val PAGE_START = 0
         private const val PAGE_SIZE = 30
@@ -25,7 +28,7 @@ internal class MXSource(val context: Context, val type: MXPickerType) :
     fun startScan() {
         val context = MXImagePicker.getContext()
         thread {
-            notifyChanged(getFolderGroup())
+            data.folderList.notifyChanged(getFolderGroup())
             when (type) {
                 MXPickerType.Video -> {
                     startScanVideo(context)
@@ -36,7 +39,7 @@ internal class MXSource(val context: Context, val type: MXPickerType) :
                     startScanVideo(context)
                 }
             }
-            notifyChanged(getFolderGroup())
+            data.folderList.notifyChanged(getFolderGroup())
         }
     }
 
@@ -51,7 +54,7 @@ internal class MXSource(val context: Context, val type: MXPickerType) :
             if (list.isEmpty()) break
             sourceDB.addSysSource(list)
             if (page == PAGE_START || page % 4 == 0) {
-                notifyChanged(getFolderGroup())
+                data.folderList.notifyChanged(getFolderGroup())
             }
             MXUtils.log("扫描完第${page}页 --> ${list.size}")
             page++
@@ -69,7 +72,7 @@ internal class MXSource(val context: Context, val type: MXPickerType) :
             if (list.isEmpty()) break
             sourceDB.addSysSource(list)
             if (page == PAGE_START || page % 3 == 0) {
-                notifyChanged(getFolderGroup())
+                data.folderList.notifyChanged(getFolderGroup())
             }
             MXUtils.log("扫描完第${page}页 --> ${list.size}")
             page++
@@ -92,6 +95,5 @@ internal class MXSource(val context: Context, val type: MXPickerType) :
 
     fun release() {
         isRelease = true
-        deleteObservers()
     }
 }

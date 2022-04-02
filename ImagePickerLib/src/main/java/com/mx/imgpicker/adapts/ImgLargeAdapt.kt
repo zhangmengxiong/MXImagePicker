@@ -6,23 +6,20 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.github.chrisbanes.photoview.PhotoView
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
-import com.mx.imgpicker.models.ItemSelectCall
+import com.mx.imgpicker.models.MXDataSet
+import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
-import com.mx.imgpicker.models.SourceGroup
 import com.mx.imgpicker.utils.MXFileBiz
 import com.mx.imgpicker.utils.MXUtils
 import com.mx.imgpicker.views.MXPickerTextView
 
-internal class ImgLargeAdapt(
-    private val activity: AppCompatActivity,
-    private val sourceGroup: SourceGroup
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var onSelectChange: ItemSelectCall? = null
+internal class ImgLargeAdapt(private val MXDataSet: MXDataSet) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    var onSelectClick: ((item: MXItem, isSelect: Boolean) -> Unit)? = null
 
     class ImgScanVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val photoView: PhotoView = itemView.findViewById(R.id.photoView)
@@ -56,16 +53,16 @@ internal class ImgLargeAdapt(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = sourceGroup.getItem(position) ?: return
+        val item = MXDataSet.getItem(position) ?: return
         if (holder is ImgScanVH) {
             holder.photoView.setImageResource(R.drawable.mx_icon_picker_image_place_holder)
-            MXImagePicker.getImageLoader()?.invoke(activity, item, holder.photoView)
-            val isSelect = sourceGroup.selectList.contains(item)
-            val index = sourceGroup.selectList.indexOf(item)
+            MXImagePicker.getImageLoader()?.invoke(item, holder.photoView)
+            val isSelect = MXDataSet.selectList.getValue().contains(item)
+            val index = MXDataSet.selectList.getValue().indexOf(item)
             holder.indexTxv.isChecked = isSelect
 
             holder.indexLay.setOnClickListener {
-                onSelectChange?.select(item)
+                onSelectClick?.invoke(item, isSelect)
             }
             if (isSelect) {
                 holder.indexTxv.text = (index + 1).toString()
@@ -74,15 +71,15 @@ internal class ImgLargeAdapt(
             }
         } else if (holder is ImgScanVideoVH) {
             holder.img.setImageResource(R.drawable.mx_icon_picker_image_place_holder)
-            MXImagePicker.getImageLoader()?.invoke(activity, item, holder.img)
-            val isSelect = sourceGroup.selectList.contains(item)
-            val index = sourceGroup.selectList.indexOf(item)
+            MXImagePicker.getImageLoader()?.invoke(item, holder.img)
+            val isSelect = MXDataSet.selectList.getValue().contains(item)
+            val index = MXDataSet.selectList.getValue().indexOf(item)
             holder.indexTxv.isChecked = isSelect
             holder.videoLengthTxv.text =
                 if (item.duration > 0) MXUtils.timeToString(item.duration) else ""
 
             holder.indexLay.setOnClickListener {
-                onSelectChange?.select(item)
+                onSelectClick?.invoke(item, isSelect)
             }
             holder.playBtn.setOnClickListener {
                 MXFileBiz.openItem(it.context, item)
@@ -96,11 +93,11 @@ internal class ImgLargeAdapt(
     }
 
     override fun getItemCount(): Int {
-        return sourceGroup.getItemSize()
+        return MXDataSet.getItemSize()
     }
 
     override fun getItemViewType(position: Int): Int {
-        val item = sourceGroup.getItem(position)
+        val item = MXDataSet.getItem(position)
         return if (item?.type == MXPickerType.Video) 0 else 1
     }
 }

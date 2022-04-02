@@ -22,15 +22,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         MXImagePicker.setDebug(true)
-        MXImagePicker.registerImageLoader { activity, item, imageView ->
+        MXImagePicker.registerImageLoader { item, imageView ->
             if (File(item.path).exists()) {
-                Glide.with(activity).load(File(item.path))
+                Glide.with(imageView).load(File(item.path))
                     .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
             } else if (item.path.startsWith("http")) {
-                Glide.with(activity).load(item.path)
+                Glide.with(imageView).load(item.path)
                     .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
             } else {
-                Glide.with(activity).load(Uri.parse(item.path))
+                Glide.with(imageView).load(Uri.parse(item.path))
                     .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
             }
         }
@@ -68,7 +68,8 @@ class MainActivity : AppCompatActivity() {
                 MXPickerBuilder().setMaxSize(1).setCameraEnable(true).createIntent(this)
             ) { resultCode, data ->
                 val path = MXPickerBuilder.getPickerResult(data).firstOrNull() ?: return@start
-                val scaleImg = MXImageScale.from(this).setIgnoreFileSize(50).compress(path).absolutePath
+                val scaleImg =
+                    MXImageScale.from(this).setIgnoreFileSize(50).compress(path).absolutePath
                 MXImgShowActivity.open(this, listOf(path, scaleImg))
             }
         }

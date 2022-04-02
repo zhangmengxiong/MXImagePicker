@@ -23,14 +23,14 @@ object MXImagePicker {
 
     internal fun getContext() = application!!
 
-    private var _imageLoader: ((activity: AppCompatActivity, item: MXItem, imageView: ImageView) -> Unit)? =
+    private var _imageLoader: ((item: MXItem, imageView: ImageView) -> Unit)? =
         null // 图片加载器
     private var _activityCall: ((AppCompatActivity) -> Unit)? = null // Activity在创建时会回调这个，可以设置样式等
 
     /**
      * 注册图片显示加载器，默认使用Glide
      */
-    fun registerImageLoader(iImageLoader: ((activity: AppCompatActivity, item: MXItem, imageView: ImageView) -> Unit)) {
+    fun registerImageLoader(iImageLoader: ((item: MXItem, imageView: ImageView) -> Unit)) {
         this._imageLoader = iImageLoader
     }
 
