@@ -68,9 +68,17 @@ internal class MXFullScreenFragment(
         willResizeLay?.setOnClickListener {
             data.willNotResize.notifyChanged(!data.willNotResize.getValue())
         }
-        if (builder.getPickerType() == MXPickerType.Video) {
+
+        if (builder.needCompressImage() == null) {
+            if (builder.getPickerType() == MXPickerType.Video) {
+                willResizeLay?.visibility = View.GONE
+            } else {
+                willResizeLay?.visibility = View.VISIBLE
+            }
+        } else {
             willResizeLay?.visibility = View.GONE
         }
+
         data.willNotResize.addObserver { resize ->
             if (resize) {
                 willResizeImg?.setImageResource(R.drawable.mx_picker_radio_select)
@@ -111,7 +119,7 @@ internal class MXFullScreenFragment(
         }
         currentIndex.addObserver { index ->
             titleTxv?.text = "${index + 1} / ${imgList.size}"
-            val item = imgList.getOrNull(index)
+            val item = imgList.getOrNull(index) ?: return@addObserver
             val isSelect = data.selectList.getValue().contains(item)
             if (isSelect) {
                 selectImg?.setImageResource(R.drawable.mx_picker_radio_select)

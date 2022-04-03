@@ -158,7 +158,13 @@ internal class MXPickerFragment(
         willResizeLay?.setOnClickListener {
             data.willNotResize.notifyChanged(!data.willNotResize.getValue())
         }
-        if (builder.getPickerType() == MXPickerType.Video) {
+        if (builder.needCompressImage() == null) {
+            if (builder.getPickerType() == MXPickerType.Video) {
+                willResizeLay?.visibility = View.GONE
+            } else {
+                willResizeLay?.visibility = View.VISIBLE
+            }
+        } else {
             willResizeLay?.visibility = View.GONE
         }
 

@@ -10,12 +10,14 @@ class MXPickerBuilder : Serializable {
     private var _pickerType: MXPickerType = MXPickerType.Image
     private var _maxSize: Int = 1 //选择最大数量
     private var _enableCamera: Boolean = true // 是否可以拍摄
+    private var _needCompressImage: Boolean? = null // 选中图片是否需要压缩至合适大小后返回
     private var _videoMaxLength: Int = -1 // 视频最大长度，单位：秒
 
     fun getPickerType() = _pickerType
     fun getMaxSize() = _maxSize
     fun isEnableCamera() = _enableCamera
     fun getVideoMaxLength() = _videoMaxLength
+    fun needCompressImage() = _needCompressImage
 
     /**
      * 设置最大选择数量
@@ -28,6 +30,17 @@ class MXPickerBuilder : Serializable {
         return this
     }
 
+    /**
+     * 图片是否需要压缩至合适大小后返回
+     * @param need
+     *      true = 需要压缩，页面不显示“原图”按钮
+     *      false = 不需要压缩，页面不显示“原图”按钮
+     *      null = 页面显示“原图”按钮，由用户控制是否压缩
+     */
+    fun setCompressImage(need: Boolean?): MXPickerBuilder {
+        _needCompressImage = need
+        return this
+    }
 
     /**
      * 选择类型，默认=Image

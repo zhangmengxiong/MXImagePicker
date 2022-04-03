@@ -12,7 +12,7 @@ import com.mx.imgpicker.app.MXImgShowActivity
 import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.builder.MXPickerBuilder
 import com.mx.imgpicker.models.MXPickerType
-import com.mx.imgpicker.scale.MXImageScale
+import com.mx.imgpicker.compress.MXImageCompress
 import com.mx.starter.MXStarter
 import java.io.File
 
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             ) { resultCode, data ->
                 val path = MXPickerBuilder.getPickerResult(data).firstOrNull() ?: return@start
                 val scaleImg =
-                    MXImageScale.from(this).setIgnoreFileSize(50).compress(path).absolutePath
+                    MXImageCompress.from(this).setIgnoreFileSize(50).compress(path).absolutePath
                 MXImgShowActivity.open(this, listOf(path, scaleImg))
             }
         }

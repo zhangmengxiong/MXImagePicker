@@ -1,4 +1,4 @@
-package com.mx.imgpicker.scale
+package com.mx.imgpicker.compress
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -10,10 +10,10 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.ceil
 
-class MXImageScale internal constructor(val build: MXScaleBuild) {
+class MXImageCompress internal constructor(val build: MXCompressBuild) {
     companion object {
-        fun from(context: Context): MXScaleBuild {
-            return MXScaleBuild(context)
+        fun from(context: Context): MXCompressBuild {
+            return MXCompressBuild(context)
         }
     }
 

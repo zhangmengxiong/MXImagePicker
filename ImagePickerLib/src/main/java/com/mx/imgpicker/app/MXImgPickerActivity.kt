@@ -17,7 +17,7 @@ import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.observer.MXSysImageObserver
 import com.mx.imgpicker.observer.MXSysVideoObserver
-import com.mx.imgpicker.scale.MXImageScale
+import com.mx.imgpicker.compress.MXImageCompress
 import com.mx.imgpicker.utils.MXUtils
 import kotlin.concurrent.thread
 
@@ -219,7 +219,7 @@ class MXImgPickerActivity : AppCompatActivity() {
         if (data.willNotResize.getValue()) {
             setResult.invoke(paths.map { it.path })
         } else {
-            val scale = MXImageScale.from(this)
+            val scale = MXImageCompress.from(this)
             thread {
                 val compressPath = paths.map { item ->
                     if (item.type == MXPickerType.Image) {
