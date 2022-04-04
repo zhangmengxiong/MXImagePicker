@@ -154,3 +154,14 @@ MXImgShowActivity.open(
     ), "图片详情"
 )
 ```
+
+### 单张图片压缩
+```
+val file = File(".../xx.png")
+val scaleImg = MXImageCompress.from(context)
+    .setCacheDir(applicationContext.cacheDir) // 缓存目录
+    .setSupportAlpha(true) // 支持透明通道(’.png‘格式) 默认=’.jpg‘格式
+    .setIgnoreFileSize(50) // 设置文件低于这个大小时，不进行压缩
+    .compress(file)
+
+```

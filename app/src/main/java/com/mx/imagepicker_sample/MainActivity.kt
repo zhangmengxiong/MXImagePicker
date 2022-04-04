@@ -68,8 +68,11 @@ class MainActivity : AppCompatActivity() {
                 MXPickerBuilder().setMaxSize(1).setCameraEnable(true).createIntent(this)
             ) { resultCode, data ->
                 val path = MXPickerBuilder.getPickerResult(data).firstOrNull() ?: return@start
-                val scaleImg =
-                    MXImageCompress.from(this).setIgnoreFileSize(50).compress(path).absolutePath
+                val scaleImg = MXImageCompress.from(this)
+                    .setCacheDir(applicationContext.cacheDir) // 缓存目录
+                    .setSupportAlpha(true) // 支持透明通道(’.png‘格式) 默认=’.jpg‘格式
+                    .setIgnoreFileSize(50) // 设置文件低于这个大小时，不进行压缩
+                    .compress(path).absolutePath
                 MXImgShowActivity.open(this, listOf(path, scaleImg))
             }
         }
