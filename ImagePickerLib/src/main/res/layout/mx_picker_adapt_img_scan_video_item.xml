@@ -20,14 +20,20 @@
             android:id="@+id/playBtn"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@drawable/mx_icon_picker_play"
-            android:tint="@android:color/white" />
+            android:padding="10dp"
+            android:src="@drawable/mx_icon_picker_play" />
 
         <TextView
             android:id="@+id/videoLengthTxv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:paddingHorizontal="10dp"
+            android:shadowColor="@android:color/black"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="7"
+            android:text="00:00"
             android:textColor="@android:color/white"
             android:textSize="@dimen/mx_img_picker_text_size_small" />
     </LinearLayout>

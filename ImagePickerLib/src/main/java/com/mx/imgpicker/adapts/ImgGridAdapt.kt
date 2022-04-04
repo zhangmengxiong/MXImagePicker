@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
@@ -12,6 +13,7 @@ import com.mx.imgpicker.models.MXConfig
 import com.mx.imgpicker.models.MXDataSet
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.utils.MXUtils
 import com.mx.imgpicker.views.MXPickerTextView
 
 internal class ImgGridAdapt(
@@ -25,7 +27,8 @@ internal class ImgGridAdapt(
     class ImgVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val img: ImageView = itemView.findViewById(R.id.img)
         val selectBG: ImageView = itemView.findViewById(R.id.selectBG)
-        val videoTag: ImageView = itemView.findViewById(R.id.videoTag)
+        val videoTag: View = itemView.findViewById(R.id.videoTag)
+        val videoLengthTxv: TextView = itemView.findViewById(R.id.videoLengthTxv)
         val indexTxv: MXPickerTextView = itemView.findViewById(R.id.indexTxv)
         val indexLay: RelativeLayout = itemView.findViewById(R.id.indexLay)
     }
@@ -48,7 +51,7 @@ internal class ImgGridAdapt(
         } else if (holder is ImgVH) {
             holder.indexTxv.visibility = View.VISIBLE
             holder.selectBG.visibility = View.VISIBLE
-            val position = if (config.enableCamera) position - 1 else position
+            val position = if (config.enableCamera) (position - 1) else position
             val item = data.getItem(position) ?: return
             holder.img.setImageResource(R.drawable.mx_icon_picker_image_place_holder)
             MXImagePicker.getImageLoader()?.invoke(item, holder.img)
@@ -58,6 +61,7 @@ internal class ImgGridAdapt(
 
             if (item.type == MXPickerType.Video) {
                 holder.videoTag.visibility = View.VISIBLE
+                holder.videoLengthTxv.text = MXUtils.timeToString(item.duration)
             } else {
                 holder.videoTag.visibility = View.GONE
             }

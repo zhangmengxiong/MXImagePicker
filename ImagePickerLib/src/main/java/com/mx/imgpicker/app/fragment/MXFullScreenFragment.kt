@@ -166,7 +166,7 @@ internal class MXFullScreenFragment(
 
     private fun refreshViews() {
         if (recycleView == null) return
-        val item = firstShowItem
+        val item = firstShowItem ?: return
         val index = imgList.indexOf(item)
         if (index < 0) {
             recycleView?.scrollToPosition(0)
@@ -175,6 +175,7 @@ internal class MXFullScreenFragment(
             recycleView?.scrollToPosition(index)
             currentIndex.notifyChanged(index)
         }
+        firstShowItem = null
     }
 
     override fun onDestroyView() {
