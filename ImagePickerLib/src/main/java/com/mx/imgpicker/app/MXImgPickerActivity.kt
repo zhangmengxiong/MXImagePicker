@@ -12,28 +12,27 @@ import com.mx.imgpicker.R
 import com.mx.imgpicker.app.fragment.MXFullScreenFragment
 import com.mx.imgpicker.app.fragment.MXPickerFragment
 import com.mx.imgpicker.builder.MXPickerBuilder
-import com.mx.imgpicker.models.MXDataSet
-import com.mx.imgpicker.models.MXItem
-import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.compress.MXImageCompress
+import com.mx.imgpicker.models.*
 import com.mx.imgpicker.observer.MXSysImageObserver
 import com.mx.imgpicker.observer.MXSysVideoObserver
-import com.mx.imgpicker.compress.MXImageCompress
 import com.mx.imgpicker.utils.MXUtils
 import kotlin.concurrent.thread
 
 
 class MXImgPickerActivity : AppCompatActivity() {
-    private val builder by lazy {
-        (intent.getSerializableExtra(MXPickerBuilder.KEY_INTENT_BUILDER) as MXPickerBuilder?)
-            ?: MXPickerBuilder()
+    private val config by lazy {
+        (intent.getSerializableExtra(
+            MXPickerBuilder.KEY_INTENT_BUILDER
+        ) as? MXConfig) ?: MXConfig()
     }
 
     private val data = MXDataSet()
-    private val source by lazy { MXSource(this, data, builder.getPickerType()) }
+    private val source by lazy { MXSource(this, data, config.pickerType) }
 
     private var currentFragment: Fragment? = null
-    private val pickerFragment by lazy { MXPickerFragment(data, source, builder) }
-    private val pickerFullScreenFragment by lazy { MXFullScreenFragment(data, source, builder) }
+    private val pickerFragment by lazy { MXPickerFragment(data, source, config) }
+    private val pickerFullScreenFragment by lazy { MXFullScreenFragment(data, source, config) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,12 +116,12 @@ class MXImgPickerActivity : AppCompatActivity() {
     }
 
     private val imageChangeObserver = MXSysImageObserver {
-        if (builder.getPickerType() in arrayOf(MXPickerType.Image, MXPickerType.ImageAndVideo)) {
+        if (config.pickerType in arrayOf(MXPickerType.Image, MXPickerType.ImageAndVideo)) {
             source.startScan()
         }
     }
     private val videoChangeObserver = MXSysVideoObserver {
-        if (builder.getPickerType() in arrayOf(MXPickerType.Video, MXPickerType.ImageAndVideo)) {
+        if (config.pickerType in arrayOf(MXPickerType.Video, MXPickerType.ImageAndVideo)) {
             source.startScan()
         }
     }
@@ -172,11 +171,11 @@ class MXImgPickerActivity : AppCompatActivity() {
     }
 
     fun onSelectChange(item: MXItem) {
-        if (builder.getPickerType() == MXPickerType.Video && builder.getVideoMaxLength() > 0 && item.duration > builder.getVideoMaxLength()) {
+        if (config.pickerType == MXPickerType.Video && config.videoMaxLength > 0 && item.duration > config.videoMaxLength) {
             val format = getString(R.string.mx_picker_string_video_limit_length_tip)
             Toast.makeText(
                 this@MXImgPickerActivity,
-                String.format(format, builder.getVideoMaxLength()),
+                String.format(format, config.videoMaxLength),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -186,15 +185,15 @@ class MXImgPickerActivity : AppCompatActivity() {
         if (isSelect) {
             list.remove(item)
         } else {
-            if (data.selectList.getValue().size >= builder.getMaxSize()) {
-                val format = if (builder.getPickerType() == MXPickerType.Video) {
+            if (data.selectList.getValue().size >= config.maxSize) {
+                val format = if (config.pickerType == MXPickerType.Video) {
                     getString(R.string.mx_picker_string_video_limit_tip)
                 } else {
                     getString(R.string.mx_picker_string_image_limit_tip)
                 }
                 Toast.makeText(
                     this@MXImgPickerActivity,
-                    String.format(format, builder.getMaxSize()),
+                    String.format(format, config.maxSize),
                     Toast.LENGTH_SHORT
                 ).show()
                 return
@@ -214,12 +213,17 @@ class MXImgPickerActivity : AppCompatActivity() {
             )
             finish()
         }
+        val needCompress = when (config.compressType) {
+            MXCompressType.ON -> true
+            MXCompressType.SELECT_BY_USER -> data.needCompress.getValue()
+            else -> false
+        }
 
         val paths = data.selectList.getValue()
-        if (data.willNotResize.getValue()) {
+        if (!needCompress) {
             setResult.invoke(paths.map { it.path })
         } else {
-            val scale = MXImageCompress.from(this)
+            val scale = MXImageCompress.from(this).setIgnoreFileSize(config.compressIgnoreSizeKb)
             thread {
                 val compressPath = paths.map { item ->
                     if (item.type == MXPickerType.Image) {

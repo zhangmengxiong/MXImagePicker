@@ -22,6 +22,27 @@ enum class MXPickerType(val value: String) : Serializable {
 }
 
 /**
+ * 压缩类型枚举
+ */
+enum class MXCompressType : Serializable {
+    ON, // 强制关闭
+    OFF, // 强制开启
+    SELECT_BY_USER // 由用户选择
+}
+
+/**
+ * 配置对象
+ */
+internal data class MXConfig(
+    val pickerType: MXPickerType = MXPickerType.Image, // 类型
+    val maxSize: Int = 1, // 选取最大数量
+    val enableCamera: Boolean = true, // 是否可拍摄
+    val compressType: MXCompressType = MXCompressType.SELECT_BY_USER, // 压缩类型
+    val compressIgnoreSizeKb: Int = 200, // 图片压缩源文件阈值
+    val videoMaxLength: Int = -1 // 视频最长时长
+) : Serializable
+
+/**
  * 类型对象
  * @property path 绝对路径
  * @property time 创建时间
@@ -68,7 +89,7 @@ internal class MXDataSet {
     val folderList = MXValueObservable<List<MXFolderItem>>(ArrayList()) // 文件夹列表
     val selectFolder = MXValueObservable<MXFolderItem?>(null) // 当前选择文件夹
     val selectList = MXValueObservable<List<MXItem>>(ArrayList()) // 选中的文件列表
-    val willNotResize = MXValueObservable(false) // 是否选中原图
+    val needCompress = MXValueObservable(true) // 是否需要压缩
 
     fun getItemSize() = selectFolder.getValue()?.items?.size ?: 0
     fun getItem(index: Int) = selectFolder.getValue()?.items?.getOrNull(index)

@@ -3,21 +3,18 @@ package com.mx.imgpicker.builder
 import android.content.Context
 import android.content.Intent
 import com.mx.imgpicker.app.MXImgPickerActivity
+import com.mx.imgpicker.models.MXCompressType
+import com.mx.imgpicker.models.MXConfig
 import com.mx.imgpicker.models.MXPickerType
 import java.io.Serializable
 
 class MXPickerBuilder : Serializable {
-    private var _pickerType: MXPickerType = MXPickerType.Image
-    private var _maxSize: Int = 1 //选择最大数量
-    private var _enableCamera: Boolean = true // 是否可以拍摄
-    private var _needCompressImage: Boolean? = null // 选中图片是否需要压缩至合适大小后返回
-    private var _videoMaxLength: Int = -1 // 视频最大长度，单位：秒
-
-    fun getPickerType() = _pickerType
-    fun getMaxSize() = _maxSize
-    fun isEnableCamera() = _enableCamera
-    fun getVideoMaxLength() = _videoMaxLength
-    fun needCompressImage() = _needCompressImage
+    private var pickerType: MXPickerType = MXPickerType.Image
+    private var maxSize: Int = 1 //选择最大数量
+    private var enableCamera: Boolean = true // 是否可以拍摄
+    private var compressType: MXCompressType = MXCompressType.SELECT_BY_USER // 选中图片是否需要压缩至合适大小后返回
+    private var compressIgnoreSizeKb = 200 // 图片压缩阈值，低于这个大小的图片不会被压缩 单位：KB   默认200KB以下不被压缩
+    private var videoMaxLength: Int = -1 // 视频最大长度，单位：秒
 
     /**
      * 设置最大选择数量
@@ -26,19 +23,28 @@ class MXPickerBuilder : Serializable {
         if (size <= 0) {
             throw IllegalArgumentException("size must > 0")
         }
-        _maxSize = size
+        maxSize = size
         return this
     }
 
     /**
      * 图片是否需要压缩至合适大小后返回
-     * @param need
-     *      true = 需要压缩，页面不显示“原图”按钮
-     *      false = 不需要压缩，页面不显示“原图”按钮
-     *      null = 页面显示“原图”按钮，由用户控制是否压缩
+     * @param type
+     *      ON = 需要压缩，页面不显示“原图”按钮
+     *      OFF = 不需要压缩，页面不显示“原图”按钮
+     *      SELECT_BY_USER = 页面显示“原图”按钮，由用户控制是否压缩
      */
-    fun setCompressImage(need: Boolean?): MXPickerBuilder {
-        _needCompressImage = need
+    fun setCompressType(type: MXCompressType): MXPickerBuilder {
+        compressType = type
+        return this
+    }
+
+    /**
+     * 图片压缩阈值，低于这个大小的图片不会被压缩
+     * @param size 单位：Kb  默认 = 200KB
+     */
+    fun setCompressIgnoreSize(size: Int): MXPickerBuilder {
+        compressIgnoreSizeKb = size
         return this
     }
 
@@ -46,7 +52,7 @@ class MXPickerBuilder : Serializable {
      * 选择类型，默认=Image
      */
     fun setType(type: MXPickerType): MXPickerBuilder {
-        _pickerType = type
+        pickerType = type
         return this
     }
 
@@ -54,7 +60,7 @@ class MXPickerBuilder : Serializable {
      * 是否可以拍摄
      */
     fun setCameraEnable(enable: Boolean): MXPickerBuilder {
-        _enableCamera = enable
+        enableCamera = enable
         return this
     }
 
@@ -62,13 +68,26 @@ class MXPickerBuilder : Serializable {
      * 视频最长时长,单位：秒
      */
     fun setMaxVideoLength(length: Int): MXPickerBuilder {
-        _videoMaxLength = length
+        videoMaxLength = length
         return this
     }
 
     fun createIntent(context: Context): Intent {
+        val compressType = if (pickerType == MXPickerType.Video) {
+            MXCompressType.OFF
+        } else compressType
+
         val intent = Intent()
-        intent.putExtra(KEY_INTENT_BUILDER, this)
+        intent.putExtra(
+            KEY_INTENT_BUILDER,
+            MXConfig(
+                pickerType,
+                maxSize,
+                enableCamera,
+                compressType,
+                videoMaxLength
+            )
+        )
         intent.setClass(context, MXImgPickerActivity::class.java)
         return intent
     }

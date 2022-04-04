@@ -15,16 +15,16 @@ import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.ImgLargeAdapt
 import com.mx.imgpicker.app.MXImgPickerActivity
 import com.mx.imgpicker.app.MXSource
-import com.mx.imgpicker.builder.MXPickerBuilder
+import com.mx.imgpicker.models.MXCompressType
+import com.mx.imgpicker.models.MXConfig
 import com.mx.imgpicker.models.MXDataSet
 import com.mx.imgpicker.models.MXItem
-import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.observer.MXValueObservable
 
 internal class MXFullScreenFragment(
     private val data: MXDataSet,
     private val source: MXSource,
-    private val builder: MXPickerBuilder
+    private val config: MXConfig
 ) : Fragment() {
     private val imgList = ArrayList<MXItem>()
     private val imgLargeAdapt by lazy { ImgLargeAdapt(imgList, data) }
@@ -66,21 +66,17 @@ internal class MXFullScreenFragment(
             (requireActivity() as? MXImgPickerActivity)?.onSelectFinish()
         }
         willResizeLay?.setOnClickListener {
-            data.willNotResize.notifyChanged(!data.willNotResize.getValue())
+            data.needCompress.notifyChanged(!data.needCompress.getValue())
         }
 
-        if (builder.needCompressImage() == null) {
-            if (builder.getPickerType() == MXPickerType.Video) {
-                willResizeLay?.visibility = View.GONE
-            } else {
-                willResizeLay?.visibility = View.VISIBLE
-            }
+        if (config.compressType == MXCompressType.SELECT_BY_USER) {
+            willResizeLay?.visibility = View.VISIBLE
         } else {
             willResizeLay?.visibility = View.GONE
         }
 
-        data.willNotResize.addObserver { resize ->
-            if (resize) {
+        data.needCompress.addObserver { compress ->
+            if (!compress) {
                 willResizeImg?.setImageResource(R.drawable.mx_picker_radio_select)
                 willResizeImg?.setColorFilter(resources.getColor(R.color.mx_picker_color_select))
             } else {
@@ -137,7 +133,7 @@ internal class MXFullScreenFragment(
             } else {
                 selectBtn?.visibility = View.VISIBLE
                 selectBtn?.text =
-                    "${getString(R.string.mx_picker_string_select)}(${data.selectList.getValue().size}/${builder.getMaxSize()})"
+                    "${getString(R.string.mx_picker_string_select)}(${data.selectList.getValue().size}/${config.maxSize})"
             }
             currentIndex.notifyChanged(currentIndex.getValue())
         }

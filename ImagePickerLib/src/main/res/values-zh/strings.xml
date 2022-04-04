@@ -10,4 +10,6 @@
     <string name="mx_picker_string_open_failed">打开失败！</string>
     <string name="mx_picker_string_preview">预览</string>
     <string name="mx_picker_string_not_compress">原图</string>
+    <string name="mx_picker_string_take_pic">拍摄图片</string>
+    <string name="mx_picker_string_take_video">拍摄视频</string>
 </resources>
