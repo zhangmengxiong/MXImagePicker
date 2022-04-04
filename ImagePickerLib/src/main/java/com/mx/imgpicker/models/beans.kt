@@ -102,6 +102,7 @@ internal class MXDataSet {
         folderList.deleteObservers()
         selectFolder.deleteObservers()
         selectList.deleteObservers()
+        needCompress.deleteObservers()
     }
 }
 
