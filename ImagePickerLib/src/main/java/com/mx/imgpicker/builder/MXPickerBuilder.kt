@@ -85,6 +85,7 @@ class MXPickerBuilder : Serializable {
                 maxSize,
                 enableCamera,
                 compressType,
+                compressIgnoreSizeKb,
                 videoMaxLength
             )
         )

@@ -19,11 +19,11 @@ class MXImageCompress internal constructor(val build: MXCompressBuild) {
 
     fun compress(source: File): File {
         if (!source.exists()) {
-            MXUtils.log("缩放图片失败，返回原文件:${source.absolutePath}")
+            MXUtils.log("缩放图片失败，源文件不存在，返回原文件:${source.absolutePath}")
             return source
         }
         if (build.ignoreSize > 0 && source.length() <= build.ignoreSize * 1024) {
-            MXUtils.log("缩放图片触发阈值限制: ${build.ignoreSize}Kb , 源文件大小：${source.length()}")
+            MXUtils.log("缩放图片触发阈值限制: ${build.ignoreSize}Kb , 源文件大小：${source.length() / 1024}Kb")
             return source
         }
         val (width, height) = readImageSize(source)
