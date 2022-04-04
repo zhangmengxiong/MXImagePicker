@@ -8,6 +8,7 @@ import com.mx.imgpicker.utils.MXUtils
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.Exception
 import kotlin.math.ceil
 
 class MXImageCompress internal constructor(val build: MXCompressBuild) {
@@ -38,7 +39,14 @@ class MXImageCompress internal constructor(val build: MXCompressBuild) {
             return source
         }
 
-        val cacheImg = saveToCacheFile(tagBitmap)
+        val cacheImg = try {
+            saveToCacheFile(tagBitmap)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            MXUtils.log("缩放图片失败:目标文件写入失败，返回原文件:${source.absolutePath}")
+            return source
+        }
+
         val (new_width, new_height) = readImageSize(source)
         MXUtils.log("缩放图片：($width,$height,${source.length() / 1024}Kb) -> ($new_width,$new_height,${cacheImg.length() / 1024}Kb)")
         return cacheImg
@@ -48,22 +56,32 @@ class MXImageCompress internal constructor(val build: MXCompressBuild) {
      * 读取文件大小
      */
     private fun readImageSize(file: File): Pair<Int, Int> {
-        val options = BitmapFactory.Options()
-        options.inJustDecodeBounds = true
-        options.inSampleSize = 1
+        try {
+            val options = BitmapFactory.Options()
+            options.inJustDecodeBounds = true
+            options.inSampleSize = 1
 
-        BitmapFactory.decodeStream(file.inputStream(), null, options)
-        return Pair(options.outWidth, options.outHeight)
+            BitmapFactory.decodeStream(file.inputStream(), null, options)
+            return Pair(options.outWidth, options.outHeight)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return Pair(0, 0)
     }
 
     /**
      * 文件->Bitmap，这里要设置采样率防止OOM
      */
     private fun decodeBitmapFromFile(target: File, width: Int, height: Int): Bitmap? {
-        val options = BitmapFactory.Options()
-        options.inSampleSize = computeSampleSize(width, height)
+        try {
+            val options = BitmapFactory.Options()
+            options.inSampleSize = computeSampleSize(width, height)
 
-        return BitmapFactory.decodeStream(target.inputStream(), null, options)
+            return BitmapFactory.decodeStream(target.inputStream(), null, options)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
     }
 
     /**
