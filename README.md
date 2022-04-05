@@ -14,11 +14,11 @@
 
 #### 第一步：项目增加Androidx库和Glide图片加载库、图片缩放库
 ```gradle
-    implementation `androidx.appcompat:appcompat:x.x.x`
+    implementation "androidx.appcompat:appcompat:x.x.x"
     implementation "androidx.recyclerview:recyclerview:x.x.x"
-    implementation `com.github.bumptech.glide:glide:x.x.x`
-    implementation `androidx.constraintlayout:constraintlayout:2.0.4`
-    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+    implementation "com.github.bumptech.glide:glide:x.x.x"
+    implementation "androidx.constraintlayout:constraintlayout:2.0.4"
+    implementation "com.github.chrisbanes:PhotoView:2.3.0"
 ```
 
 #### 第二步：使用前需要修改‘AndroidManifest.xml’配置：添加相册、存储权限
