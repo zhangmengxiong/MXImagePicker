@@ -12,6 +12,7 @@ import com.mx.imgpicker.app.MXImgShowActivity
 import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.builder.MXPickerBuilder
 import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.compress.MXImageCompress
 import com.mx.starter.MXStarter
 import java.io.File
 
@@ -20,15 +21,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        MXImagePicker.registerImageLoader { activity, item, imageView ->
+        MXImagePicker.setDebug(true)
+        MXImagePicker.registerImageLoader { item, imageView ->
             if (File(item.path).exists()) {
-                Glide.with(activity).load(File(item.path))
+                Glide.with(imageView).load(File(item.path))
                     .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
             } else if (item.path.startsWith("http")) {
-                Glide.with(activity).load(item.path)
+                Glide.with(imageView).load(item.path)
                     .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
             } else {
-                Glide.with(activity).load(Uri.parse(item.path))
+                Glide.with(imageView).load(Uri.parse(item.path))
                     .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
             }
         }
@@ -60,6 +62,20 @@ class MainActivity : AppCompatActivity() {
                 MXImgShowActivity.open(this, list)
             }
         }
+        findViewById<View>(R.id.imageScaleBtn).setOnClickListener {
+            MXStarter.start(
+                this,
+                MXPickerBuilder().setMaxSize(1).setCameraEnable(true).createIntent(this)
+            ) { resultCode, data ->
+                val path = MXPickerBuilder.getPickerResult(data).firstOrNull() ?: return@start
+                val scaleImg = MXImageCompress.from(this)
+                    .setCacheDir(applicationContext.cacheDir) // 缓存目录
+                    .setSupportAlpha(true) // 支持透明通道(’.png‘格式) 默认=’.jpg‘格式
+                    .setIgnoreFileSize(50) // 设置文件低于这个大小时，不进行压缩
+                    .compress(path).absolutePath
+                MXImgShowActivity.open(this, listOf(path, scaleImg))
+            }
+        }
         findViewById<View>(R.id.videoBtn).setOnClickListener {
             MXStarter.start(
                 this,
@@ -81,6 +97,7 @@ class MainActivity : AppCompatActivity() {
                 if (!agree) return@requestPermission
                 val builder = MXCaptureBuilder().setType(MXPickerType.Image)
                 MXStarter.start(this, builder.createIntent(this)) { resultCode, data ->
+                    if (!builder.getCaptureFile().exists()) return@start
                     MXImgShowActivity.open(this, listOf(builder.getCaptureFile().absolutePath))
                 }
             }
@@ -95,6 +112,7 @@ class MainActivity : AppCompatActivity() {
                 if (!agree) return@requestPermission
                 val builder = MXCaptureBuilder().setType(MXPickerType.Video).setMaxVideoLength(10)
                 MXStarter.start(this, builder.createIntent(this)) { resultCode, data ->
+                    if (!builder.getCaptureFile().exists()) return@start
                     MXImgShowActivity.open(this, listOf(builder.getCaptureFile().absolutePath))
                 }
             }

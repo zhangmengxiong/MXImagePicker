@@ -8,4 +8,9 @@
     <string name="mx_picker_string_need_permission_storage_camera">Write storage、 camera permissions are required</string>
     <string name="mx_picker_string_need_permission_storage">Read storage permissions are required</string>
     <string name="mx_picker_string_open_failed">Failed to open!</string>
+    <string name="mx_picker_string_preview">Preview</string>
+    <string name="mx_picker_string_not_compress">Original</string>
+    <string name="mx_picker_string_take_pic">Take a picture</string>
+    <string name="mx_picker_string_take_video">Shoot a video</string>
+    <string name="mx_picker_string_show_list">Picture view</string>
 </resources>

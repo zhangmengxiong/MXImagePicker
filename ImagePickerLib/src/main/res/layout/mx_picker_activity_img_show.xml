@@ -25,9 +25,9 @@
             android:ellipsize="end"
             android:maxEms="8"
             android:singleLine="true"
-            android:text=""
+            android:text="@string/mx_picker_string_show_list"
             android:textColor="@color/mx_picker_color_important"
-            android:textSize="15sp" />
+            android:textSize="@dimen/mx_img_picker_text_size_normal" />
 
     </RelativeLayout>
 
@@ -37,8 +37,32 @@
         android:alpha="0.1"
         android:background="@color/mx_picker_color_important" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycleView"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycleView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fadingEdge="none"
+            android:fadingEdgeLength="0dp"
+            android:requiresFadingEdge="none" />
+
+        <TextView
+            android:id="@+id/indexTxv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="@dimen/mx_picker_bar_height"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:shadowColor="@android:color/black"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="7"
+            android:text="1 / 1"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/mx_img_picker_text_size_normal" />
+    </FrameLayout>
 </LinearLayout>

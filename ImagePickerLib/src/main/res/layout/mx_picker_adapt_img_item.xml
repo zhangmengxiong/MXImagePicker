@@ -42,19 +42,37 @@
             android:gravity="center"
             android:text="1"
             android:textColor="@android:color/white"
-            android:textSize="14sp" />
+            android:textSize="@dimen/mx_img_picker_text_size_small" />
 
     </RelativeLayout>
 
-    <ImageView
+    <LinearLayout
         android:id="@+id/videoTag"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginLeft="7dp"
-        android:layout_marginBottom="3dp"
-        android:src="@drawable/mx_icon_picker_video"
-        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/mx_bg_picker_grid_bottom_info"
+        android:paddingLeft="7dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        app:layout_constraintLeft_toLeftOf="parent">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="center_vertical"
+            android:scaleType="centerCrop"
+            android:src="@drawable/mx_icon_picker_video" />
+
+        <TextView
+            android:id="@+id/videoLengthTxv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="4dp"
+            android:text="01:11"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/mx_img_picker_text_size_small_most" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

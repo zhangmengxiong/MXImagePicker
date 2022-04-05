@@ -5,30 +5,30 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
-import com.mx.imgpicker.builder.MXPickerBuilder
-import com.mx.imgpicker.models.ItemSelectCall
+import com.mx.imgpicker.models.MXConfig
+import com.mx.imgpicker.models.MXDataSet
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
-import com.mx.imgpicker.models.SourceGroup
+import com.mx.imgpicker.utils.MXUtils
 import com.mx.imgpicker.views.MXPickerTextView
 
 internal class ImgGridAdapt(
-    private val activity: AppCompatActivity,
-    private val sourceGroup: SourceGroup,
-    private val builder: MXPickerBuilder
+    private val data: MXDataSet,
+    private val config: MXConfig
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var onSelectClick: ItemSelectCall? = null
-    var onItemClick: ((item: MXItem, list: ArrayList<MXItem>) -> Unit)? = null
+    var onSelectClick: ((item: MXItem, isSelect: Boolean) -> Unit)? = null
+    var onItemClick: ((item: MXItem, list: List<MXItem>) -> Unit)? = null
     var onTakePictureClick: (() -> Unit)? = null
 
     class ImgVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val img: ImageView = itemView.findViewById(R.id.img)
         val selectBG: ImageView = itemView.findViewById(R.id.selectBG)
-        val videoTag: ImageView = itemView.findViewById(R.id.videoTag)
+        val videoTag: View = itemView.findViewById(R.id.videoTag)
+        val videoLengthTxv: TextView = itemView.findViewById(R.id.videoLengthTxv)
         val indexTxv: MXPickerTextView = itemView.findViewById(R.id.indexTxv)
         val indexLay: RelativeLayout = itemView.findViewById(R.id.indexLay)
     }
@@ -51,21 +51,22 @@ internal class ImgGridAdapt(
         } else if (holder is ImgVH) {
             holder.indexTxv.visibility = View.VISIBLE
             holder.selectBG.visibility = View.VISIBLE
-            val position = if (builder.isEnableCamera()) position - 1 else position
-            val item = sourceGroup.getItem(position) ?: return
+            val position = if (config.enableCamera) (position - 1) else position
+            val item = data.getItem(position) ?: return
             holder.img.setImageResource(R.drawable.mx_icon_picker_image_place_holder)
-            MXImagePicker.getImageLoader()?.invoke(activity,item, holder.img)
-            val isSelect = sourceGroup.selectList.contains(item)
-            val index = sourceGroup.selectList.indexOf(item)
+            MXImagePicker.getImageLoader()?.invoke(item, holder.img)
+            val index = data.selectList.getValue().indexOf(item)
+            val isSelect = index >= 0
             holder.indexTxv.isChecked = isSelect
 
             if (item.type == MXPickerType.Video) {
                 holder.videoTag.visibility = View.VISIBLE
+                holder.videoLengthTxv.text = MXUtils.timeToString(item.duration)
             } else {
                 holder.videoTag.visibility = View.GONE
             }
             holder.indexLay.setOnClickListener {
-                onSelectClick?.select(item)
+                onSelectClick?.invoke(item, isSelect)
             }
             if (isSelect) {
                 holder.selectBG.alpha = 1f
@@ -75,20 +76,17 @@ internal class ImgGridAdapt(
                 holder.indexTxv.text = ""
             }
             holder.itemView.setOnClickListener {
-                onItemClick?.invoke(
-                    item,
-                    ArrayList(sourceGroup.selectList)
-                )
+                onItemClick?.invoke(item, data.selectList.getValue())
             }
         }
     }
 
     override fun getItemCount(): Int {
-        val size = sourceGroup.getItemSize()
-        return if (builder.isEnableCamera()) size + 1 else size
+        val size = data.getItemSize()
+        return if (config.enableCamera) size + 1 else size
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (builder.isEnableCamera() && position == 0) 0 else 1
+        return if (config.enableCamera && position == 0) 0 else 1
     }
 }

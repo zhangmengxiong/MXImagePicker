@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mx.imgpicker.app.MXImgPickerActivity
 import com.mx.imgpicker.app.MXImgShowActivity
 import com.mx.imgpicker.models.MXItem
+import com.mx.imgpicker.utils.MXUtils
 import java.util.concurrent.atomic.AtomicBoolean
 
 object MXImagePicker {
@@ -22,18 +23,22 @@ object MXImagePicker {
 
     internal fun getContext() = application!!
 
-    private var _imageLoader: ((activity: AppCompatActivity, item: MXItem, imageView: ImageView) -> Unit)? =
+    private var _imageLoader: ((item: MXItem, imageView: ImageView) -> Unit)? =
         null // 图片加载器
     private var _activityCall: ((AppCompatActivity) -> Unit)? = null // Activity在创建时会回调这个，可以设置样式等
 
     /**
      * 注册图片显示加载器，默认使用Glide
      */
-    fun registerImageLoader(iImageLoader: ((activity: AppCompatActivity, item: MXItem, imageView: ImageView) -> Unit)) {
+    fun registerImageLoader(iImageLoader: ((item: MXItem, imageView: ImageView) -> Unit)) {
         this._imageLoader = iImageLoader
     }
 
     internal fun getImageLoader() = _imageLoader
+
+    fun setDebug(debug: Boolean) {
+        MXUtils.setDebug(debug)
+    }
 
     /**
      * 注册全局页面启动回调

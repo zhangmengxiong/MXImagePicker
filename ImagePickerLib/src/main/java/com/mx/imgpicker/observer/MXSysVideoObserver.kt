@@ -4,7 +4,7 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import com.mx.imgpicker.utils.MXLog
+import com.mx.imgpicker.utils.MXUtils
 
 internal class MXSysVideoObserver(private val onChangeCall: (() -> Unit)? = null) :
     ContentObserver(Handler(Looper.getMainLooper())) {
@@ -12,7 +12,7 @@ internal class MXSysVideoObserver(private val onChangeCall: (() -> Unit)? = null
     override fun onChange(selfChange: Boolean, uri: Uri?) {
         super.onChange(selfChange, uri)
         if (uri?.toString()?.contains("video", ignoreCase = true) == true) {
-            MXLog.log("MXSysVideoObserver onChange $selfChange $uri")
+            MXUtils.log("MXSysVideoObserver onChange $selfChange $uri")
             onChangeCall?.invoke()
         }
     }

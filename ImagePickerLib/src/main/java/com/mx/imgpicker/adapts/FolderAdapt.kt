@@ -5,17 +5,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
+import com.mx.imgpicker.models.MXDataSet
 import com.mx.imgpicker.models.MXFolderItem
-import com.mx.imgpicker.models.SourceGroup
 
-internal class FolderAdapt(
-    private val activity: AppCompatActivity,
-    private val sourceGroup: SourceGroup
-) : RecyclerView.Adapter<FolderAdapt.FolderVH>() {
+internal class FolderAdapt(private val MXDataSet: MXDataSet) :
+    RecyclerView.Adapter<FolderAdapt.FolderVH>() {
     var onItemClick: ((item: MXFolderItem) -> Unit)? = null
 
     class FolderVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -33,11 +30,11 @@ internal class FolderAdapt(
     }
 
     override fun onBindViewHolder(holder: FolderVH, position: Int) {
-        val item = sourceGroup.folderList?.getOrNull(position) ?: return
-        val isSelect = (item.name == sourceGroup.selectFolder?.name)
+        val item = MXDataSet.folderList.getValue().getOrNull(position) ?: return
+        val isSelect = (item.name == MXDataSet.selectFolder.getValue()?.name)
         item.items.firstOrNull()?.let { imgItem ->
             holder.img.setImageResource(R.drawable.mx_icon_picker_image_place_holder)
-            MXImagePicker.getImageLoader()?.invoke(activity, imgItem, holder.img)
+            MXImagePicker.getImageLoader()?.invoke(imgItem, holder.img)
         }
         holder.folderNameTxv.text = item.name
         holder.imgSizeTxv.text = "(${item.items.size})"
@@ -46,6 +43,6 @@ internal class FolderAdapt(
     }
 
     override fun getItemCount(): Int {
-        return sourceGroup.folderList?.size ?: 0
+        return MXDataSet.folderList.getValue().size
     }
 }

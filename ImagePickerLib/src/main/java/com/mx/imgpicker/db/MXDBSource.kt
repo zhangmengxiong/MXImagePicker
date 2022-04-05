@@ -15,6 +15,10 @@ internal class MXDBSource(val context: Context) {
     }
 
     private val dbHelp by lazy { MXSQLiteOpenHelper(context.applicationContext) }
+
+    /**
+     * 添加临时缓存文件
+     */
     fun addPrivateSource(file: File, type: MXPickerType): Boolean {
         synchronized(lock) {
             val database = dbHelp.writableDatabase
@@ -33,6 +37,9 @@ internal class MXDBSource(val context: Context) {
         return false
     }
 
+    /**
+     * 批量添加/替换系统视频、图片数据
+     */
     fun addSysSource(list: List<MXItem>): Boolean {
         synchronized(lock) {
             val database = dbHelp.writableDatabase
@@ -102,6 +109,9 @@ internal class MXDBSource(val context: Context) {
         return null
     }
 
+    /**
+     * 获取对应类型的所有数据
+     */
     fun getAllSource(type: MXPickerType): ArrayList<MXItem> {
         val sourceList = ArrayList<MXItem>()
         var section: String? = null
@@ -150,6 +160,9 @@ internal class MXDBSource(val context: Context) {
         return sourceList
     }
 
+    /**
+     * 指针转换成对象
+     */
     private fun cursorToItem(database: SQLiteDatabase, cursor: Cursor): MXItem? {
         try {
             val type = MXPickerType.from(

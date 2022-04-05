@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="mx_picker_bar_height">50dp</dimen>
+    <dimen name="mx_img_picker_text_size_normal">16sp</dimen>
+    <dimen name="mx_img_picker_text_size_small">14sp</dimen>
+    <dimen name="mx_img_picker_text_size_small_most">11sp</dimen>
 </resources>

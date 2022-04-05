@@ -16,25 +16,41 @@ import java.util.concurrent.atomic.AtomicLong
 
 
 internal object MXFileBiz {
+    private const val PREFIX_IMAGE = "MX_IMG"
+    private const val PREFIX_VIDEO = "MX_VIDEO"
     private val fileIndex = AtomicLong(1000)
 
     /**
      * 生成缓存图片路径
      */
-    fun createImageFile(context: Context): File {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val imageFileName =
-            String.format("IMG_%s_${fileIndex.incrementAndGet()}.jpg", timeStamp)
+    internal fun createImageFile(context: Context): File {
+        val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val imageFileName = "${PREFIX_IMAGE}_${time}_${fileIndex.incrementAndGet()}.jpg"
         return File(getExistExtDir(context), imageFileName)
     }
 
     /**
      * 生成缓存视频路径
      */
-    fun createVideoFile(context: Context): File {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val imageFileName = String.format("VIDEO_%s_${fileIndex.incrementAndGet()}.mp4", timeStamp)
+    internal fun createVideoFile(context: Context): File {
+        val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val imageFileName = "${PREFIX_VIDEO}_${time}_${fileIndex.incrementAndGet()}.mp4"
         return File(getExistExtDir(context), imageFileName)
+    }
+
+    /**
+     * 创建一个缓存图片文件
+     * @param targetDir 目标文件夹
+     * @param extension 文件后缀
+     */
+    internal fun createCacheImageFile(context: Context, targetDir: File?, extension: String): File {
+        val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val imageFileName = "${PREFIX_IMAGE}_${time}_${fileIndex.incrementAndGet()}.$extension"
+        if (targetDir != null && !targetDir.exists()) {
+            targetDir.mkdirs()
+        }
+
+        return File(targetDir ?: context.cacheDir, imageFileName)
     }
 
     private fun getExistExtDir(context: Context): File {
@@ -49,7 +65,7 @@ internal object MXFileBiz {
     /**
      * 打开视频或者图片
      */
-    fun openItem(context: Context, item: MXItem) {
+    internal fun openItem(context: Context, item: MXItem) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
             val mimeType = when (item.type) {

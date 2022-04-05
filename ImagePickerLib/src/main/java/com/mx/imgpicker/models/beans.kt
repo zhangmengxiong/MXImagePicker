@@ -1,5 +1,6 @@
 package com.mx.imgpicker.models
 
+import com.mx.imgpicker.observer.MXValueObservable
 import java.io.File
 import java.io.Serializable
 
@@ -21,6 +22,27 @@ enum class MXPickerType(val value: String) : Serializable {
 }
 
 /**
+ * 压缩类型枚举
+ */
+enum class MXCompressType : Serializable {
+    ON, // 强制关闭
+    OFF, // 强制开启
+    SELECT_BY_USER // 由用户选择
+}
+
+/**
+ * 配置对象
+ */
+internal data class MXConfig(
+    val pickerType: MXPickerType = MXPickerType.Image, // 类型
+    val maxSize: Int = 1, // 选取最大数量
+    val enableCamera: Boolean = true, // 是否可拍摄
+    val compressType: MXCompressType = MXCompressType.SELECT_BY_USER, // 压缩类型
+    val compressIgnoreSizeKb: Int = 200, // 图片压缩源文件阈值
+    val videoMaxLength: Int = -1 // 视频最长时长
+) : Serializable
+
+/**
  * 类型对象
  * @property path 绝对路径
  * @property time 创建时间
@@ -30,12 +52,17 @@ enum class MXPickerType(val value: String) : Serializable {
  */
 data class MXItem(val path: String, val time: Long, val type: MXPickerType, val duration: Int = 0) :
     Serializable {
-    fun getFolderName(): String {
+    private var folderName: String? = null
+
+    init {
         val paths = path.split(File.separator)
         if (paths.size >= 2) {
-            return paths[paths.size - 2]
+            folderName = paths[paths.size - 2]
         }
-        return ""
+    }
+
+    fun getFolderName(): String {
+        return folderName ?: "Others"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -63,16 +90,24 @@ data class MXItem(val path: String, val time: Long, val type: MXPickerType, val 
  */
 internal data class MXFolderItem(val name: String, val items: List<MXItem> = ArrayList())
 
-internal class SourceGroup {
-    var folderList: ArrayList<MXFolderItem>? = null
-    var selectFolder: MXFolderItem? = null
-    val selectList = ArrayList<MXItem>()
+internal class MXDataSet {
+    val folderList = MXValueObservable<List<MXFolderItem>>(ArrayList()) // 文件夹列表
+    val selectFolder = MXValueObservable<MXFolderItem?>(null) // 当前选择文件夹
+    val selectList = MXValueObservable<List<MXItem>>(ArrayList()) // 选中的文件列表
+    val needCompress = MXValueObservable(true) // 是否需要压缩
 
-    fun getItemSize() = selectFolder?.items?.size ?: 0
-    fun getItem(index: Int) = selectFolder?.items?.getOrNull(index)
+    fun getItemSize() = selectFolder.getValue()?.items?.size ?: 0
+    fun getItem(index: Int) = selectFolder.getValue()?.items?.getOrNull(index)
     fun itemIndexOf(item: MXItem?): Int {
         if (item == null) return -1
-        return selectFolder?.items?.indexOf(item) ?: -1
+        return selectFolder.getValue()?.items?.indexOf(item) ?: -1
+    }
+
+    fun release() {
+        folderList.deleteObservers()
+        selectFolder.deleteObservers()
+        selectList.deleteObservers()
+        needCompress.deleteObservers()
     }
 }
 
