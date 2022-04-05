@@ -45,7 +45,7 @@ internal class MXFullScreenFragment(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.mx_fragment_picker_full, container, false)
+        return inflater.inflate(R.layout.mx_picker_fragment_picker_full, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
