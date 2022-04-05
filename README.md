@@ -32,10 +32,10 @@
 注意：`没有权限进入选择页面会报错！`
 
 #### 第三步：启动选择页面
-```
+```kotlin
 val intent = MXPickerBuilder().setMaxSize(3).createIntent(this)
 startActivityForResult(intent,0x22)
-```kotlin
+```
 ##### MXPickerBuilder参数说明
 1. `setMaxSize(size: Int)` 设置最大选择文件个数
 2. `setType(type: PickerType)` 设置类型 
