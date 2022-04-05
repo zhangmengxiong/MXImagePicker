@@ -61,6 +61,8 @@
             android:id="@+id/recycleView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:fadingEdge="none"
+            android:fadingEdgeLength="0dp"
             android:paddingHorizontal="1dp" />
     </FrameLayout>
 

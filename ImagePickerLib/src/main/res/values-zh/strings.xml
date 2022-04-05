@@ -12,4 +12,5 @@
     <string name="mx_picker_string_not_compress">原图</string>
     <string name="mx_picker_string_take_pic">拍摄图片</string>
     <string name="mx_picker_string_take_video">拍摄视频</string>
+    <string name="mx_picker_string_show_list">图片查看</string>
 </resources>

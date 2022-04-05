@@ -52,12 +52,17 @@ internal data class MXConfig(
  */
 data class MXItem(val path: String, val time: Long, val type: MXPickerType, val duration: Int = 0) :
     Serializable {
-    fun getFolderName(): String {
+    private var folderName: String? = null
+
+    init {
         val paths = path.split(File.separator)
         if (paths.size >= 2) {
-            return paths[paths.size - 2]
+            folderName = paths[paths.size - 2]
         }
-        return "Others"
+    }
+
+    fun getFolderName(): String {
+        return folderName ?: "Others"
     }
 
     override fun equals(other: Any?): Boolean {
