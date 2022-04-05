@@ -57,7 +57,7 @@ data class MXItem(val path: String, val time: Long, val type: MXPickerType, val 
         if (paths.size >= 2) {
             return paths[paths.size - 2]
         }
-        return ""
+        return "Others"
     }
 
     override fun equals(other: Any?): Boolean {

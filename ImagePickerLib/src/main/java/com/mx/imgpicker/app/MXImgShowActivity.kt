@@ -28,14 +28,6 @@ class MXImgShowActivity : AppCompatActivity() {
                     .putExtra(EXTRAS_TITLE, title)
             )
         }
-
-        fun open(context: Context, list: List<MXItem>) {
-            if (list.isEmpty()) return
-            context.startActivity(
-                Intent(context, MXImgShowActivity::class.java)
-                    .putExtra(EXTRAS_LIST, ArrayList(list))
-            )
-        }
     }
 
     private val imgList = ArrayList<MXItem>()
