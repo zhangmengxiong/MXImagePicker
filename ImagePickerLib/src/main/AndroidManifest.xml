@@ -17,7 +17,7 @@
         </provider>
 
         <activity
-            android:name="com.mx.imgpicker.app.MXImgPickerActivity"
+            android:name="com.mx.imgpicker.app.picker.MXImgPickerActivity"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />

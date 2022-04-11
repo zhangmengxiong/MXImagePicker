@@ -1,4 +1,4 @@
-package com.mx.imgpicker.app
+package com.mx.imgpicker.app.picker
 
 import android.content.Context
 import androidx.lifecycle.MutableLiveData

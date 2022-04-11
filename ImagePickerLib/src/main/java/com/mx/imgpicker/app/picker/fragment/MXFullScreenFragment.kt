@@ -1,4 +1,4 @@
-package com.mx.imgpicker.app.fragment
+package com.mx.imgpicker.app.picker.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.ImgLargeAdapt
-import com.mx.imgpicker.app.MXImgPickerActivity
-import com.mx.imgpicker.app.MXPickerVM
+import com.mx.imgpicker.app.picker.MXImgPickerActivity
+import com.mx.imgpicker.app.picker.MXPickerVM
 import com.mx.imgpicker.models.MXCompressType
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.observer.MXValueObservable

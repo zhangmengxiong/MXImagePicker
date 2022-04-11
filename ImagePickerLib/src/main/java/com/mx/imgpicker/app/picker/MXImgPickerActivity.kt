@@ -1,4 +1,4 @@
-package com.mx.imgpicker.app
+package com.mx.imgpicker.app.picker
 
 import android.Manifest
 import android.content.Intent
@@ -10,8 +10,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
-import com.mx.imgpicker.app.fragment.MXFullScreenFragment
-import com.mx.imgpicker.app.fragment.MXPickerFragment
+import com.mx.imgpicker.app.picker.fragment.MXFullScreenFragment
+import com.mx.imgpicker.app.picker.fragment.MXPickerFragment
 import com.mx.imgpicker.builder.MXPickerBuilder
 import com.mx.imgpicker.compress.MXImageCompress
 import com.mx.imgpicker.models.MXCompressType

@@ -1,4 +1,4 @@
-package com.mx.imgpicker.app.fragment
+package com.mx.imgpicker.app.picker.fragment
 
 import android.Manifest
 import android.os.Bundle
@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.FolderAdapt
 import com.mx.imgpicker.adapts.ImgGridAdapt
-import com.mx.imgpicker.app.MXImgPickerActivity
-import com.mx.imgpicker.app.MXPickerVM
+import com.mx.imgpicker.app.picker.MXImgPickerActivity
+import com.mx.imgpicker.app.picker.MXPickerVM
 import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.models.MXCompressType
 import com.mx.imgpicker.models.MXPickerType
