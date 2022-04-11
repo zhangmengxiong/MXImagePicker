@@ -18,13 +18,11 @@ import com.mx.imgpicker.app.picker.MXImgPickerActivity
 import com.mx.imgpicker.app.picker.MXPickerVM
 import com.mx.imgpicker.models.MXCompressType
 import com.mx.imgpicker.models.MXItem
-import com.mx.imgpicker.observer.MXValueObservable
 
 internal class MXFullScreenFragment : Fragment() {
     private val vm by lazy { ViewModelProvider(requireActivity()).get(MXPickerVM::class.java) }
     private val imgList = ArrayList<MXItem>()
     private val imgLargeAdapt = ImgLargeAdapt(imgList)
-    private val currentIndex = MXValueObservable(0)
     private var firstShowItem: MXItem? = null
     private var returnBtn: ImageView? = null
     private var titleTxv: TextView? = null
@@ -97,21 +95,21 @@ internal class MXFullScreenFragment : Fragment() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         val index = layoutManager.findFirstVisibleItemPosition()
-                        if (currentIndex.getValue() != index) {
-                            currentIndex.notifyChanged(index)
+                        if (vm.fullScreenSelectIndex.value != index) {
+                            vm.fullScreenSelectIndex.postValue(index)
                         }
                     }
                 }
             })
         }
         selectLay?.setOnClickListener {
-            val index = currentIndex.getValue()
+            val index = vm.fullScreenSelectIndex.value ?: 0
             val item = imgList.getOrNull(index) ?: return@setOnClickListener
             (requireActivity() as? MXImgPickerActivity)?.onSelectChange(item)
         }
-        currentIndex.addObserver { index ->
+        vm.fullScreenSelectIndex.observe(viewLifecycleOwner) { index ->
             titleTxv?.text = "${index + 1} / ${imgList.size}"
-            val item = imgList.getOrNull(index) ?: return@addObserver
+            val item = imgList.getOrNull(index) ?: return@observe
             val isSelect = (vm.getSelectIndexOf(item) >= 0)
             if (isSelect) {
                 selectImg?.setImageResource(R.drawable.mx_picker_radio_select)
@@ -131,7 +129,7 @@ internal class MXFullScreenFragment : Fragment() {
                 selectBtn?.text =
                     "${getString(R.string.mx_picker_string_select)}(${vm.getSelectListSize()}/${vm.maxSize})"
             }
-            currentIndex.notifyChanged(currentIndex.getValue())
+            vm.fullScreenSelectIndex.postValue(vm.fullScreenSelectIndex.value)
         }
     }
 
@@ -166,16 +164,11 @@ internal class MXFullScreenFragment : Fragment() {
         val index = imgList.indexOf(item)
         if (index < 0) {
             recycleView?.scrollToPosition(0)
-            currentIndex.notifyChanged(0)
+            vm.fullScreenSelectIndex.postValue(0)
         } else {
             recycleView?.scrollToPosition(index)
-            currentIndex.notifyChanged(index)
+            vm.fullScreenSelectIndex.postValue(index)
         }
         firstShowItem = null
-    }
-
-    override fun onDestroyView() {
-        currentIndex.deleteObservers()
-        super.onDestroyView()
     }
 }

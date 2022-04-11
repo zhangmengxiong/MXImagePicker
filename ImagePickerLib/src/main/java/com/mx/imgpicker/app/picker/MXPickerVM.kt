@@ -50,6 +50,7 @@ internal class MXPickerVM : ViewModel() {
     val selectFolder = MutableLiveData<MXFolderItem?>(null) // 当前选择文件夹
     val selectList = MutableLiveData<List<MXItem>>(ArrayList()) // 选中的文件列表
     val needCompress = MutableLiveData(true) // 是否需要压缩
+    val fullScreenSelectIndex = MutableLiveData(0) // 是否需要压缩
 
     fun getItemSize() = selectFolder.value?.items?.size ?: 0
     fun getItem(index: Int) = selectFolder.value?.items?.getOrNull(index)

@@ -30,8 +30,25 @@ class MXImgPickerActivity : AppCompatActivity() {
     }
 
     private var currentFragment: Fragment? = null
-    private val pickerFragment by lazy { MXPickerFragment() }
-    private val pickerFullScreenFragment by lazy { MXFullScreenFragment() }
+    private val pickerFragment by lazy {
+        createFragment(MXPickerFragment::class.java)
+    }
+    private val pickerFullScreenFragment by lazy {
+        createFragment(MXFullScreenFragment::class.java)
+    }
+
+    private fun <T : Any> createFragment(clazz: Class<T>): T {
+        try {
+            val simpleName = clazz.simpleName
+            val cache = (supportFragmentManager.findFragmentByTag(simpleName) as T?)
+            if (cache != null) {
+                return cache
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return clazz.newInstance()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -153,7 +170,7 @@ class MXImgPickerActivity : AppCompatActivity() {
         }
         currentFragment?.let { transaction.hide(it) }
         if (!cFragment.isAdded) {
-            transaction.add(R.id.rootLay, cFragment, cFragment.javaClass.simpleName)
+            transaction.add(R.id.rootLay, cFragment, cFragment::class.java.simpleName)
         } else {
             transaction.show(cFragment)
         }
