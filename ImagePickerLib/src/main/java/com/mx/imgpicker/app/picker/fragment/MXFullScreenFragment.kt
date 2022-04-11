@@ -1,4 +1,4 @@
-package com.mx.imgpicker.app.fragment
+package com.mx.imgpicker.app.picker.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,28 +7,22 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.ImgLargeAdapt
-import com.mx.imgpicker.app.MXImgPickerActivity
-import com.mx.imgpicker.app.MXSource
+import com.mx.imgpicker.app.picker.MXImgPickerActivity
+import com.mx.imgpicker.app.picker.MXPickerVM
 import com.mx.imgpicker.models.MXCompressType
-import com.mx.imgpicker.models.MXConfig
-import com.mx.imgpicker.models.MXDataSet
 import com.mx.imgpicker.models.MXItem
-import com.mx.imgpicker.observer.MXValueObservable
 
-internal class MXFullScreenFragment(
-    private val data: MXDataSet,
-    private val source: MXSource,
-    private val config: MXConfig
-) : Fragment() {
+internal class MXFullScreenFragment : Fragment() {
+    private val vm by lazy { ViewModelProvider(requireActivity()).get(MXPickerVM::class.java) }
     private val imgList = ArrayList<MXItem>()
-    private val imgLargeAdapt by lazy { ImgLargeAdapt(imgList, data) }
-    private val currentIndex = MXValueObservable(0)
+    private val imgLargeAdapt = ImgLargeAdapt(imgList)
     private var firstShowItem: MXItem? = null
     private var returnBtn: ImageView? = null
     private var titleTxv: TextView? = null
@@ -66,16 +60,16 @@ internal class MXFullScreenFragment(
             (requireActivity() as? MXImgPickerActivity)?.onSelectFinish()
         }
         willResizeLay?.setOnClickListener {
-            data.needCompress.notifyChanged(!data.needCompress.getValue())
+            vm.needCompress.postValue(!(vm.needCompress.value ?: false))
         }
 
-        if (config.compressType == MXCompressType.SELECT_BY_USER) {
+        if (vm.compressType == MXCompressType.SELECT_BY_USER) {
             willResizeLay?.visibility = View.VISIBLE
         } else {
             willResizeLay?.visibility = View.GONE
         }
 
-        data.needCompress.addObserver { compress ->
+        vm.needCompress.observe(viewLifecycleOwner) { compress ->
             if (!compress) {
                 willResizeImg?.setImageResource(R.drawable.mx_picker_radio_select)
                 willResizeImg?.setColorFilter(resources.getColor(R.color.mx_picker_color_select))
@@ -101,22 +95,22 @@ internal class MXFullScreenFragment(
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         val index = layoutManager.findFirstVisibleItemPosition()
-                        if (currentIndex.getValue() != index) {
-                            currentIndex.notifyChanged(index)
+                        if (vm.fullScreenSelectIndex.value != index) {
+                            vm.fullScreenSelectIndex.postValue(index)
                         }
                     }
                 }
             })
         }
         selectLay?.setOnClickListener {
-            val index = currentIndex.getValue()
+            val index = vm.fullScreenSelectIndex.value ?: 0
             val item = imgList.getOrNull(index) ?: return@setOnClickListener
             (requireActivity() as? MXImgPickerActivity)?.onSelectChange(item)
         }
-        currentIndex.addObserver { index ->
+        vm.fullScreenSelectIndex.observe(viewLifecycleOwner) { index ->
             titleTxv?.text = "${index + 1} / ${imgList.size}"
-            val item = imgList.getOrNull(index) ?: return@addObserver
-            val isSelect = data.selectList.getValue().contains(item)
+            val item = imgList.getOrNull(index) ?: return@observe
+            val isSelect = (vm.getSelectIndexOf(item) >= 0)
             if (isSelect) {
                 selectImg?.setImageResource(R.drawable.mx_picker_radio_select)
                 selectImg?.setColorFilter(resources.getColor(R.color.mx_picker_color_select))
@@ -126,16 +120,16 @@ internal class MXFullScreenFragment(
             }
         }
 
-        data.selectList.addObserver { list ->
+        vm.selectList.observe(viewLifecycleOwner) { list ->
             if (list.isEmpty()) {
                 selectBtn?.visibility = View.GONE
                 selectBtn?.text = getString(R.string.mx_picker_string_select)
             } else {
                 selectBtn?.visibility = View.VISIBLE
                 selectBtn?.text =
-                    "${getString(R.string.mx_picker_string_select)}(${data.selectList.getValue().size}/${config.maxSize})"
+                    "${getString(R.string.mx_picker_string_select)}(${vm.getSelectListSize()}/${vm.maxSize})"
             }
-            currentIndex.notifyChanged(currentIndex.getValue())
+            vm.fullScreenSelectIndex.postValue(vm.fullScreenSelectIndex.value)
         }
     }
 
@@ -170,16 +164,11 @@ internal class MXFullScreenFragment(
         val index = imgList.indexOf(item)
         if (index < 0) {
             recycleView?.scrollToPosition(0)
-            currentIndex.notifyChanged(0)
+            vm.fullScreenSelectIndex.postValue(0)
         } else {
             recycleView?.scrollToPosition(index)
-            currentIndex.notifyChanged(index)
+            vm.fullScreenSelectIndex.postValue(index)
         }
         firstShowItem = null
-    }
-
-    override fun onDestroyView() {
-        currentIndex.deleteObservers()
-        super.onDestroyView()
     }
 }

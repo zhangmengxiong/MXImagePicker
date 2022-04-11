@@ -5,7 +5,7 @@ import android.app.Application
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import com.mx.imgpicker.app.MXImgPickerActivity
+import com.mx.imgpicker.app.picker.MXImgPickerActivity
 import com.mx.imgpicker.app.MXImgShowActivity
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.utils.MXUtils
@@ -47,8 +47,7 @@ object MXImagePicker {
         _activityCall = call
     }
 
-    private val activityLifecycleCall = object :
-        Application.ActivityLifecycleCallbacks {
+    private val activityLifecycleCall = object : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(p0: Activity, p1: Bundle?) {
         }
 

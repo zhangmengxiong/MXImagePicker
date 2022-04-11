@@ -3,7 +3,7 @@
 基于Kotlin，AndroidX的仿微信图片选择器
 [![](https://jitpack.io/v/com.gitee.zhangmengxiong/MXImagePicker.svg)](https://jitpack.io/#com.gitee.zhangmengxiong/MXImagePicker)
 库引用： 替换x.x.x 为最新版本
-```kotlin
+```gradle
     implementation 'com.gitee.zhangmengxiong:MXImagePicker:x.x.x'
 ```
 
@@ -13,12 +13,12 @@
 ## 使用方法
 
 #### 第一步：项目增加Androidx库和Glide图片加载库、图片缩放库
-```kotlin
-    implementation `androidx.appcompat:appcompat:x.x.x`
+```gradle
+    implementation "androidx.appcompat:appcompat:x.x.x"
     implementation "androidx.recyclerview:recyclerview:x.x.x"
-    implementation `com.github.bumptech.glide:glide:x.x.x`
-    implementation `androidx.constraintlayout:constraintlayout:2.0.4`
-    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+    implementation "com.github.bumptech.glide:glide:x.x.x"
+    implementation "androidx.constraintlayout:constraintlayout:2.0.4"
+    implementation "com.github.chrisbanes:PhotoView:2.3.0"
 ```
 
 #### 第二步：使用前需要修改‘AndroidManifest.xml’配置：添加相册、存储权限
@@ -32,10 +32,10 @@
 注意：`没有权限进入选择页面会报错！`
 
 #### 第三步：启动选择页面
-```
+```kotlin
 val intent = MXPickerBuilder().setMaxSize(3).createIntent(this)
 startActivityForResult(intent,0x22)
-```kotlin
+```
 ##### MXPickerBuilder参数说明
 1. `setMaxSize(size: Int)` 设置最大选择文件个数
 2. `setType(type: PickerType)` 设置类型 
@@ -60,7 +60,7 @@ MXImagePicker.registerActivityCallback { activity ->
 
 ##### 页面颜色设置
 将下面颜色值放如主项目的资源xml中，可以修改页面对应的颜色显示
-```kotlin
+```xml
     <!--  页面背景色  -->
     <color name="mx_picker_color_background">#333333</color>
    
@@ -73,7 +73,7 @@ MXImagePicker.registerActivityCallback { activity ->
 
 ##### 多语言设置
 将下面字符串定义放入对应的语言目录中，可以修改页面对应的文字提示
-```kotlin
+```xml
     <string name="mx_picker_string_select">选择</string>
     <string name="mx_picker_string_all">全部</string>
     <string name="mx_picker_string_image_limit_tip">您最多只能选择 %s 张图片！</string>
@@ -90,7 +90,7 @@ MXImagePicker.registerActivityCallback { activity ->
 ```
 
 dimens.xml 资源
-```kotlin
+```xml
     <!--  顶部导航栏高度  -->  
     <dimen name="mx_picker_bar_height">50dp</dimen>
 ```

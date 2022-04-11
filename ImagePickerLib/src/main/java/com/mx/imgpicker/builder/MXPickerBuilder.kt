@@ -2,7 +2,7 @@ package com.mx.imgpicker.builder
 
 import android.content.Context
 import android.content.Intent
-import com.mx.imgpicker.app.MXImgPickerActivity
+import com.mx.imgpicker.app.picker.MXImgPickerActivity
 import com.mx.imgpicker.models.MXCompressType
 import com.mx.imgpicker.models.MXConfig
 import com.mx.imgpicker.models.MXPickerType

@@ -1,6 +1,5 @@
 package com.mx.imgpicker.models
 
-import com.mx.imgpicker.observer.MXValueObservable
 import java.io.File
 import java.io.Serializable
 
@@ -40,7 +39,9 @@ internal data class MXConfig(
     val compressType: MXCompressType = MXCompressType.SELECT_BY_USER, // 压缩类型
     val compressIgnoreSizeKb: Int = 200, // 图片压缩源文件阈值
     val videoMaxLength: Int = -1 // 视频最长时长
-) : Serializable
+) : Serializable{
+
+}
 
 /**
  * 类型对象
@@ -89,27 +90,6 @@ data class MXItem(val path: String, val time: Long, val type: MXPickerType, val 
  * 分组对象
  */
 internal data class MXFolderItem(val name: String, val items: List<MXItem> = ArrayList())
-
-internal class MXDataSet {
-    val folderList = MXValueObservable<List<MXFolderItem>>(ArrayList()) // 文件夹列表
-    val selectFolder = MXValueObservable<MXFolderItem?>(null) // 当前选择文件夹
-    val selectList = MXValueObservable<List<MXItem>>(ArrayList()) // 选中的文件列表
-    val needCompress = MXValueObservable(true) // 是否需要压缩
-
-    fun getItemSize() = selectFolder.getValue()?.items?.size ?: 0
-    fun getItem(index: Int) = selectFolder.getValue()?.items?.getOrNull(index)
-    fun itemIndexOf(item: MXItem?): Int {
-        if (item == null) return -1
-        return selectFolder.getValue()?.items?.indexOf(item) ?: -1
-    }
-
-    fun release() {
-        folderList.deleteObservers()
-        selectFolder.deleteObservers()
-        selectList.deleteObservers()
-        needCompress.deleteObservers()
-    }
-}
 
 /**
  * 图片选择回调
