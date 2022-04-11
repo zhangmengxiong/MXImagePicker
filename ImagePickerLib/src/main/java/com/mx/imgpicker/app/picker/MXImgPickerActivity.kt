@@ -39,7 +39,7 @@ class MXImgPickerActivity : AppCompatActivity() {
 
     private fun <T : Any> createFragment(clazz: Class<T>): T {
         try {
-            val simpleName = clazz.simpleName
+            val simpleName = clazz.name
             val cache = (supportFragmentManager.findFragmentByTag(simpleName) as T?)
             if (cache != null) {
                 return cache
@@ -170,7 +170,7 @@ class MXImgPickerActivity : AppCompatActivity() {
         }
         currentFragment?.let { transaction.hide(it) }
         if (!cFragment.isAdded) {
-            transaction.add(R.id.rootLay, cFragment, cFragment::class.java.simpleName)
+            transaction.add(R.id.rootLay, cFragment, cFragment::class.java.name)
         } else {
             transaction.show(cFragment)
         }
