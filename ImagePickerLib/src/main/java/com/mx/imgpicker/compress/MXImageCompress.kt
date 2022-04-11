@@ -8,7 +8,6 @@ import com.mx.imgpicker.utils.MXUtils
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.lang.Exception
 import kotlin.math.ceil
 
 class MXImageCompress internal constructor(val build: MXCompressBuild) {

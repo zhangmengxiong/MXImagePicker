@@ -9,13 +9,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.chrisbanes.photoview.PhotoView
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
-import com.mx.imgpicker.models.MXDataSet
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.utils.MXFileBiz
 import com.mx.imgpicker.utils.MXUtils
 
-internal class ImgLargeAdapt(private val list: List<MXItem>, private val data: MXDataSet) :
+internal class ImgLargeAdapt(private val list: List<MXItem> ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     class ImgScanVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val photoView: PhotoView = itemView.findViewById(R.id.photoView)
