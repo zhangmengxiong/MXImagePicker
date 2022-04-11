@@ -19,6 +19,11 @@ internal class MXPickerVM : ViewModel() {
         private const val PAGE_SIZE = 30
     }
 
+    private val sourceDB by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        MXDBSource(MXImagePicker.getContext())
+    }
+    private var isRelease = false
+
     var pickerType: MXPickerType = MXPickerType.Image  // 类型
         private set
     var maxSize: Int = 1  // 选取最大数量
@@ -60,8 +65,6 @@ internal class MXPickerVM : ViewModel() {
         return selectList.value?.indexOf(item) ?: -1
     }
 
-    private val sourceDB by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { MXDBSource(MXImagePicker.getContext()) }
-    private var isRelease = false
     fun startScan() {
         val context = MXImagePicker.getContext()
         thread {

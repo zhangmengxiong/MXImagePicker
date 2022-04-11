@@ -41,8 +41,8 @@ class MXImgShowActivity : AppCompatActivity() {
     private val adapt by lazy { ImgShowAdapt(imgList) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.mx_picker_activity_img_show)
         MXImagePicker.init(application)
+        setContentView(R.layout.mx_picker_activity_img_show)
 
         initView()
         initIntent()

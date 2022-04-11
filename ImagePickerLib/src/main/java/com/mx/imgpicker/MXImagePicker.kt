@@ -47,8 +47,7 @@ object MXImagePicker {
         _activityCall = call
     }
 
-    private val activityLifecycleCall = object :
-        Application.ActivityLifecycleCallbacks {
+    private val activityLifecycleCall = object : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(p0: Activity, p1: Bundle?) {
         }
 

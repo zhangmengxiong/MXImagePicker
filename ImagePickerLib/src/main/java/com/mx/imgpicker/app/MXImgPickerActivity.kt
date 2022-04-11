@@ -35,13 +35,13 @@ class MXImgPickerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.mx_picker_activity_img_picker)
         MXImagePicker.init(application)
+        setContentView(R.layout.mx_picker_activity_img_picker)
         supportActionBar?.hide()
         actionBar?.hide()
         vm.setConfig(
-            (intent.getSerializableExtra(MXPickerBuilder.KEY_INTENT_BUILDER) as? MXConfig)
-                ?: MXConfig()
+            (intent.getSerializableExtra(MXPickerBuilder.KEY_INTENT_BUILDER)
+                    as? MXConfig) ?: MXConfig()
         )
 
         MXUtils.log("启动")
@@ -53,7 +53,6 @@ class MXImgPickerActivity : AppCompatActivity() {
                 Toast.LENGTH_SHORT
             ).show()
             MXUtils.requestPermission(this, permissions, MXUtils.REQUEST_CODE_READ)
-            return
         } else {
             initView()
         }
