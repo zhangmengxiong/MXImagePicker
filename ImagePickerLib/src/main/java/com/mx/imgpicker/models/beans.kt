@@ -1,53 +1,99 @@
 package com.mx.imgpicker.models
 
-import android.net.Uri
 import java.io.File
 import java.io.Serializable
 
 /**
  * 类型
  */
-enum class MXPickerType : Serializable {
-    Image, Video
+enum class MXPickerType(val value: String) : Serializable {
+    Image("Image"), Video("Video"), ImageAndVideo("ImageAndVideo");
+
+    companion object {
+        fun from(value: String): MXPickerType {
+            return when (value) {
+                Image.value -> Image
+                Video.value -> Video
+                else -> ImageAndVideo
+            }
+        }
+    }
+}
+
+/**
+ * 压缩类型枚举
+ */
+enum class MXCompressType : Serializable {
+    ON, // 强制关闭
+    OFF, // 强制开启
+    SELECT_BY_USER // 由用户选择
+}
+
+/**
+ * 配置对象
+ */
+internal data class MXConfig(
+    val pickerType: MXPickerType = MXPickerType.Image, // 类型
+    val maxSize: Int = 1, // 选取最大数量
+    val enableCamera: Boolean = true, // 是否可拍摄
+    val compressType: MXCompressType = MXCompressType.SELECT_BY_USER, // 压缩类型
+    val compressIgnoreSizeKb: Int = 200, // 图片压缩源文件阈值
+    val videoMaxLength: Int = -1 // 视频最长时长
+) : Serializable{
+
 }
 
 /**
  * 类型对象
+ * @property path 绝对路径
+ * @property time 创建时间
+ * @property type 对象类型  图片/视频
+ * @property duration 视频长度  单位：秒
+ *
  */
-data class Item(
-    val path: String,
-    val uri: Uri,
-    val mimeType: String,
-    val time: Long,
-    val name: String,
-    val type: MXPickerType,
-    val duration: Int = 0
-) : Serializable {
-    fun getFolderName(): String {
+data class MXItem(val path: String, val time: Long, val type: MXPickerType, val duration: Int = 0) :
+    Serializable {
+    private var folderName: String? = null
+
+    init {
         val paths = path.split(File.separator)
         if (paths.size >= 2) {
-            return paths[paths.size - 2]
+            folderName = paths[paths.size - 2]
         }
-        return ""
+    }
+
+    fun getFolderName(): String {
+        return folderName ?: "Others"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MXItem
+
+        if (path != other.path) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = path.hashCode()
+        result = 31 * result + time.hashCode()
+        result = 31 * result + type.hashCode()
+        result = 31 * result + duration
+        return result
     }
 }
-
-data class DbSourceItem(
-    val path: String, // 路径
-    val type: MXPickerType, //类型
-    val mimeType: String, // mime类型
-    val time: Long, // 创建时间
-    val videoLength: Int // 视频时长,单位：秒
-)
 
 /**
  * 分组对象
  */
-data class FolderItem(val name: String, val images: ArrayList<Item> = ArrayList()) : Serializable
+internal data class MXFolderItem(val name: String, val items: List<MXItem> = ArrayList())
 
 /**
  * 图片选择回调
  */
-interface ItemSelectCall {
-    fun select(item: Item)
+internal interface ItemSelectCall {
+    fun select(item: MXItem)
 }
