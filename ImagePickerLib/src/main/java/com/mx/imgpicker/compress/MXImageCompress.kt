@@ -3,6 +3,8 @@ package com.mx.imgpicker.compress
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import com.mx.imgpicker.utils.MXFileBiz
 import com.mx.imgpicker.utils.MXUtils
 import java.io.ByteArrayOutputStream
@@ -39,8 +41,11 @@ class MXImageCompress internal constructor(val build: MXCompressBuild) {
             return source
         }
 
+        // 旋转图片
+        val rotationBitmap = rotationIfNeed(source, tagBitmap) ?: tagBitmap
+
         val cacheImg = try {
-            saveToCacheFile(tagBitmap)
+            saveToCacheFile(rotationBitmap)
         } catch (e: Exception) {
             e.printStackTrace()
             MXUtils.log("缩放图片失败:目标文件写入失败，返回原文件:${source.absolutePath}")
@@ -132,5 +137,34 @@ class MXImageCompress internal constructor(val build: MXCompressBuild) {
         } else {
             ceil(longSide / (1280.0 / scale)).toInt()
         }
+    }
+
+    private fun rotationIfNeed(file: File, tagBitmap: Bitmap): Bitmap? {
+        try {
+            val orientation = ExifInterface(file.absolutePath)
+                .getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            val degree = when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                else -> 0
+            }
+            if (degree != 0) {
+                MXUtils.log("缩放图片： 图片角度 = $degree")
+                val matrix = Matrix()
+                matrix.postRotate(degree.toFloat())
+                val rotationBitmap = Bitmap.createBitmap(
+                    tagBitmap, 0, 0,
+                    tagBitmap.width, tagBitmap.height, matrix,
+                    true
+                )
+                tagBitmap.recycle()
+                return rotationBitmap
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            MXUtils.log("旋转错误：${e.message}")
+        }
+        return null
     }
 }

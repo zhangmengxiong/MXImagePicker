@@ -2,9 +2,9 @@
 ## 介绍
 基于Kotlin，AndroidX的仿微信图片选择器
 [![](https://jitpack.io/v/com.gitee.zhangmengxiong/MXImagePicker.svg)](https://jitpack.io/#com.gitee.zhangmengxiong/MXImagePicker)
-库引用： 替换x.x.x 为最新版本
+库引用： 替换1.4.3 为最新版本
 ```gradle
-    implementation 'com.gitee.zhangmengxiong:MXImagePicker:x.x.x'
+    implementation 'com.gitee.zhangmengxiong:MXImagePicker:1.4.3'
 ```
 
 ![Image text](https://gitee.com/zhangmengxiong/MXImagePicker/raw/master/imgs/screenshot1.png)
