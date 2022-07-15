@@ -9,6 +9,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 internal object MXUtils {
+    val IMAGE_EXT = arrayOf(
+        "svg", "png", "webp", "jpg", "jpeg", "gif", "bmp", "heic", "heif"
+    )
+    val VIDEO_EXT = arrayOf(
+        "mp4", "3gp", "mov", "m4a", "ts", "webm", "mkv"
+    )
+
     private var isDebug = false
     fun setDebug(debug: Boolean) {
         isDebug = debug

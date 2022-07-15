@@ -80,6 +80,7 @@ internal class MXPickerVM : ViewModel() {
                     startScanVideo(context)
                 }
             }
+            startScanAllDirs()
             folderList.postValue(getFolderGroup())
         }
     }
@@ -117,6 +118,43 @@ internal class MXPickerVM : ViewModel() {
             }
             MXUtils.log("扫描完第${page}页 --> ${list.size}")
             page++
+        }
+    }
+
+    /**
+     * 搜索文件夹
+     */
+    private fun startScanAllDirs() {
+        val dirs = sourceDB.getAllDirs()
+        if (dirs.isEmpty()) return
+        for (dir in dirs) {
+            val list = dir.listFiles()
+            if (list == null || list.isEmpty()) continue
+            val mediaList = ArrayList<MXItem>()
+            for (file in list) {
+                val ext = file.extension?.lowercase()
+                if (ext in MXUtils.IMAGE_EXT) {
+                    mediaList.add(
+                        MXItem(
+                            file.absolutePath,
+                            file.lastModified(),
+                            MXPickerType.Image
+                        )
+                    )
+                } else if (ext in MXUtils.VIDEO_EXT) {
+                    mediaList.add(
+                        MXItem(
+                            file.absolutePath,
+                            file.lastModified(),
+                            MXPickerType.Video
+                        )
+                    )
+                }
+            }
+            MXUtils.log("扫描目录 --> ${dir.absolutePath}  ${mediaList.size}")
+            if (mediaList.isNotEmpty()) {
+                sourceDB.addSysSource(mediaList)
+            }
         }
     }
 

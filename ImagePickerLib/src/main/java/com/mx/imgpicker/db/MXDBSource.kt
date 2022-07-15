@@ -25,6 +25,7 @@ internal class MXDBSource(val context: Context) {
             try {
                 val values = ContentValues()
                 values.put(MXSQLiteOpenHelper.DB_KEY_PATH, file.absolutePath)
+                values.put(MXSQLiteOpenHelper.DB_KEY_DIR, file.parentFile?.absolutePath)
                 values.put(MXSQLiteOpenHelper.DB_KEY_TYPE, type.value)
                 values.put(MXSQLiteOpenHelper.DB_KEY_PRIVATE, MXSQLiteOpenHelper.VALUE_PRIVATE_APP)
                 values.put(MXSQLiteOpenHelper.DB_KEY_TIME, (System.currentTimeMillis() / 1000))
@@ -46,20 +47,22 @@ internal class MXDBSource(val context: Context) {
             val insertSql =
                 "replace into ${MXSQLiteOpenHelper.DB_NAME}(" +
                         "${MXSQLiteOpenHelper.DB_KEY_PATH}, " +
+                        "${MXSQLiteOpenHelper.DB_KEY_DIR}, " +
                         "${MXSQLiteOpenHelper.DB_KEY_TYPE}, " +
                         "${MXSQLiteOpenHelper.DB_KEY_PRIVATE}, " +
                         "${MXSQLiteOpenHelper.DB_KEY_TIME}, " +
                         "${MXSQLiteOpenHelper.DB_KEY_VIDEO_LENGTH}) " +
-                        "values(?,?,?,?,?)"
+                        "values(?,?,?,?,?,?)"
             val stat = database.compileStatement(insertSql)
             database.beginTransaction()
             try {
                 for (item in list) {
                     stat.bindString(1, item.path)
-                    stat.bindString(2, item.type.value)
-                    stat.bindString(3, MXSQLiteOpenHelper.VALUE_PRIVATE_SYS)
-                    stat.bindLong(4, item.time)
-                    stat.bindLong(5, item.duration.toLong())
+                    stat.bindString(2, File(item.path).parentFile?.absolutePath)
+                    stat.bindString(3, item.type.value)
+                    stat.bindString(4, MXSQLiteOpenHelper.VALUE_PRIVATE_SYS)
+                    stat.bindLong(5, item.time)
+                    stat.bindLong(6, item.duration.toLong())
                     stat.executeInsert()
                 }
                 database.setTransactionSuccessful()
@@ -160,6 +163,40 @@ internal class MXDBSource(val context: Context) {
         return sourceList
     }
 
+    fun getAllDirs(): ArrayList<File> {
+        val dirs = ArrayList<File>()
+        synchronized(lock) {
+            val database = dbHelp.writableDatabase
+            var cursor: Cursor? = null
+            try {
+                val selectSql =
+                    "select ${MXSQLiteOpenHelper.DB_KEY_DIR} from ${MXSQLiteOpenHelper.DB_NAME} group by ${MXSQLiteOpenHelper.DB_KEY_DIR}"
+                cursor = database.rawQuery(selectSql, arrayOf())
+                if (cursor != null && cursor.moveToFirst()) {
+                    do {
+                        val dir = cursor.getString(
+                            cursor.getColumnIndexOrThrow(MXSQLiteOpenHelper.DB_KEY_DIR)
+                        )
+                        val dirFile = File(dir)
+                        if (!dirFile.exists()) continue
+                        val child = dirFile.listFiles()
+                        if (child == null || child.isEmpty()) continue
+                        dirs.add(dirFile)
+                    } while (cursor.moveToNext())
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                try {
+                    cursor?.close()
+                } catch (e: Exception) {
+                }
+                database.close()
+            }
+        }
+        return dirs
+    }
+
     /**
      * 指针转换成对象
      */
@@ -171,13 +208,18 @@ internal class MXDBSource(val context: Context) {
 
             val isPrivate =
                 cursor.getString(cursor.getColumnIndexOrThrow(MXSQLiteOpenHelper.DB_KEY_PRIVATE)) == MXSQLiteOpenHelper.VALUE_PRIVATE_APP
-            val path = cursor.getString(cursor.getColumnIndexOrThrow(MXSQLiteOpenHelper.DB_KEY_PATH))
+            val path =
+                cursor.getString(cursor.getColumnIndexOrThrow(MXSQLiteOpenHelper.DB_KEY_PATH))
             var duration =
                 cursor.getLong(cursor.getColumnIndexOrThrow(MXSQLiteOpenHelper.DB_KEY_VIDEO_LENGTH))
 
             val file = File(path)
             if (!file.exists() && !isPrivate) {
-                database.delete(MXSQLiteOpenHelper.DB_NAME, "${MXSQLiteOpenHelper.DB_KEY_PATH} = ?", arrayOf(path))
+                database.delete(
+                    MXSQLiteOpenHelper.DB_NAME,
+                    "${MXSQLiteOpenHelper.DB_KEY_PATH} = ?",
+                    arrayOf(path)
+                )
                 return null
             }
             val time = file.lastModified()
