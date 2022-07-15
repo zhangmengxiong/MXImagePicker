@@ -4,7 +4,7 @@
 [![](https://jitpack.io/v/com.gitee.zhangmengxiong/MXImagePicker.svg)](https://jitpack.io/#com.gitee.zhangmengxiong/MXImagePicker)
 库引用： 替换1.4.3 为最新版本
 ```gradle
-    implementation 'com.gitee.zhangmengxiong:MXImagePicker:1.4.3'
+    implementation 'com.gitee.zhangmengxiong:MXImagePicker:1.5.1'
 ```
 
 ![Image text](https://gitee.com/zhangmengxiong/MXImagePicker/raw/master/imgs/screenshot1.png)
