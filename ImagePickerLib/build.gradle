@@ -33,7 +33,7 @@ afterEvaluate {
 
                 groupId = 'com.mx.imgpicker'
                 artifactId = 'MXImagePicker'
-                version = '1.5.1'
+                version = '1.5.2'
             }
         }
     }
@@ -41,7 +41,7 @@ afterEvaluate {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compileOnly 'androidx.appcompat:appcompat:1.4.0'
+    compileOnly 'androidx.appcompat:appcompat:1.4.1'
     compileOnly "androidx.recyclerview:recyclerview:1.2.1"
     compileOnly 'androidx.constraintlayout:constraintlayout:2.0.4'
     compileOnly 'com.github.chrisbanes:PhotoView:2.3.0'

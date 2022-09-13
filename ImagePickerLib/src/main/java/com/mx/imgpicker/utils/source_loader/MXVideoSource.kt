@@ -97,7 +97,7 @@ internal object MXVideoSource : IMXSource {
 //            val time = File(path).lastModified() / 1000 // 单位：秒
             if (path.endsWith("downloading")) return null
             if (contentResolver.openFileDescriptor(uri, "r") != null) {
-                return MXItem(path, modify, MXPickerType.Video, duration / 1000)
+                return MXItem(path, modify * 1000, MXPickerType.Video, duration / 1000)
             }
         } catch (e: Exception) {
         }
