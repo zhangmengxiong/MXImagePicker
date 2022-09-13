@@ -61,7 +61,7 @@ internal class MXDBSource(val context: Context) {
                     stat.bindString(2, File(item.path).parentFile?.absolutePath)
                     stat.bindString(3, item.type.value)
                     stat.bindString(4, MXSQLiteOpenHelper.VALUE_PRIVATE_SYS)
-                    stat.bindLong(5, item.time)
+                    stat.bindLong(5, item.timeInMs)
                     stat.bindLong(6, item.duration.toLong())
                     stat.executeInsert()
                 }
@@ -210,6 +210,8 @@ internal class MXDBSource(val context: Context) {
                 cursor.getString(cursor.getColumnIndexOrThrow(MXSQLiteOpenHelper.DB_KEY_PRIVATE)) == MXSQLiteOpenHelper.VALUE_PRIVATE_APP
             val path =
                 cursor.getString(cursor.getColumnIndexOrThrow(MXSQLiteOpenHelper.DB_KEY_PATH))
+            val time =
+                cursor.getLong(cursor.getColumnIndexOrThrow(MXSQLiteOpenHelper.DB_KEY_TIME))
             var duration =
                 cursor.getLong(cursor.getColumnIndexOrThrow(MXSQLiteOpenHelper.DB_KEY_VIDEO_LENGTH))
 
@@ -222,7 +224,7 @@ internal class MXDBSource(val context: Context) {
                 )
                 return null
             }
-            val time = file.lastModified()
+//            val time = file.lastModified()
 
             if (type == MXPickerType.Video && duration <= 0) {
                 duration = MXVideoSource.getVideoLength(file) / 1000

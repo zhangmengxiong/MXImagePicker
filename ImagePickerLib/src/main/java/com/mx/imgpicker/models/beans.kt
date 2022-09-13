@@ -39,19 +39,19 @@ internal data class MXConfig(
     val compressType: MXCompressType = MXCompressType.SELECT_BY_USER, // 压缩类型
     val compressIgnoreSizeKb: Int = 200, // 图片压缩源文件阈值
     val videoMaxLength: Int = -1 // 视频最长时长
-) : Serializable{
+) : Serializable {
 
 }
 
 /**
  * 类型对象
  * @property path 绝对路径
- * @property time 创建时间
+ * @property timeInMs 创建时间
  * @property type 对象类型  图片/视频
  * @property duration 视频长度  单位：秒
  *
  */
-data class MXItem(val path: String, val time: Long, val type: MXPickerType, val duration: Int = 0) :
+data class MXItem(val path: String, val timeInMs: Long, val type: MXPickerType, val duration: Int = 0) :
     Serializable {
     private var folderName: String? = null
 
@@ -79,7 +79,7 @@ data class MXItem(val path: String, val time: Long, val type: MXPickerType, val 
 
     override fun hashCode(): Int {
         var result = path.hashCode()
-        result = 31 * result + time.hashCode()
+        result = 31 * result + timeInMs.hashCode()
         result = 31 * result + type.hashCode()
         result = 31 * result + duration
         return result
@@ -90,10 +90,3 @@ data class MXItem(val path: String, val time: Long, val type: MXPickerType, val 
  * 分组对象
  */
 internal data class MXFolderItem(val name: String, val items: List<MXItem> = ArrayList())
-
-/**
- * 图片选择回调
- */
-internal interface ItemSelectCall {
-    fun select(item: MXItem)
-}
