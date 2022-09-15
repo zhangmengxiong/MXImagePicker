@@ -3,21 +3,15 @@ package com.mx.imgpicker.adapts
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.RelativeLayout
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
 import com.mx.imgpicker.app.picker.MXPickerVM
 import com.mx.imgpicker.models.MXItem
-import com.mx.imgpicker.models.MXPickerType
-import com.mx.imgpicker.utils.MXUtils
 import com.mx.imgpicker.views.MXAdaptItemView
-import com.mx.imgpicker.views.MXPickerTextView
 
 internal class ImgGridAdapt(
-    private val vm: MXPickerVM
+    private val vm: MXPickerVM,
+    val imgList: ArrayList<MXItem> = ArrayList()
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var onSelectClick: ((item: MXItem, isSelect: Boolean) -> Unit)? = null
     var onItemClick: ((item: MXItem, list: List<MXItem>) -> Unit)? = null
@@ -45,18 +39,18 @@ internal class ImgGridAdapt(
             holder.itemView.setOnClickListener { onTakePictureClick?.invoke() }
         } else if (holder is ImgVH) {
             val position = if (vm.enableCamera) (position - 1) else position
-            val item = vm.getItem(position) ?: return
-            val selectIndex = vm.getSelectIndexOf(item)
+            val item = imgList.getOrNull(position) ?: return
+            val selectIndex = vm.selectMediaList.indexOf(item)
             (holder.itemView as MXAdaptItemView).setData(item, selectIndex, onSelectClick)
 
             holder.itemView.setOnClickListener {
-                onItemClick?.invoke(item, vm.getSelectList())
+                onItemClick?.invoke(item, vm.selectMediaList)
             }
         }
     }
 
     override fun getItemCount(): Int {
-        val size = vm.getItemSize()
+        val size = imgList.size
         return if (vm.enableCamera) size + 1 else size
     }
 

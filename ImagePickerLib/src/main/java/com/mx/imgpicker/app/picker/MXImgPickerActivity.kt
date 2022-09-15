@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
 import com.mx.imgpicker.app.picker.fragment.MXFullScreenFragment
@@ -21,6 +22,7 @@ import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.observer.MXSysImageObserver
 import com.mx.imgpicker.observer.MXSysVideoObserver
 import com.mx.imgpicker.utils.MXUtils
+import kotlinx.coroutines.launch
 import kotlin.concurrent.thread
 
 
@@ -103,13 +105,8 @@ class MXImgPickerActivity : AppCompatActivity() {
             true,
             videoChangeObserver
         )
-        vm.folderList.observe(this) { list ->
-            val selectName = vm.selectFolder.value?.name
-            val selectFolder = list.firstOrNull {
-                it.name == selectName
-            } ?: list.firstOrNull()
-            vm.selectFolder.postValue(selectFolder)
-            MXUtils.log("数据刷新：${vm.getItemSize()}")
+        vm.selectDirLive.observe(this) {
+            lifecycleScope.launch { vm.reloadMediaList() }
         }
 
         vm.startScan()
@@ -117,7 +114,7 @@ class MXImgPickerActivity : AppCompatActivity() {
 
     fun showLargeView(show: Boolean, target: MXItem? = null) {
         if (show) {
-            pickerFullScreenFragment.setItemList(vm.selectFolder.value?.items)
+            pickerFullScreenFragment.setItemList(vm.mediaList)
             pickerFullScreenFragment.setTargetItem(target)
             gotoFragment(pickerFullScreenFragment)
         } else {
@@ -126,28 +123,25 @@ class MXImgPickerActivity : AppCompatActivity() {
     }
 
     fun showLargeSelectView() {
-        val list = vm.getSelectList()
+        val list = vm.selectMediaList
         if (list.isEmpty()) return
 
-        pickerFullScreenFragment.setItemList(vm.getSelectList())
+        pickerFullScreenFragment.setItemList(list)
         pickerFullScreenFragment.setTargetItem(list.firstOrNull())
         gotoFragment(pickerFullScreenFragment)
     }
 
     private val imageChangeObserver = MXSysImageObserver {
+        if (isDestroyed) return@MXSysImageObserver
         if (vm.pickerType in arrayOf(MXPickerType.Image, MXPickerType.ImageAndVideo)) {
             vm.startScan()
         }
     }
     private val videoChangeObserver = MXSysVideoObserver {
+        if (isDestroyed) return@MXSysVideoObserver
         if (vm.pickerType in arrayOf(MXPickerType.Video, MXPickerType.ImageAndVideo)) {
             vm.startScan()
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        vm.startScan()
     }
 
     override fun onBackPressed() {
@@ -198,7 +192,7 @@ class MXImgPickerActivity : AppCompatActivity() {
             ).show()
             return
         }
-        val selectList = vm.getSelectList()
+        val selectList = vm.selectMediaList
         val isSelect = (selectList.contains(item))
         val list = ArrayList(selectList)
         if (isSelect) {
@@ -219,7 +213,7 @@ class MXImgPickerActivity : AppCompatActivity() {
             }
             list.add(item)
         }
-        vm.selectList.postValue(list)
+        vm.selectMediaListLive.postValue(list)
     }
 
     fun onSelectFinish() {
@@ -238,7 +232,7 @@ class MXImgPickerActivity : AppCompatActivity() {
             else -> false
         }
 
-        val paths = vm.getSelectList()
+        val paths = vm.selectMediaList
         if (!needCompress) {
             setResult.invoke(paths.map { it.path })
         } else {

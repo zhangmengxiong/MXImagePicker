@@ -110,7 +110,7 @@ internal class MXFullScreenFragment : Fragment() {
         vm.fullScreenSelectIndex.observe(viewLifecycleOwner) { index ->
             titleTxv?.text = "${index + 1} / ${imgList.size}"
             val item = imgList.getOrNull(index) ?: return@observe
-            val isSelect = (vm.getSelectIndexOf(item) >= 0)
+            val isSelect = (vm.selectMediaList.indexOf(item) >= 0)
             if (isSelect) {
                 selectImg?.setImageResource(R.drawable.mx_picker_radio_select)
                 selectImg?.setColorFilter(resources.getColor(R.color.mx_picker_color_select))
@@ -120,14 +120,14 @@ internal class MXFullScreenFragment : Fragment() {
             }
         }
 
-        vm.selectList.observe(viewLifecycleOwner) { list ->
+        vm.selectMediaListLive.observe(viewLifecycleOwner) { list ->
             if (list.isEmpty()) {
                 selectBtn?.visibility = View.GONE
                 selectBtn?.text = getString(R.string.mx_picker_string_select)
             } else {
                 selectBtn?.visibility = View.VISIBLE
                 selectBtn?.text =
-                    "${getString(R.string.mx_picker_string_select)}(${vm.getSelectListSize()}/${vm.maxSize})"
+                    "${getString(R.string.mx_picker_string_select)}(${vm.selectMediaList.size}/${vm.maxSize})"
             }
             vm.fullScreenSelectIndex.postValue(vm.fullScreenSelectIndex.value)
         }

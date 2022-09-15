@@ -1,6 +1,8 @@
 package com.mx.imgpicker.app.picker.fragment
 
 import android.Manifest
+import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,10 +13,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.*
 import com.mx.imgpicker.R
 import com.mx.imgpicker.adapts.FolderAdapt
 import com.mx.imgpicker.adapts.ImgGridAdapt
@@ -24,6 +24,8 @@ import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.models.MXCompressType
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.utils.MXUtils
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 internal class MXPickerFragment : Fragment() {
     private val vm by lazy { ViewModelProvider(requireActivity()).get(MXPickerVM::class.java) }
@@ -85,8 +87,7 @@ internal class MXPickerFragment : Fragment() {
             if (folderRecycleView?.isShown == true) {
                 showFolderList(false)
             } else {
-                val folderList = vm.folderList.value ?: emptyList()
-                if (folderList.size <= 1) return@setOnClickListener
+                if (vm.dirList.size <= 1) return@setOnClickListener
                 showFolderList(true)
             }
         }
@@ -129,6 +130,7 @@ internal class MXPickerFragment : Fragment() {
                     val intent = captureBuilder.createIntent(requireContext())
                     val file = captureBuilder.getCaptureFile()
                     vm.addPrivateSource(file, type)
+
                     startActivityForResult(intent, 0x12)
                     MXUtils.log("PATH = ${file.absolutePath}")
                 }
@@ -140,7 +142,7 @@ internal class MXPickerFragment : Fragment() {
                                 getString(R.string.mx_picker_string_take_pic),
                                 getString(R.string.mx_picker_string_take_video)
                             )
-                        ) { dialog, index ->
+                        ) { _, index ->
                             val type = if (index == 0) MXPickerType.Image else MXPickerType.Video
                             takeCall.invoke(type)
                         }
@@ -174,41 +176,52 @@ internal class MXPickerFragment : Fragment() {
                 willResizeImg?.setColorFilter(resources.getColor(R.color.mx_picker_color_important))
             }
         }
-        vm.selectList.observe(viewLifecycleOwner) { list ->
-            if (list.isEmpty()) {
-                selectBtn?.visibility = View.GONE
-                selectBtn?.text = getString(R.string.mx_picker_string_select)
-                previewBtn?.alpha = 0.5f
-                previewBtn?.text = getString(R.string.mx_picker_string_preview)
-            } else {
-                selectBtn?.visibility = View.VISIBLE
-                selectBtn?.text =
-                    "${getString(R.string.mx_picker_string_select)}(${vm.getSelectListSize()}/${vm.maxSize})"
+        vm.selectMediaListLive.observe(viewLifecycleOwner) { list ->
+            updateSelectStatus()
 
-                previewBtn?.alpha = 1f
-                previewBtn?.text =
-                    "${getString(R.string.mx_picker_string_preview)}(${vm.getSelectListSize()})"
-            }
             val oldIdx = selectItemIndex?.toList() ?: emptyList()
-            val newIdx = list.map { vm.itemIndexOf(it) }
+            val newIdx = list.map { vm.mediaList.indexOf(it) }
             val notifyIndex = (oldIdx + newIdx).distinct()
             selectItemIndex = newIdx.toTypedArray()
             notifyIndex.forEach { index ->
                 imgAdapt.notifyItemChanged(if (vm.enableCamera) index + 1 else index)
             }
         }
-        vm.selectFolder.observe(viewLifecycleOwner) { folder ->
-            folderNameTxv?.text = folder?.name
-            emptyTxv?.visibility = if (folder?.items?.isEmpty() == true) View.VISIBLE else View.GONE
+        vm.selectDirLive.observe(viewLifecycleOwner) { dir ->
+            folderNameTxv?.text = dir?.name
             folderAdapt.notifyDataSetChanged()
+        }
+        vm.mediaListLive.observe(viewLifecycleOwner) { list ->
+            emptyTxv?.visibility = if (vm.mediaList.isEmpty()) View.VISIBLE else View.GONE
+            imgAdapt.imgList.clear()
+            imgAdapt.imgList.addAll(list)
             imgAdapt.notifyDataSetChanged()
+            MXUtils.log("刷新列表：${imgAdapt.imgList.size}")
         }
         folderAdapt.onItemClick = { folder ->
-            vm.selectFolder.postValue(folder)
+            vm.selectDirLive.postValue(folder)
             showFolderList(false)
         }
-        vm.folderList.observe(viewLifecycleOwner) {
+        vm.dirListLive.observe(viewLifecycleOwner) {
             folderAdapt.notifyDataSetChanged()
+            MXUtils.log("刷新目录：${vm.dirList.size}")
+        }
+    }
+
+    private fun updateSelectStatus() {
+        val selectSize = vm.selectMediaList.size
+        if (selectSize <= 0) {
+            selectBtn?.visibility = View.GONE
+            selectBtn?.text = getString(R.string.mx_picker_string_select)
+            previewBtn?.alpha = 0.5f
+            previewBtn?.text = getString(R.string.mx_picker_string_preview)
+        } else {
+            selectBtn?.visibility = View.VISIBLE
+            selectBtn?.text =
+                "${getString(R.string.mx_picker_string_select)}(${selectSize}/${vm.maxSize})"
+            previewBtn?.alpha = 1f
+            previewBtn?.text =
+                "${getString(R.string.mx_picker_string_preview)}(${selectSize})"
         }
     }
 
@@ -228,5 +241,12 @@ internal class MXPickerFragment : Fragment() {
 
     fun dismissFolder() {
         showFolderList(false)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        lifecycleScope.launch {
+            delay(1000)
+            vm.reloadMediaList()
+        }
     }
 }

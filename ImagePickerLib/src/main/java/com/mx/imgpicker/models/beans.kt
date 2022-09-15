@@ -1,6 +1,5 @@
 package com.mx.imgpicker.models
 
-import java.io.File
 import java.io.Serializable
 
 /**
@@ -51,20 +50,12 @@ internal data class MXConfig(
  * @property duration 视频长度  单位：秒
  *
  */
-data class MXItem(val path: String, val timeInMs: Long, val type: MXPickerType, val duration: Int = 0) :
-    Serializable {
-    private var folderName: String? = null
-
-    init {
-        val paths = path.split(File.separator)
-        if (paths.size >= 2) {
-            folderName = paths[paths.size - 2]
-        }
-    }
-
-    fun getFolderName(): String {
-        return folderName ?: "Others"
-    }
+data class MXItem(
+    val path: String,
+    val timeInMs: Long,
+    val type: MXPickerType,
+    val duration: Int = 0
+) : Serializable {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -89,4 +80,29 @@ data class MXItem(val path: String, val timeInMs: Long, val type: MXPickerType, 
 /**
  * 分组对象
  */
-internal data class MXFolderItem(val name: String, val items: List<MXItem> = ArrayList())
+internal data class MXDirItem(
+    val name: String,
+    val path: String,
+    val childSize: Int,
+    var lastItem: MXItem? = null
+) : Serializable {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MXDirItem
+
+        if (name != other.name) return false
+        if (path != other.path) return false
+        if (childSize != other.childSize) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + path.hashCode()
+        result = 31 * result + childSize
+        return result
+    }
+}

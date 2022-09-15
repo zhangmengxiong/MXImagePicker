@@ -5,13 +5,11 @@ import com.mx.imgpicker.models.MXItem
 import java.io.File
 
 internal interface IMXSource {
-    fun scan(
+    suspend fun scan(
         context: Context,
-        page: Int,
         pageSize: Int,
-        minTime: Long?,
-        maxTime: Long?
-    ): List<MXItem>
+        onScanCall: ((List<MXItem>) -> Boolean)
+    )
 
     fun save(context: Context, file: File): Boolean
 }

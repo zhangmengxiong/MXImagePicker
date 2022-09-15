@@ -27,6 +27,14 @@ internal object MXUtils {
         }
     }
 
+    fun compareList(list1: List<*>?, list2: List<*>?): Boolean {
+        if (list1 == null || list2 == null || list1.size != list2.size) return false
+        list1.forEachIndexed { index, oldItem ->
+            if (list2.getOrNull(index)?.equals(oldItem) != true) return false
+        }
+        return true
+    }
+
     fun timeToString(second: Int): String {
         val hour = second / (60 * 60)
         val minute = (second / 60) % 60

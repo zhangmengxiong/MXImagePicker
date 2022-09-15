@@ -16,23 +16,19 @@ object MXContentProvide {
         whereArgs: Array<String>,
         orderBy: String,
         orderAscending: Boolean,
-        limit: Int = 20,
-        offset: Int = 0
     ): Cursor? = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
             val selection = createSelectionBundle(
                 whereCondition,
                 whereArgs,
                 orderBy,
-                orderAscending,
-                limit,
-                offset
+                orderAscending
             )
             contentResolver.query(collection, projection, selection, null)
         }
         else -> {
             val orderDirection = if (orderAscending) "ASC" else "DESC"
-            val order = "$orderBy $orderDirection LIMIT $limit OFFSET $offset"
+            val order = "$orderBy $orderDirection"
             contentResolver.query(collection, projection, whereCondition, whereArgs, order)
         }
     }
@@ -43,12 +39,7 @@ object MXContentProvide {
         whereArgs: Array<String>,
         orderBy: String,
         orderAscending: Boolean,
-        limit: Int = 20,
-        offset: Int = 0
     ): Bundle = Bundle().apply {
-        // Limit & Offset
-        putInt(ContentResolver.QUERY_ARG_LIMIT, limit)
-        putInt(ContentResolver.QUERY_ARG_OFFSET, offset)
         // Sort function
         putStringArray(ContentResolver.QUERY_ARG_SORT_COLUMNS, arrayOf(orderBy))
 

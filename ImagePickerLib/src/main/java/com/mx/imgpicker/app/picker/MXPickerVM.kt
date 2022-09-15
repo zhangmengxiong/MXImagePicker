@@ -1,24 +1,30 @@
 package com.mx.imgpicker.app.picker
 
-import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
 import com.mx.imgpicker.db.MXDBSource
 import com.mx.imgpicker.models.*
 import com.mx.imgpicker.utils.MXUtils
+import com.mx.imgpicker.utils.source_loader.MXDirSource
 import com.mx.imgpicker.utils.source_loader.MXImageSource
 import com.mx.imgpicker.utils.source_loader.MXVideoSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
-import kotlin.concurrent.thread
 
 internal class MXPickerVM : ViewModel() {
     companion object {
-        private const val PAGE_START = 0
-        private const val PAGE_SIZE = 30
+        private const val PAGE_SIZE = 40
     }
 
+    private val allResStr by lazy {
+        MXImagePicker.getContext().resources.getString(R.string.mx_picker_string_all)
+    }
     private val sourceDB by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         MXDBSource(MXImagePicker.getContext())
     }
@@ -46,136 +52,84 @@ internal class MXPickerVM : ViewModel() {
         this.videoMaxLength = config.videoMaxLength
     }
 
-    val folderList = MutableLiveData<List<MXFolderItem>>(ArrayList()) // 文件夹列表
-    val selectFolder = MutableLiveData<MXFolderItem?>(null) // 当前选择文件夹
-    val selectList = MutableLiveData<List<MXItem>>(ArrayList()) // 选中的文件列表
+    val dirListLive = MutableLiveData<List<MXDirItem>>(ArrayList()) // 文件夹列表
+    val dirList: List<MXDirItem>
+        get() = dirListLive.value ?: emptyList()
+
+    val selectDirLive = MutableLiveData(MXDirItem(allResStr, "", 0)) // 当前选择文件夹
+    val mediaListLive = MutableLiveData<List<MXItem>>(ArrayList()) // 文件列表
+    val mediaList: List<MXItem>
+        get() = mediaListLive.value ?: emptyList()
+
+    val selectMediaListLive = MutableLiveData<List<MXItem>>(ArrayList()) // 选中的文件列表
+    val selectMediaList: List<MXItem>
+        get() = selectMediaListLive.value ?: emptyList()
+
     val needCompress = MutableLiveData(true) // 是否需要压缩
     val fullScreenSelectIndex = MutableLiveData(0) // 是否需要压缩
 
-    fun getItemSize() = selectFolder.value?.items?.size ?: 0
-    fun getItem(index: Int) = selectFolder.value?.items?.getOrNull(index)
-    fun itemIndexOf(item: MXItem?): Int {
-        if (item == null) return -1
-        return selectFolder.value?.items?.indexOf(item) ?: -1
-    }
-
-    fun getSelectList() = selectList.value ?: emptyList()
-    fun getSelectListSize() = selectList.value?.size ?: 0
-    fun getSelectIndexOf(item: MXItem?): Int {
-        if (item == null) return -1
-        return selectList.value?.indexOf(item) ?: -1
-    }
-
     fun startScan() {
-        val context = MXImagePicker.getContext()
-        thread {
-            folderList.postValue(getFolderGroup())
-            when (pickerType) {
-                MXPickerType.Video -> {
-                    startScanVideo(context)
-                    startScanImage(context)
-                }
-                else -> {
-                    startScanImage(context)
-                    startScanVideo(context)
-                }
-            }
-            startScanAllDirs()
-            folderList.postValue(getFolderGroup())
-        }
-    }
+        viewModelScope.launch {
+            MXUtils.log("开始扫描--> <--")
+            val context = MXImagePicker.getContext()
+            reloadMediaList()
 
-    private fun startScanImage(context: Context) {
-        var page = PAGE_START
-        while (!isRelease) {
-            val timePair = sourceDB.getLimitTime(MXPickerType.Image)
-            val list = MXImageSource.scan(
-                context, page, PAGE_SIZE,
-                timePair?.first, timePair?.second
-            )
-            if (list.isEmpty()) break
-            sourceDB.addSysSource(list)
-            if (page == PAGE_START || page % 4 == 0) {
-                folderList.postValue(getFolderGroup())
-            }
-            MXUtils.log("扫描完第${page}页 --> ${list.size}")
-            page++
-        }
-    }
-
-    private fun startScanVideo(context: Context) {
-        var page = PAGE_START
-        while (!isRelease) {
-            val timePair = sourceDB.getLimitTime(MXPickerType.Video)
-            val list = MXVideoSource.scan(
-                context, page, PAGE_SIZE,
-                timePair?.first, timePair?.second
-            )
-            if (list.isEmpty()) break
-            sourceDB.addSysSource(list)
-            if (page == PAGE_START || page % 3 == 0) {
-                folderList.postValue(getFolderGroup())
-            }
-            MXUtils.log("扫描完第${page}页 --> ${list.size}")
-            page++
-        }
-    }
-
-    /**
-     * 搜索文件夹
-     */
-    private fun startScanAllDirs() {
-        val dirs = sourceDB.getAllDirs()
-        if (dirs.isEmpty()) return
-        for (dir in dirs) {
-            val list = dir.listFiles()
-            if (list == null || list.isEmpty()) continue
-            val mediaList = ArrayList<MXItem>()
-            for (file in list) {
-                val ext = file.extension?.lowercase()
-                if (ext in MXUtils.IMAGE_EXT) {
-                    mediaList.add(
-                        MXItem(
-                            file.absolutePath,
-                            file.lastModified(),
-                            MXPickerType.Image
-                        )
-                    )
-                } else if (ext in MXUtils.VIDEO_EXT) {
-                    mediaList.add(
-                        MXItem(
-                            file.absolutePath,
-                            file.lastModified(),
-                            MXPickerType.Video
-                        )
-                    )
+            val scanResult: ((List<MXItem>) -> Boolean) = { list ->
+                viewModelScope.launch {
+                    val hasSave = withContext(Dispatchers.IO) {
+                        mediaList.containsAll(list)
+                    }
+                    if (hasSave) return@launch
+                    MXUtils.log("扫描结果--> ${list.size}")
+                    sourceDB.addSysSource(list)
+                    reloadMediaList()
                 }
+                this.isActive
             }
-            MXUtils.log("扫描目录 --> ${dir.absolutePath}  ${mediaList.size}")
-            if (mediaList.isNotEmpty()) {
-                sourceDB.addSysSource(mediaList)
+            if (pickerType != MXPickerType.Video) {
+                MXImageSource.scan(context, PAGE_SIZE, scanResult)
             }
+            if (pickerType != MXPickerType.Image) {
+                MXVideoSource.scan(context, PAGE_SIZE, scanResult)
+            }
+
+            val dirs = sourceDB.getAllDirList(pickerType)
+            MXDirSource(dirs).scan(context, PAGE_SIZE, scanResult)
+
+            reloadMediaList()
+            MXUtils.log("结束扫描--> <--")
         }
     }
 
     fun addPrivateSource(file: File, type: MXPickerType) {
-        sourceDB.addPrivateSource(file, type)
+        viewModelScope.launch { sourceDB.addPrivateSource(file, type) }
     }
 
-    private fun getFolderGroup(): ArrayList<MXFolderItem> {
-        val list = sourceDB.getAllSource(pickerType)
-        val group = list.groupBy { it.getFolderName() }.map {
-            MXFolderItem(it.key, it.value)
-        }.toMutableList()
-        group.add(
-            0,
-            MXFolderItem(
-                MXImagePicker.getContext().resources.getString(R.string.mx_picker_string_all),
-                list
-            )
+    suspend fun reloadMediaList() = withContext(Dispatchers.IO) {
+        val dirs = sourceDB.getAllDirList(pickerType)
+        val dir = selectDirLive.value
+        val allDir = MXDirItem(
+            allResStr,
+            "",
+            dirs.sumOf { it.childSize },
+            sourceDB.queryLastItem("", pickerType)
         )
-        group.sortByDescending { it.items.size }
-        return ArrayList(group)
+        val allDirs = listOf(allDir) + dirs
+
+        val selectDir = allDirs.firstOrNull { it.path == (dir?.path ?: "") }
+            ?: allDirs.first()
+
+        if (!MXUtils.compareList(dirListLive.value, allDirs)) {
+            dirListLive.postValue(allDirs)
+        }
+        if (dir != selectDir) {
+            selectDirLive.postValue(selectDir)
+        }
+
+        val mediaList = sourceDB.getAllSource(pickerType, selectDir.path)
+        if (!MXUtils.compareList(mediaListLive.value, mediaList)) {
+            mediaListLive.postValue(mediaList)
+        }
     }
 
     fun release() {

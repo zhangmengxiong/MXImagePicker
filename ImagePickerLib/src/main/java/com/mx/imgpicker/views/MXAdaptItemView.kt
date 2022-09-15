@@ -12,13 +12,14 @@ import com.mx.imgpicker.R
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.utils.MXUtils
-import com.mx.imgpicker.views.MXPickerTextView
 
 class MXAdaptItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : ConstraintLayout(context, attrs) {
     init {
         View.inflate(context, R.layout.mx_picker_adapt_img_item, this)
+        isFocusable = false
+        isFocusableInTouchMode = false
     }
 
     private val img: ImageView by lazy { findViewById(R.id.img) }

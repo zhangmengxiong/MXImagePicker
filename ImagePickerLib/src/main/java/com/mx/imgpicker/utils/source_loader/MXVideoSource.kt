@@ -11,20 +11,20 @@ import android.os.Build
 import android.provider.MediaStore
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 
 internal object MXVideoSource : IMXSource {
     const val MIME_TYPE = "video/*"
     private val SOURCE_URI = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-    override fun scan(
+    override suspend fun scan(
         context: Context,
-        page: Int,
         pageSize: Int,
-        minTime: Long?,
-        maxTime: Long?
-    ): List<MXItem> {
+        onScanCall: ((List<MXItem>) -> Boolean)
+    ) = withContext(Dispatchers.IO) {
         //扫描图片
-        val resolver = context.contentResolver ?: return emptyList()
+        val resolver = context.contentResolver ?: return@withContext
         val columns = arrayListOf(
             MediaStore.Video.Media.DATA,
             MediaStore.Video.Media._ID,
@@ -35,19 +35,8 @@ internal object MXVideoSource : IMXSource {
             columns.add(MediaStore.Video.Media.RELATIVE_PATH)
         }
 
-        var where = MediaStore.Video.Media.SIZE + " > ? "
+        val where = MediaStore.Video.Media.SIZE + ">?"
         val whereArgs = arrayListOf("0")
-        if (maxTime != null && minTime != null) {
-            where += " and (" + MediaStore.Video.Media.DATE_MODIFIED + "<? or " + MediaStore.Video.Media.DATE_MODIFIED + ">?)"
-            whereArgs.add(minTime.toString())
-            whereArgs.add(maxTime.toString())
-        } else if (minTime != null) {
-            where += " and " + MediaStore.Video.Media.DATE_MODIFIED + "<?"
-            whereArgs.add(minTime.toString())
-        } else if (maxTime != null) {
-            where += " and " + MediaStore.Video.Media.DATE_MODIFIED + ">?"
-            whereArgs.add(maxTime.toString())
-        }
 
         val images = ArrayList<MXItem>()
         var mCursor: Cursor? = null
@@ -56,20 +45,23 @@ internal object MXVideoSource : IMXSource {
                 resolver, SOURCE_URI, columns.toTypedArray(),
                 where, whereArgs.toTypedArray(),
                 MediaStore.Video.Media.DATE_MODIFIED,
-                false, pageSize, page * pageSize
+                false
             )
-
-            //读取扫描到的图片
-            if (mCursor != null && mCursor.moveToFirst()) {
-                var count = 0
-                do {
-                    val item = cursorToImageItem(resolver, mCursor)
-                    if (item != null) {
-                        images.add(item)
-                        count++
-                    }
-                } while (mCursor.moveToNext() && count < pageSize)
+            if (mCursor == null || !mCursor.moveToFirst()) {
+                return@withContext
             }
+            do {
+                val item = cursorToImageItem(resolver, mCursor)
+                if (item != null) {
+                    images.add(item)
+                }
+                if (images.size >= pageSize) {
+                    val scanContinue = onScanCall.invoke(images.toList())
+                    images.clear()
+                    if (!scanContinue) break
+                }
+            } while (mCursor.moveToNext())
+            onScanCall.invoke(images.toList())
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
@@ -78,7 +70,6 @@ internal object MXVideoSource : IMXSource {
             } catch (e: Exception) {
             }
         }
-        return images
     }
 
     private fun cursorToImageItem(contentResolver: ContentResolver, mCursor: Cursor): MXItem? {

@@ -79,7 +79,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:animateLayoutChanges="true">
+        android:animateLayoutChanges="true"
+        android:focusable="false"
+        android:focusableInTouchMode="false">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycleView"
@@ -87,6 +89,9 @@
             android:layout_height="match_parent"
             android:fadingEdge="none"
             android:fadingEdgeLength="0dp"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:isScrollContainer="false"
             android:paddingHorizontal="1dp" />
 
         <TextView
@@ -106,6 +111,8 @@
             android:background="@color/mx_picker_color_background"
             android:fadingEdge="none"
             android:fadingEdgeLength="0dp"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             android:visibility="gone" />
     </FrameLayout>
 
