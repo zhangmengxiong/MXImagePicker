@@ -11,6 +11,7 @@ import com.mx.imgpicker.utils.source_loader.MXVideoSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import kotlin.math.abs
 
 internal class MXDBSource(val context: Context) {
     companion object {
@@ -273,6 +274,13 @@ internal class MXDBSource(val context: Context) {
             val file = File(path)
             if (!file.exists() || file.length() <= 0) {
                 if (!isPrivate) {
+                    database.delete(
+                        MXSQLite.DB_NAME,
+                        "${MXSQLite.DB_PATH} = ?",
+                        arrayOf(path)
+                    )
+                }
+                if (isPrivate && abs(System.currentTimeMillis() - time) > 60 * 1000) {// 删除超时的自拍数据
                     database.delete(
                         MXSQLite.DB_NAME,
                         "${MXSQLite.DB_PATH} = ?",

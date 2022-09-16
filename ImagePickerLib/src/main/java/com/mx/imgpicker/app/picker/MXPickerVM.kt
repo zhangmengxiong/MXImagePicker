@@ -120,17 +120,17 @@ internal class MXPickerVM : ViewModel() {
 
         if (!MXUtils.compareList(dirListLive.value, allDirs)) {
             dirListLive.postValue(allDirs)
-            MXUtils.log("目录列表刷新:${dirListLive.value?.size}->${allDirs.size}")
+            MXUtils.log("刷新->目录列表:${dirListLive.value?.size}->${allDirs.size}")
         }
         if (dir?.path != selectDir.path) {
             selectDirLive.postValue(selectDir)
-            MXUtils.log("选中目录刷新:${dir?.path}->${selectDir.path}")
+            MXUtils.log("刷新->选中目录:${dir?.path}->${selectDir.path}")
         }
 
         val mediaList = sourceDB.getAllSource(pickerType, selectDir.path)
         if (!MXUtils.compareList(mediaListLive.value, mediaList)) {
             mediaListLive.postValue(mediaList)
-            MXUtils.log("图片数据刷新")
+            MXUtils.log("刷新->图片列表")
         }
         MXUtils.log("加载时长：${(System.currentTimeMillis() - start) / 1000f} 秒")
     }
