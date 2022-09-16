@@ -44,6 +44,7 @@ startActivityForResult(intent,0x22)
     * PickerType.ImageAndVideo = 图片 + 视频  混合选择
 3. `setCameraEnable(enable: Boolean)` 设置是否启动拍摄功能，默认=true
 4. `setMaxVideoLength(length: Int)` 当类型=Video时，可以选择视频最大时长限制，单位：秒   默认=-1 无限制
+5. `setMaxListSize(size: Int)` 最长列表加载长度，防止图片过多时产生OOM  -1=不限制   默认限制长度=1000条
 
 ```kotlin
 // 在图片选择器Activity创建时会回调这个方法，一般会通过这个来改变导航栏、状态栏的Theme,demo中搭配`ImmersionBar`来实现沉浸式效果
