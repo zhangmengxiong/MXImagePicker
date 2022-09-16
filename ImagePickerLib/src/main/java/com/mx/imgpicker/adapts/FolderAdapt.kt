@@ -5,14 +5,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
 import com.mx.imgpicker.app.picker.MXPickerVM
 import com.mx.imgpicker.models.MXDirItem
+import kotlinx.coroutines.launch
 
-internal class FolderAdapt(private val vm: MXPickerVM) :
-    RecyclerView.Adapter<FolderAdapt.FolderVH>() {
+internal class FolderAdapt(
+    private val vm: MXPickerVM,
+    private val lifecycleScope: LifecycleCoroutineScope
+) : RecyclerView.Adapter<FolderAdapt.FolderVH>() {
     var onItemClick: ((item: MXDirItem) -> Unit)? = null
 
     class FolderVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -32,8 +36,16 @@ internal class FolderAdapt(private val vm: MXPickerVM) :
     override fun onBindViewHolder(holder: FolderVH, position: Int) {
         val item = vm.dirList.getOrNull(position) ?: return
         val isSelect = (item.path == vm.selectDirLive.value?.path)
+
+        if (item.lastItem == null) {
+            lifecycleScope.launch {
+                item.lastItem = vm.sourceDB.queryLastItem(item.path, vm.pickerType)
+                this@FolderAdapt.notifyItemChanged(position)
+            }
+        }
+
+        holder.img.setImageResource(R.drawable.mx_icon_picker_image_place_holder)
         item.lastItem?.let { imgItem ->
-            holder.img.setImageResource(R.drawable.mx_icon_picker_image_place_holder)
             MXImagePicker.getImageLoader()?.invoke(imgItem, holder.img)
         }
         holder.folderNameTxv.text = item.name
