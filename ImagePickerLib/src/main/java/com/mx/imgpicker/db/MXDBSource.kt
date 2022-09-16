@@ -194,9 +194,6 @@ internal class MXDBSource(val context: Context) {
                     database.close()
                 }
             }
-            for (dir in dirs) {
-                dir.lastItem = queryLastItem(dir.path, type)
-            }
             return@withContext dirs
         }
 
@@ -235,7 +232,12 @@ internal class MXDBSource(val context: Context) {
                         orderBy
                     )
                     if (cursor != null && cursor.moveToFirst()) {
-                        return@withContext cursorToItem(database, cursor)
+                        do {
+                            val item = cursorToItem(database, cursor)
+                            if (item != null) {
+                                return@withContext item
+                            }
+                        } while (cursor.moveToNext())
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

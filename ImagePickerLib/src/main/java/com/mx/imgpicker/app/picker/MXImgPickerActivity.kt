@@ -62,6 +62,9 @@ class MXImgPickerActivity : AppCompatActivity() {
             (intent.getSerializableExtra(MXPickerBuilder.KEY_INTENT_BUILDER)
                     as? MXConfig) ?: MXConfig()
         )
+        lifecycleScope.launch {
+            vm.reloadMediaList()
+        }
 
         MXUtils.log("启动")
         val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
