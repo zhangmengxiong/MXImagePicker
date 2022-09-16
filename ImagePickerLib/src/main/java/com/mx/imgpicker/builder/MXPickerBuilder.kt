@@ -15,6 +15,7 @@ class MXPickerBuilder : Serializable {
     private var compressType: MXCompressType = MXCompressType.SELECT_BY_USER // 选中图片是否需要压缩至合适大小后返回
     private var compressIgnoreSizeKb = 200 // 图片压缩阈值，低于这个大小的图片不会被压缩 单位：KB   默认200KB以下不被压缩
     private var videoMaxLength: Int = -1 // 视频最大长度，单位：秒
+    private var maxListSize: Int = 1000 // 列表最多显示条数，防止OOM
 
     /**
      * 设置最大选择数量
@@ -72,6 +73,19 @@ class MXPickerBuilder : Serializable {
         return this
     }
 
+    /**
+     * 最长列表加载长度
+     *  - -1=不限制
+     *  - 默认限制长度=1000条
+     */
+    fun setMaxListSize(size: Int): MXPickerBuilder {
+        if (size < 100) {
+            throw IllegalArgumentException("size must > 100")
+        }
+        maxListSize = size
+        return this
+    }
+
     fun createIntent(context: Context): Intent {
         val compressType = if (pickerType == MXPickerType.Video) {
             MXCompressType.OFF
@@ -86,7 +100,8 @@ class MXPickerBuilder : Serializable {
                 enableCamera,
                 compressType,
                 compressIgnoreSizeKb,
-                videoMaxLength
+                videoMaxLength,
+                maxListSize
             )
         )
         intent.setClass(context, MXImgPickerActivity::class.java)

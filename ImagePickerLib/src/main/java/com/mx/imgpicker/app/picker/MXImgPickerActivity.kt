@@ -22,8 +22,9 @@ import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.observer.MXSysImageObserver
 import com.mx.imgpicker.observer.MXSysVideoObserver
 import com.mx.imgpicker.utils.MXUtils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.concurrent.thread
+import kotlinx.coroutines.withContext
 
 
 class MXImgPickerActivity : AppCompatActivity() {
@@ -176,7 +177,6 @@ class MXImgPickerActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        vm.release()
         try {
             contentResolver.unregisterContentObserver(imageChangeObserver)
             contentResolver.unregisterContentObserver(videoChangeObserver)
@@ -195,13 +195,11 @@ class MXImgPickerActivity : AppCompatActivity() {
             ).show()
             return
         }
-        val selectList = vm.selectMediaList
-        val isSelect = (selectList.contains(item))
-        val list = ArrayList(selectList)
+        val isSelect = (vm.selectMediaList.contains(item))
         if (isSelect) {
-            list.remove(item)
+            vm.selectMediaList.remove(item)
         } else {
-            if (selectList.size >= vm.maxSize) {
+            if (vm.selectMediaList.size >= vm.maxSize) {
                 val format = if (vm.pickerType == MXPickerType.Video) {
                     getString(R.string.mx_picker_string_video_limit_tip)
                 } else {
@@ -214,42 +212,42 @@ class MXImgPickerActivity : AppCompatActivity() {
                 ).show()
                 return
             }
-            list.add(item)
+            vm.selectMediaList.add(item)
         }
-        vm.selectMediaListLive.postValue(list)
+        vm.selectMediaListLive.postValue(Any())
     }
 
     fun onSelectFinish() {
-        val setResult = { list: List<String> ->
+        val paths = vm.selectMediaList.toList()
+        if (paths.isEmpty()) {
+            setResult(RESULT_CANCELED)
+            finish()
+            return
+        }
+        lifecycleScope.launch {
+            val needCompress = when (vm.compressType) {
+                MXCompressType.ON -> true
+                MXCompressType.SELECT_BY_USER -> vm.needCompress.value ?: false
+                else -> false
+            }
+            val compressPath = if (needCompress) {
+                withContext(Dispatchers.IO) {
+                    val scale = MXImageCompress.from(this@MXImgPickerActivity)
+                        .setIgnoreFileSize(vm.compressIgnoreSizeKb)
+                    paths.map { item ->
+                        if (item.type == MXPickerType.Image) {
+                            scale.compress(item.path).absolutePath
+                        } else item.path
+                    }
+                }
+            } else {
+                paths.map { it.path }
+            }
             setResult(
-                RESULT_OK, Intent().putExtra(
-                    MXPickerBuilder.KEY_INTENT_RESULT,
-                    ArrayList(list)
-                )
+                RESULT_OK,
+                Intent().putExtra(MXPickerBuilder.KEY_INTENT_RESULT, ArrayList(compressPath))
             )
             finish()
-        }
-        val needCompress = when (vm.compressType) {
-            MXCompressType.ON -> true
-            MXCompressType.SELECT_BY_USER -> vm.needCompress.value ?: false
-            else -> false
-        }
-
-        val paths = vm.selectMediaList
-        if (!needCompress) {
-            setResult.invoke(paths.map { it.path })
-        } else {
-            val scale = MXImageCompress.from(this).setIgnoreFileSize(vm.compressIgnoreSizeKb)
-            thread {
-                val compressPath = paths.map { item ->
-                    if (item.type == MXPickerType.Image) {
-                        scale.compress(item.path).absolutePath
-                    } else item.path
-                }
-                runOnUiThread {
-                    setResult.invoke(compressPath)
-                }
-            }
         }
     }
 }

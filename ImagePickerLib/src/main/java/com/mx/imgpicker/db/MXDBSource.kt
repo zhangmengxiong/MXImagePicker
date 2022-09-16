@@ -92,7 +92,11 @@ internal class MXDBSource(val context: Context) {
     /**
      * 获取对应类型的所有数据
      */
-    suspend fun getAllSource(type: MXPickerType, path: String): ArrayList<MXItem> =
+    suspend fun getAllSource(
+        type: MXPickerType,
+        path: String,
+        maxListSize: Int
+    ): ArrayList<MXItem> =
         withContext(Dispatchers.IO) {
             val sourceList = ArrayList<MXItem>()
             val section = ArrayList<String>()
@@ -106,7 +110,8 @@ internal class MXDBSource(val context: Context) {
                 section.add("${MXSQLite.DB_DIR}=?")
                 sectionArg.add(path)
             }
-            val orderBy = MXSQLite.DB_TIME + " desc"
+            val orderBy =
+                MXSQLite.DB_TIME + " desc" + (if (maxListSize > 0) " limit $maxListSize" else "")
 
             synchronized(lock) {
                 val database = dbHelp.writableDatabase

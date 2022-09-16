@@ -120,8 +120,8 @@ internal class MXFullScreenFragment : Fragment() {
             }
         }
 
-        vm.selectMediaListLive.observe(viewLifecycleOwner) { list ->
-            if (list.isEmpty()) {
+        vm.selectMediaListLive.observe(viewLifecycleOwner) {
+            if (vm.selectMediaList.isEmpty()) {
                 selectBtn?.visibility = View.GONE
                 selectBtn?.text = getString(R.string.mx_picker_string_select)
             } else {

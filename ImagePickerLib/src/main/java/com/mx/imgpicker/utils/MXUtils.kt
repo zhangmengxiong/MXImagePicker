@@ -29,8 +29,12 @@ internal object MXUtils {
 
     fun compareList(list1: List<*>?, list2: List<*>?): Boolean {
         if (list1 == null || list2 == null || list1.size != list2.size) return false
-        list1.forEachIndexed { index, oldItem ->
-            if (list2.getOrNull(index)?.equals(oldItem) != true) return false
+        list1.forEachIndexed { index, item1 ->
+            if (item1 == null) return false
+            val item2 = list2.getOrNull(index) ?: return false
+            if (item1 != item2) {
+                return false
+            }
         }
         return true
     }

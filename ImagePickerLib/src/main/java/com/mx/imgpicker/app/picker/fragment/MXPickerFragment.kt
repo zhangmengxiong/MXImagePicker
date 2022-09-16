@@ -178,9 +178,9 @@ internal class MXPickerFragment : Fragment() {
                 willResizeImg?.setColorFilter(resources.getColor(R.color.mx_picker_color_important))
             }
         }
-        vm.selectMediaListLive.observe(viewLifecycleOwner) { list ->
+        vm.selectMediaListLive.observe(viewLifecycleOwner) {
             updateSelectStatus()
-
+            val list = vm.selectMediaList
             val oldIdx = selectItemIndex?.toList() ?: emptyList()
             val newIdx = list.map { vm.mediaList.indexOf(it) }
             val notifyIndex = (oldIdx + newIdx).distinct()
@@ -193,7 +193,8 @@ internal class MXPickerFragment : Fragment() {
             folderNameTxv?.text = dir?.name
             folderAdapt.notifyDataSetChanged()
         }
-        vm.mediaListLive.observe(viewLifecycleOwner) { list ->
+        vm.mediaListLive.observe(viewLifecycleOwner) {
+            val list = vm.mediaList
             emptyTxv?.visibility = if (vm.mediaList.isEmpty()) View.VISIBLE else View.GONE
             imgAdapt.imgList.clear()
             imgAdapt.imgList.addAll(list)
@@ -206,7 +207,6 @@ internal class MXPickerFragment : Fragment() {
         }
         vm.dirListLive.observe(viewLifecycleOwner) {
             folderAdapt.notifyDataSetChanged()
-            MXUtils.log("刷新目录：${vm.dirList.size}")
         }
     }
 

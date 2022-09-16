@@ -37,7 +37,8 @@ internal data class MXConfig(
     val enableCamera: Boolean = true, // 是否可拍摄
     val compressType: MXCompressType = MXCompressType.SELECT_BY_USER, // 压缩类型
     val compressIgnoreSizeKb: Int = 200, // 图片压缩源文件阈值
-    val videoMaxLength: Int = -1 // 视频最长时长
+    val videoMaxLength: Int = -1, // 视频最长时长
+    val maxListSize: Int = -1 // 最长列表加载长度
 ) : Serializable {
 
 }
@@ -75,6 +76,10 @@ data class MXItem(
         result = 31 * result + duration
         return result
     }
+
+    override fun toString(): String {
+        return "MXItem(path='$path', timeInMs=$timeInMs, type=$type)"
+    }
 }
 
 /**
@@ -83,7 +88,7 @@ data class MXItem(
 internal data class MXDirItem(
     val name: String,
     val path: String,
-    val childSize: Int,
+    var childSize: Int,
     var lastItem: MXItem? = null
 ) : Serializable {
     override fun equals(other: Any?): Boolean {
@@ -104,5 +109,9 @@ internal data class MXDirItem(
         result = 31 * result + path.hashCode()
         result = 31 * result + childSize
         return result
+    }
+
+    override fun toString(): String {
+        return "MXDirItem(name='$name', path='$path', childSize=$childSize)"
     }
 }

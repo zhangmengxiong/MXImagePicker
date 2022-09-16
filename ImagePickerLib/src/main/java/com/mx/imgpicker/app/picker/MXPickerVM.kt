@@ -17,19 +17,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.abs
 
 internal class MXPickerVM : ViewModel() {
     companion object {
         private const val PAGE_SIZE = 40
     }
 
-    private val allResStr by lazy {
-        MXImagePicker.getContext().resources.getString(R.string.mx_picker_string_all)
-    }
+    private val allResStr by lazy { MXImagePicker.getContext().resources.getString(R.string.mx_picker_string_all) }
+    private val allDir by lazy { MXDirItem(allResStr, "", 0) }
     val sourceDB by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         MXDBSource(MXImagePicker.getContext())
     }
-    private var isRelease = false
 
     var pickerType: MXPickerType = MXPickerType.Image  // 类型
         private set
@@ -43,6 +42,8 @@ internal class MXPickerVM : ViewModel() {
         private set
     var videoMaxLength: Int = -1 // 视频最长时长
         private set
+    var maxListSize: Int = -1 // 最长列表加载长度
+        private set
 
     fun setConfig(config: MXConfig) {
         this.pickerType = config.pickerType
@@ -51,25 +52,28 @@ internal class MXPickerVM : ViewModel() {
         this.compressType = config.compressType
         this.compressIgnoreSizeKb = config.compressIgnoreSizeKb
         this.videoMaxLength = config.videoMaxLength
+        this.maxListSize = config.maxListSize
     }
 
-    val dirListLive = MutableLiveData<List<MXDirItem>>(ArrayList()) // 文件夹列表
+    val dirListLive = MutableLiveData(Any()) // 文件夹列表
+    private var _dirList: List<MXDirItem>? = null
     val dirList: List<MXDirItem>
-        get() = dirListLive.value ?: emptyList()
+        get() = _dirList ?: emptyList()
 
-    val selectDirLive = MutableLiveData(MXDirItem(allResStr, "", 0)) // 当前选择文件夹
-    val mediaListLive = MutableLiveData<List<MXItem>>(ArrayList()) // 文件列表
+    val selectDirLive = MutableLiveData(allDir) // 当前选择文件夹
+    val mediaListLive = MutableLiveData(Any()) // 文件列表
+    private var _mediaList: List<MXItem>? = null
     val mediaList: List<MXItem>
-        get() = mediaListLive.value ?: emptyList()
+        get() = _mediaList ?: emptyList()
 
-    val selectMediaListLive = MutableLiveData<List<MXItem>>(ArrayList()) // 选中的文件列表
-    val selectMediaList: List<MXItem>
-        get() = selectMediaListLive.value ?: emptyList()
+    val selectMediaListLive = MutableLiveData(Any()) // 选中的文件列表
+    val selectMediaList = ArrayList<MXItem>()
 
     val needCompress = MutableLiveData(true) // 是否需要压缩
     val fullScreenSelectIndex = MutableLiveData(0) // 是否需要压缩
 
     private val scanLock = AtomicBoolean(false)
+    private var lastReloadTime = 0L
     fun startScan() {
         viewModelScope.launch {
             if (scanLock.get()) return@launch
@@ -78,13 +82,15 @@ internal class MXPickerVM : ViewModel() {
             val context = MXImagePicker.getContext()
             val scanResult: ((List<MXItem>) -> Boolean) = { list ->
                 viewModelScope.launch {
+                    if (list.isEmpty()) return@launch
                     val hasSave = withContext(Dispatchers.IO) {
                         mediaList.containsAll(list)
                     }
                     if (hasSave) return@launch
-//                    MXUtils.log("扫描结果--> ${list.size}")
                     sourceDB.addSysSource(list)
-                    reloadMediaList()
+                    if (abs(System.currentTimeMillis() - lastReloadTime) > 3000) {
+                        reloadMediaList()
+                    }
                 }
                 this.isActive
             }
@@ -110,32 +116,27 @@ internal class MXPickerVM : ViewModel() {
 
     suspend fun reloadMediaList() = withContext(Dispatchers.IO) {
         val start = System.currentTimeMillis()
+        val selectDir = selectDirLive.value ?: allDir
+        val mediaList = sourceDB.getAllSource(pickerType, selectDir.path, maxListSize)
+        if (!MXUtils.compareList(_mediaList, mediaList)) {
+            MXUtils.log("刷新->图片列表 ${_mediaList?.size}->${mediaList.size}")
+            _mediaList = mediaList
+            mediaListLive.postValue(Any())
+        }
+
         val dirs = sourceDB.getAllDirList(pickerType)
-        val dir = selectDirLive.value
-        val allDir = MXDirItem(allResStr, "", dirs.sumOf { it.childSize })
+        allDir.childSize = dirs.sumOf { it.childSize }
         val allDirs = listOf(allDir) + dirs
 
-        val selectDir = allDirs.firstOrNull { it.path == (dir?.path ?: "") }
-            ?: allDirs.first()
-
-        if (!MXUtils.compareList(dirListLive.value, allDirs)) {
-            dirListLive.postValue(allDirs)
-            MXUtils.log("刷新->目录列表:${dirListLive.value?.size}->${allDirs.size}")
+        if (!MXUtils.compareList(_dirList, allDirs)) {
+            MXUtils.log("刷新->目录列表:${_dirList?.size}->${allDirs.size}")
+            _dirList = allDirs
+            dirListLive.postValue(Any())
         }
-        if (dir?.path != selectDir.path) {
-            selectDirLive.postValue(selectDir)
-            MXUtils.log("刷新->选中目录:${dir?.path}->${selectDir.path}")
-        }
+        MXUtils.log("刷新->加载时长：${(System.currentTimeMillis() - start) / 1000f} 秒")
 
-        val mediaList = sourceDB.getAllSource(pickerType, selectDir.path)
-        if (!MXUtils.compareList(mediaListLive.value, mediaList)) {
-            mediaListLive.postValue(mediaList)
-            MXUtils.log("刷新->图片列表")
+        if (mediaList.isNotEmpty()) {
+            lastReloadTime = System.currentTimeMillis()
         }
-        MXUtils.log("加载时长：${(System.currentTimeMillis() - start) / 1000f} 秒")
-    }
-
-    fun release() {
-        isRelease = true
     }
 }
