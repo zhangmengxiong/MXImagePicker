@@ -5,11 +5,11 @@
 ---
 引用方法1 -  Gradle引用
 ```gradle
-    implementation 'com.gitee.zhangmengxiong:MXImagePicker:1.5.5'
+    implementation 'com.gitee.zhangmengxiong:MXImagePicker:1.5.7'
 ```
 ---
 引用方法2 -  AAR包引用
-- [下载aar - 1.5.5版本](https://gitee.com/zhangmengxiong/MXImagePicker/releases/download/1.5.5/ImagePickerLib-1.5.5.aar)
+- [下载aar - 1.5.7版本](https://gitee.com/zhangmengxiong/MXImagePicker/releases/download/1.5.7/ImagePickerLib-1.5.7.aar)
 ---
 
 ![Image text](https://gitee.com/zhangmengxiong/MXImagePicker/raw/master/imgs/screenshot1.png)

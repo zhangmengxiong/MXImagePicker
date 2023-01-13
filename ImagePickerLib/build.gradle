@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'maven-publish'
 }
+group = 'com.mx.imgpicker'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -42,10 +43,10 @@ afterEvaluate {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1"
-    compileOnly 'androidx.appcompat:appcompat:1.4.1'
-    compileOnly "androidx.recyclerview:recyclerview:1.2.1"
-    compileOnly 'androidx.constraintlayout:constraintlayout:2.0.4'
-    compileOnly 'com.github.chrisbanes:PhotoView:2.3.0'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation "androidx.recyclerview:recyclerview:1.2.1"
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 }
