@@ -24,6 +24,7 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
+    namespace 'com.mx.imgpicker'
 }
 afterEvaluate {
     publishing {
@@ -33,7 +34,7 @@ afterEvaluate {
 
                 groupId = 'com.mx.imgpicker'
                 artifactId = 'MXImagePicker'
-                version = '1.5.5'
+                version = rootProject.ext.versionName
             }
         }
     }

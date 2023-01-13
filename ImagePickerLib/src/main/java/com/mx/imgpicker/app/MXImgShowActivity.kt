@@ -20,13 +20,15 @@ class MXImgShowActivity : AppCompatActivity() {
     companion object {
         private const val EXTRAS_LIST = "EXTRAS_LIST"
         private const val EXTRAS_TITLE = "EXTRAS_TITLE"
-        fun open(context: Context, list: List<String>, title: String? = null) {
+        private const val EXTRAS_INDEX = "EXTRAS_INDEX"
+        fun open(context: Context, list: List<String>, title: String? = null, index: Int = 0) {
             if (list.isEmpty()) return
             val list = list.map { MXItem(it, 0L, MXPickerType.Image) }
             context.startActivity(
                 Intent(context, MXImgShowActivity::class.java)
                     .putExtra(EXTRAS_LIST, ArrayList(list))
                     .putExtra(EXTRAS_TITLE, title)
+                    .putExtra(EXTRAS_INDEX, index)
             )
         }
     }
@@ -50,7 +52,9 @@ class MXImgShowActivity : AppCompatActivity() {
 
     private fun initView() {
         returnBtn.setOnClickListener { onBackPressed() }
-        titleTxv.text = intent.getStringExtra(EXTRAS_TITLE) ?: getString(R.string.mx_picker_string_show_list)
+        titleTxv.text =
+            intent.getStringExtra(EXTRAS_TITLE) ?: getString(R.string.mx_picker_string_show_list)
+
 
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         recycleView.layoutManager = layoutManager
@@ -80,5 +84,11 @@ class MXImgShowActivity : AppCompatActivity() {
         indexTxv.text = "1 / ${imgList.size}"
         MXUtils.log("显示图片：${imgList.joinToString(",") { it.path }}")
         adapt.notifyDataSetChanged()
+
+        val index = intent.getIntExtra(EXTRAS_INDEX, 0)
+        if (index < imgList.size && index >= 0) {
+            recycleView.scrollToPosition(index)
+            indexTxv.text = "${index + 1} / ${imgList.size}"
+        }
     }
 }

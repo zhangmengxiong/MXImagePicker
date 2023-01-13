@@ -56,10 +56,11 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.imageBtn).setOnClickListener {
             MXStarter.start(
                 this,
-                MXPickerBuilder().setMaxSize(9).setMaxListSize(1000).setCameraEnable(true).createIntent(this)
+                MXPickerBuilder().setMaxSize(9).setMaxListSize(1000).setCameraEnable(true)
+                    .createIntent(this)
             ) { resultCode, data ->
                 val list = MXPickerBuilder.getPickerResult(data)
-                MXImgShowActivity.open(this, list)
+                MXImgShowActivity.open(this, list, index = list.size - 1)
             }
         }
         findViewById<View>(R.id.imageScaleBtn).setOnClickListener {
