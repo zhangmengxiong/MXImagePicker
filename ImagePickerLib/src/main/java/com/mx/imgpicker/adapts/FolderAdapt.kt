@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.R
 import com.mx.imgpicker.app.picker.MXPickerVM
+import com.mx.imgpicker.db.MXDBSource
 import com.mx.imgpicker.models.MXDirItem
 import kotlinx.coroutines.launch
 
@@ -39,7 +40,7 @@ internal class FolderAdapt(
 
         if (item.lastItem == null) {
             lifecycleScope.launch {
-                item.lastItem = vm.sourceDB.queryLastItem(item.path, vm.pickerType)
+                item.lastItem = MXDBSource.instance.queryLastItem(item.path, vm.pickerType)
                 this@FolderAdapt.notifyItemChanged(position)
             }
         }

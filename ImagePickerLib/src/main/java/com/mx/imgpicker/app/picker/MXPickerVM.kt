@@ -8,27 +8,14 @@ import com.mx.imgpicker.R
 import com.mx.imgpicker.db.MXDBSource
 import com.mx.imgpicker.models.*
 import com.mx.imgpicker.utils.MXUtils
-import com.mx.imgpicker.utils.source_loader.MXDirSource
-import com.mx.imgpicker.utils.source_loader.MXImageSource
-import com.mx.imgpicker.utils.source_loader.MXVideoSource
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.abs
 
 internal class MXPickerVM : ViewModel() {
-    companion object {
-        private const val PAGE_SIZE = 40
-    }
-
     private val allResStr by lazy { MXImagePicker.getContext().resources.getString(R.string.mx_picker_string_all) }
     private val allDir by lazy { MXDirItem(allResStr, "", 0) }
-    val sourceDB by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        MXDBSource(MXImagePicker.getContext())
-    }
 
     var pickerType: MXPickerType = MXPickerType.Image  // 类型
         private set
@@ -72,59 +59,21 @@ internal class MXPickerVM : ViewModel() {
     val needCompress = MutableLiveData(true) // 是否需要压缩
     val fullScreenSelectIndex = MutableLiveData(0) // 是否需要压缩
 
-    private val scanLock = AtomicBoolean(false)
-    private var lastReloadTime = 0L
-    fun startScan() {
-        viewModelScope.launch {
-            if (scanLock.get()) return@launch
-            scanLock.set(true)
-            MXUtils.log("开始扫描--> <--")
-            val context = MXImagePicker.getContext()
-            val scanResult: ((List<MXItem>) -> Boolean) = { list ->
-                viewModelScope.launch {
-                    if (list.isEmpty()) return@launch
-                    val hasSave = withContext(Dispatchers.IO) {
-                        mediaList.containsAll(list)
-                    }
-                    if (hasSave) return@launch
-                    sourceDB.addSysSource(list)
-                    if (abs(System.currentTimeMillis() - lastReloadTime) > 3000) {
-                        reloadMediaList()
-                    }
-                }
-                this.isActive
-            }
-            if (pickerType != MXPickerType.Video) {
-                MXImageSource.scan(context, PAGE_SIZE, scanResult)
-            }
-            if (pickerType != MXPickerType.Image) {
-                MXVideoSource.scan(context, PAGE_SIZE, scanResult)
-            }
-
-            val dirs = sourceDB.getAllDirList(pickerType)
-            MXDirSource(dirs).scan(context, PAGE_SIZE, scanResult)
-
-            reloadMediaList()
-            MXUtils.log("结束扫描--> <--")
-            scanLock.set(false)
-        }
-    }
-
     fun addPrivateSource(file: File, type: MXPickerType) {
-        viewModelScope.launch { sourceDB.addPrivateSource(file, type) }
+        viewModelScope.launch { MXDBSource.instance.addPrivateSource(file, type) }
     }
 
     suspend fun reloadMediaList() = withContext(Dispatchers.IO) {
         val start = System.currentTimeMillis()
         val selectDir = selectDirLive.value ?: allDir
-        val mediaList = sourceDB.getAllSource(pickerType, selectDir.path, maxListSize)
+        val mediaList = MXDBSource.instance.getAllSource(pickerType, selectDir.path, maxListSize)
         if (!MXUtils.compareList(_mediaList, mediaList)) {
             MXUtils.log("刷新->图片列表 ${_mediaList?.size}->${mediaList.size}")
             _mediaList = mediaList
             mediaListLive.postValue(Any())
         }
 
-        val dirs = sourceDB.getAllDirList(pickerType)
+        val dirs = MXDBSource.instance.getAllDirList(pickerType)
         allDir.childSize = dirs.sumOf { it.childSize }
         val allDirs = listOf(allDir) + dirs
 
@@ -134,9 +83,15 @@ internal class MXPickerVM : ViewModel() {
             dirListLive.postValue(Any())
         }
         MXUtils.log("刷新->加载时长：${(System.currentTimeMillis() - start) / 1000f} 秒")
+    }
 
-        if (mediaList.isNotEmpty()) {
-            lastReloadTime = System.currentTimeMillis()
+    suspend fun onMediaInsert(file: File) = withContext(Dispatchers.IO) {
+        val ext = file.extension?.lowercase()
+        val type = if (ext in MXUtils.IMAGE_EXT) MXPickerType.Image else MXPickerType.Video
+        val item = MXItem(file.absolutePath, file.lastModified(), type)
+        _mediaList = ArrayList(_mediaList ?: emptyList()).apply {
+            if (!this.contains(item)) add(0, item)
         }
+        mediaListLive.postValue(Any())
     }
 }

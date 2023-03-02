@@ -26,8 +26,8 @@ import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.models.MXCompressType
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.utils.MXUtils
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 
 internal class MXPickerFragment : Fragment() {
     private val vm by lazy { ViewModelProvider(requireActivity()).get(MXPickerVM::class.java) }
@@ -47,6 +47,8 @@ internal class MXPickerFragment : Fragment() {
     private var bottomLay: View? = null
     private var willResizeLay: View? = null
     private var willResizeImg: ImageView? = null
+
+    private var targetFile: File? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -132,9 +134,10 @@ internal class MXPickerFragment : Fragment() {
                     val intent = captureBuilder.createIntent(requireContext())
                     val file = captureBuilder.getCaptureFile()
                     vm.addPrivateSource(file, type)
+                    targetFile = file
+                    MXUtils.log("PATH = ${file.absolutePath}")
 
                     startActivityForResult(intent, 0x12)
-                    MXUtils.log("PATH = ${file.absolutePath}")
                 }
 
                 if (vm.pickerType == MXPickerType.ImageAndVideo) {
@@ -246,9 +249,11 @@ internal class MXPickerFragment : Fragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val file = targetFile ?: return
+        if (!file.exists()) return
         lifecycleScope.launch {
-            delay(1000)
-            vm.reloadMediaList()
+            vm.onMediaInsert(file)
         }
+        targetFile = null
     }
 }

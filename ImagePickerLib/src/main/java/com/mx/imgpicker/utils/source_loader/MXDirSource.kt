@@ -5,52 +5,38 @@ import com.mx.imgpicker.models.MXDirItem
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.utils.MXUtils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.File
 
 internal class MXDirSource(private val dirs: List<MXDirItem>) : IMXSource {
-    override suspend fun scan(
-        context: Context,
-        pageSize: Int,
-        onScanCall: (List<MXItem>) -> Boolean
-    ) = withContext(Dispatchers.IO) {
-        if (dirs.isEmpty()) return@withContext
+    override fun scan(context: Context, size: Int, offset: Int): List<MXItem>? {
+        if (dirs.isEmpty()) return null
         val list = ArrayList<MXItem>()
+        var index = 0
         for (dir in dirs) {
-            val files = File(dir.path).listFiles()
+            val files = File(dir.path).listFiles()?.sortedBy { it.name }
             if (files == null || files.isEmpty()) continue
             for (file in files) {
-                val ext = file.extension?.lowercase()
-                if (ext in MXUtils.IMAGE_EXT) {
-                    list.add(
-                        MXItem(
-                            file.absolutePath,
-                            file.lastModified(),
-                            MXPickerType.Image
-                        )
-                    )
-                } else if (ext in MXUtils.VIDEO_EXT) {
-                    list.add(
-                        MXItem(
-                            file.absolutePath,
-                            file.lastModified(),
-                            MXPickerType.Video
-                        )
-                    )
+                val item = when (file.extension.lowercase()) {
+                    in MXUtils.IMAGE_EXT -> {
+                        MXItem(file.absolutePath, file.lastModified(), MXPickerType.Image)
+                    }
+                    in MXUtils.VIDEO_EXT -> {
+                        MXItem(file.absolutePath, file.lastModified(), MXPickerType.Video)
+                    }
+                    else -> null
                 }
-                if (list.size >= pageSize) {
-                    val continueScan = onScanCall.invoke(list.toList())
-                    list.clear()
-                    if (!continueScan) {
-                        return@withContext
+                if (item != null) {
+                    index++
+                    if (index > offset) {
+                        list.add(item)
+                    }
+                    if (list.size >= size) {
+                        return list
                     }
                 }
             }
         }
-        if (list.isNotEmpty()) {
-            onScanCall.invoke(list.toList())
-        }
+        return list
     }
 
     override fun save(context: Context, file: File): Boolean {

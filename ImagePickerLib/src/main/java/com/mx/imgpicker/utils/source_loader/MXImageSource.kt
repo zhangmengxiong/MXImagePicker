@@ -11,8 +11,6 @@ import android.os.Build
 import android.provider.MediaStore
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.File
 
 
@@ -20,13 +18,10 @@ internal object MXImageSource : IMXSource {
     const val MIME_TYPE = "image/*"
     private val SOURCE_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
-    override suspend fun scan(
-        context: Context,
-        pageSize: Int,
-        onScanCall: ((List<MXItem>) -> Boolean)
-    ) = withContext(Dispatchers.IO) {
+    override fun scan(context: Context, size: Int, offset: Int): List<MXItem>? {
+        val images = ArrayList<MXItem>()
         //扫描图片
-        val resolver = context.contentResolver ?: return@withContext
+        val resolver = context.contentResolver ?: return null
         val columns = arrayListOf(
             MediaStore.Images.Media.DATA,
             MediaStore.Images.Media._ID,
@@ -39,7 +34,6 @@ internal object MXImageSource : IMXSource {
         val where = MediaStore.Images.Media.SIZE + " > ? "
         val whereArgs = arrayListOf("0")
 
-        val images = ArrayList<MXItem>()
         var mCursor: Cursor? = null
         try {
             mCursor = MXContentProvide.createCursor(
@@ -50,28 +44,33 @@ internal object MXImageSource : IMXSource {
             )
 
             if (mCursor == null || !mCursor.moveToFirst()) {
-                return@withContext
+                return null
+            }
+            if (offset > 0) {
+                if (offset < mCursor.count) {
+                    mCursor.move(offset)
+                } else {
+                    return null
+                }
             }
             do {
                 val item = cursorToImageItem(resolver, mCursor)
                 if (item != null) {
                     images.add(item)
                 }
-                if (images.size >= pageSize) {
-                    val scanContinue = onScanCall.invoke(images.toList())
-                    images.clear()
-                    if (!scanContinue) break
+                if (images.size >= size) {
+                    break
                 }
             } while (mCursor.moveToNext())
-            onScanCall.invoke(images.toList())
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
             try {
                 mCursor?.close()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
+        return images
     }
 
     private fun cursorToImageItem(contentResolver: ContentResolver, mCursor: Cursor): MXItem? {

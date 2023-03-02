@@ -21,6 +21,7 @@ import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.observer.MXSysImageObserver
 import com.mx.imgpicker.observer.MXSysVideoObserver
+import com.mx.imgpicker.utils.MXScanBiz
 import com.mx.imgpicker.utils.MXUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -81,6 +82,11 @@ class MXImgPickerActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        MXScanBiz.scanRecent(this, lifecycleScope)
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -112,8 +118,10 @@ class MXImgPickerActivity : AppCompatActivity() {
         vm.selectDirLive.observe(this) {
             lifecycleScope.launch { vm.reloadMediaList() }
         }
-
-        vm.startScan()
+        MXScanBiz.setOnUpdateListener {
+            lifecycleScope.launch { vm.reloadMediaList() }
+        }
+        MXScanBiz.scanAll(this, lifecycleScope)
     }
 
     fun showLargeView(show: Boolean, target: MXItem? = null) {
@@ -138,13 +146,13 @@ class MXImgPickerActivity : AppCompatActivity() {
     private val imageChangeObserver = MXSysImageObserver {
         if (isDestroyed) return@MXSysImageObserver
         if (vm.pickerType in arrayOf(MXPickerType.Image, MXPickerType.ImageAndVideo)) {
-            vm.startScan()
+            MXScanBiz.scanRecent(this, lifecycleScope)
         }
     }
     private val videoChangeObserver = MXSysVideoObserver {
         if (isDestroyed) return@MXSysVideoObserver
         if (vm.pickerType in arrayOf(MXPickerType.Video, MXPickerType.ImageAndVideo)) {
-            vm.startScan()
+            MXScanBiz.scanRecent(this, lifecycleScope)
         }
     }
 
@@ -179,9 +187,13 @@ class MXImgPickerActivity : AppCompatActivity() {
     override fun onDestroy() {
         try {
             contentResolver.unregisterContentObserver(imageChangeObserver)
-            contentResolver.unregisterContentObserver(videoChangeObserver)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
+        try {
+            contentResolver.unregisterContentObserver(videoChangeObserver)
+        } catch (_: Exception) {
+        }
+        MXScanBiz.setOnUpdateListener(null)
         super.onDestroy()
     }
 

@@ -14,11 +14,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 object MXImagePicker {
     private val hasInit = AtomicBoolean(false)
     private var application: Application? = null
-    internal fun init(application: Application) {
+    fun init(application: Application) {
         if (hasInit.get()) return
+        this.application = application
         application.registerActivityLifecycleCallbacks(activityLifecycleCall)
         hasInit.set(true)
-        this.application = application
     }
 
     internal fun getContext() = application!!

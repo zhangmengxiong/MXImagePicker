@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.models.MXDirItem
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
@@ -13,9 +14,10 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.math.abs
 
-internal class MXDBSource(val context: Context) {
+internal class MXDBSource private constructor(val context: Context) {
     companion object {
         private val lock = Object()
+        val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { MXDBSource(MXImagePicker.getContext()) }
     }
 
     private val dbHelp by lazy { MXSQLite(context.applicationContext) }
@@ -53,41 +55,40 @@ internal class MXDBSource(val context: Context) {
     /**
      * 批量添加/替换系统视频、图片数据
      */
-    suspend fun addSysSource(list: List<MXItem>): Boolean =
-        withContext(Dispatchers.IO) {
-            synchronized(lock) {
-                val database = dbHelp.writableDatabase
-                val insertSql =
-                    "replace into ${MXSQLite.DB_NAME}(" +
-                            "${MXSQLite.DB_PATH}, " +
-                            "${MXSQLite.DB_DIR}, " +
-                            "${MXSQLite.DB_TYPE}, " +
-                            "${MXSQLite.DB_PRIVATE}, " +
-                            "${MXSQLite.DB_TIME}, " +
-                            "${MXSQLite.DB_VIDEO_LENGTH}) " +
-                            "values(?,?,?,?,?,?)"
-                val stat = database.compileStatement(insertSql)
-                database.beginTransaction()
-                try {
-                    for (item in list) {
-                        stat.bindString(1, item.path)
-                        stat.bindString(2, File(item.path).parentFile?.absolutePath)
-                        stat.bindString(3, item.type.value)
-                        stat.bindString(4, MXSQLite.VALUE_PRIVATE_SYS)
-                        stat.bindLong(5, item.timeInMs)
-                        stat.bindLong(6, item.duration.toLong())
-                        stat.executeInsert()
-                    }
-                    database.setTransactionSuccessful()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                } finally {
-                    database.endTransaction()
-                    database.close()
+    fun addSysSource(list: List<MXItem>): Boolean {
+        synchronized(lock) {
+            val database = dbHelp.writableDatabase
+            val insertSql =
+                "replace into ${MXSQLite.DB_NAME}(" +
+                        "${MXSQLite.DB_PATH}, " +
+                        "${MXSQLite.DB_DIR}, " +
+                        "${MXSQLite.DB_TYPE}, " +
+                        "${MXSQLite.DB_PRIVATE}, " +
+                        "${MXSQLite.DB_TIME}, " +
+                        "${MXSQLite.DB_VIDEO_LENGTH}) " +
+                        "values(?,?,?,?,?,?)"
+            val stat = database.compileStatement(insertSql)
+            database.beginTransaction()
+            try {
+                for (item in list) {
+                    stat.bindString(1, item.path)
+                    stat.bindString(2, File(item.path).parentFile?.absolutePath)
+                    stat.bindString(3, item.type.value)
+                    stat.bindString(4, MXSQLite.VALUE_PRIVATE_SYS)
+                    stat.bindLong(5, item.timeInMs)
+                    stat.bindLong(6, item.duration.toLong())
+                    stat.executeInsert()
                 }
+                database.setTransactionSuccessful()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                database.endTransaction()
+                database.close()
             }
-            return@withContext false
         }
+        return false
+    }
 
     /**
      * 获取对应类型的所有数据

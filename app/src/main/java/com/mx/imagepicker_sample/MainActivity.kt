@@ -4,7 +4,8 @@ import android.Manifest
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.gyf.immersionbar.ImmersionBar
 import com.mx.imgpicker.MXImagePicker
@@ -13,10 +14,11 @@ import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.builder.MXPickerBuilder
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.compress.MXImageCompress
+import com.mx.imgpicker.utils.MXScanBiz
 import com.mx.starter.MXStarter
 import java.io.File
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -150,5 +152,7 @@ class MainActivity : AppCompatActivity() {
                 ), "图片详情"
             )
         }
+        MXImagePicker.init(application)
+//        MXScanBiz.scanAll(this, lifecycleScope)
     }
 }
