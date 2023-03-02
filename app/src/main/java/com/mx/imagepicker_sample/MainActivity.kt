@@ -5,16 +5,14 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.gyf.immersionbar.ImmersionBar
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.app.MXImgShowActivity
 import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.builder.MXPickerBuilder
-import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.compress.MXImageCompress
-import com.mx.imgpicker.utils.MXScanBiz
+import com.mx.imgpicker.models.MXPickerType
 import com.mx.starter.MXStarter
 import java.io.File
 

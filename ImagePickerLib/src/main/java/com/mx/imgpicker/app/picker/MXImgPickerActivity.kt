@@ -2,6 +2,7 @@ package com.mx.imgpicker.app.picker
 
 import android.Manifest
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
@@ -69,7 +70,11 @@ class MXImgPickerActivity : AppCompatActivity() {
         }
 
         MXUtils.log("启动")
-        val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO)
+        } else {
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
         if (!MXUtils.hasPermission(this, permissions)) {
             Toast.makeText(
                 this,
