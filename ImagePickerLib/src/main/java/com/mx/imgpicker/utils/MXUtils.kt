@@ -1,11 +1,9 @@
 package com.mx.imgpicker.utils
 
-import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 internal object MXUtils {
@@ -59,16 +57,6 @@ internal object MXUtils {
 
     private fun toTimeString(time: Int): String {
         return if (time < 10) "0$time" else time.toString()
-    }
-
-    const val REQUEST_CODE_READ = 0x21
-    const val REQUEST_CODE_CAMERA = 0x22
-
-    /**
-     * 权限申请
-     */
-    fun requestPermission(activity: Activity, array: Array<String>, requestCode: Int) {
-        ActivityCompat.requestPermissions(activity, array, requestCode)
     }
 
     /**

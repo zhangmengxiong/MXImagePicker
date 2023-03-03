@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -33,6 +34,7 @@ internal class MXPickerFragment : Fragment() {
     private val vm by lazy { ViewModelProvider(requireActivity()).get(MXPickerVM::class.java) }
     private val imgAdapt by lazy { ImgGridAdapt(vm) }
     private val folderAdapt by lazy { FolderAdapt(vm, lifecycleScope) }
+    private val permissions = arrayOf(Manifest.permission.CAMERA)
     private var selectItemIndex: Array<Int>? = null
 
     private var returnBtn: ImageView? = null
@@ -115,17 +117,13 @@ internal class MXPickerFragment : Fragment() {
         }
 
         imgAdapt.onTakePictureClick = {
-            val permissions = arrayOf(Manifest.permission.CAMERA)
             if (!MXUtils.hasPermission(requireContext(), permissions)) {
                 Toast.makeText(
                     requireContext(),
                     getString(R.string.mx_picker_string_need_permission_storage_camera),
                     Toast.LENGTH_SHORT
                 ).show()
-                MXUtils.requestPermission(
-                    requireActivity(), permissions,
-                    MXUtils.REQUEST_CODE_CAMERA
-                )
+                permissionResult.launch(permissions)
             } else {
                 val takeCall = { type: MXPickerType ->
                     val captureBuilder = MXCaptureBuilder()
@@ -136,8 +134,7 @@ internal class MXPickerFragment : Fragment() {
                     vm.addPrivateSource(file, type)
                     targetFile = file
                     MXUtils.log("PATH = ${file.absolutePath}")
-
-                    startActivityForResult(intent, 0x12)
+                    captureResult.launch(intent)
                 }
 
                 if (vm.pickerType == MXPickerType.ImageAndVideo) {
@@ -213,6 +210,25 @@ internal class MXPickerFragment : Fragment() {
         }
     }
 
+    private val captureResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        val file = targetFile ?: return@registerForActivityResult
+        if (!file.exists()) return@registerForActivityResult
+        lifecycleScope.launch {
+            vm.onMediaInsert(file)
+        }
+        targetFile = null
+    }
+
+    private val permissionResult = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) {
+        if (MXUtils.hasPermission(requireContext(), permissions)) {
+            imgAdapt.onTakePictureClick?.invoke()
+        }
+    }
+
     private fun updateSelectStatus() {
         val selectSize = vm.selectMediaList.size
         if (selectSize <= 0) {
@@ -246,14 +262,5 @@ internal class MXPickerFragment : Fragment() {
 
     fun dismissFolder() {
         showFolderList(false)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val file = targetFile ?: return
-        if (!file.exists()) return
-        lifecycleScope.launch {
-            vm.onMediaInsert(file)
-        }
-        targetFile = null
     }
 }

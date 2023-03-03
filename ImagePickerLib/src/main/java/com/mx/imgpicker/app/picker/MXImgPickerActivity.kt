@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -71,7 +72,11 @@ class MXImgPickerActivity : AppCompatActivity() {
 
         MXUtils.log("启动")
         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO)
+            arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VIDEO
+            )
         } else {
             arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
@@ -81,30 +86,25 @@ class MXImgPickerActivity : AppCompatActivity() {
                 getString(R.string.mx_picker_string_need_permission_storage),
                 Toast.LENGTH_SHORT
             ).show()
-            MXUtils.requestPermission(this, permissions, MXUtils.REQUEST_CODE_READ)
+            permissionResult.launch(permissions)
         } else {
             initView()
+        }
+    }
+
+    private val permissionResult = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { map ->
+        if (MXUtils.hasPermission(this, map.keys.toTypedArray())) {
+            initView()
+        } else {
+            finish()
         }
     }
 
     override fun onStart() {
         super.onStart()
         MXScanBiz.scanRecent(this, lifecycleScope)
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == MXUtils.REQUEST_CODE_READ) {
-            if (MXUtils.hasPermission(this, permissions)) {
-                initView()
-            } else {
-                finish()
-            }
-        }
     }
 
     private fun initView() {
