@@ -73,7 +73,6 @@ class MXImgPickerActivity : AppCompatActivity() {
         MXUtils.log("启动")
         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.READ_MEDIA_IMAGES,
                 Manifest.permission.READ_MEDIA_VIDEO
             )
@@ -95,11 +94,7 @@ class MXImgPickerActivity : AppCompatActivity() {
     private val permissionResult = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { map ->
-        if (MXUtils.hasPermission(this, map.keys.toTypedArray())) {
-            initView()
-        } else {
-            finish()
-        }
+        initView()
     }
 
     override fun onStart() {
