@@ -36,7 +36,7 @@ internal data class MXConfig(
     val maxSize: Int = 1, // 选取最大数量
     val enableCamera: Boolean = true, // 是否可拍摄
     val compressType: MXCompressType = MXCompressType.SELECT_BY_USER, // 压缩类型
-    val compressIgnoreSizeKb: Int = 200, // 图片压缩源文件阈值
+    val targetFileSize: Int = 200, // 图片压缩源文件阈值
     val videoMaxLength: Int = -1, // 视频最长时长
     val maxListSize: Int = -1 // 最长列表加载长度
 ) : Serializable {

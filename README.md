@@ -8,7 +8,7 @@
 Gradle引用
 
 ```gradle
-    implementation 'com.gitee.zhangmengxiong:MXImagePicker:1.6.1'
+    implementation 'com.gitee.zhangmengxiong:MXImagePicker:1.6.2'
 ```
 
 ![Image text](https://gitee.com/zhangmengxiong/MXImagePicker/raw/master/imgs/screenshot1.png)
@@ -202,7 +202,8 @@ val file = File(".../xx.png")
 val scaleImg = MXImageCompress.from(context)
    .setCacheDir(applicationContext.cacheDir) // 缓存目录
    .setSupportAlpha(true) // 支持透明通道(’.png‘格式) 默认=’.jpg‘格式
-   .setIgnoreFileSize(50) // 设置文件低于这个大小时，不进行压缩
+   .setTargetFileSize(50) // 设置压缩文件大小目标值 单位：Kb 默认=0 自然压缩
+   .setTargetPixel(2400) // 设置压缩文件宽或高目标值 单位：像素
    .compress(file)
 
 ```

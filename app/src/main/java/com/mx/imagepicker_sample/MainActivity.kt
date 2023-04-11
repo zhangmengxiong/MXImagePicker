@@ -5,15 +5,21 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.gyf.immersionbar.ImmersionBar
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.app.MXImgShowActivity
 import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.builder.MXPickerBuilder
+import com.mx.imgpicker.compress.MXCompressBuild
 import com.mx.imgpicker.compress.MXImageCompress
+import com.mx.imgpicker.models.MXCompressType
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.starter.MXStarter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class MainActivity : FragmentActivity() {
@@ -66,15 +72,19 @@ class MainActivity : FragmentActivity() {
         findViewById<View>(R.id.imageScaleBtn).setOnClickListener {
             MXStarter.start(
                 this,
-                MXPickerBuilder().setMaxSize(1).setCameraEnable(true).createIntent(this)
+                MXPickerBuilder().setCompressType(MXCompressType.OFF).setMaxSize(1)
+                    .setCameraEnable(true).createIntent(this)
             ) { resultCode, data ->
                 val path = MXPickerBuilder.getPickerResult(data).firstOrNull() ?: return@start
-                val scaleImg = MXImageCompress.from(this)
-                    .setCacheDir(applicationContext.cacheDir) // 缓存目录
-                    .setSupportAlpha(true) // 支持透明通道(’.png‘格式) 默认=’.jpg‘格式
-                    .setIgnoreFileSize(50) // 设置文件低于这个大小时，不进行压缩
-                    .compress(path).absolutePath
-                MXImgShowActivity.open(this, listOf(path, scaleImg))
+                println(path)
+                lifecycleScope.launch {
+                    val compressFile = MXImageCompress.from(this@MainActivity)
+                        .setCacheDir(applicationContext.cacheDir) // 缓存目录
+                        .setSupportAlpha(false) // 支持透明通道(’.png‘格式) 默认=’.jpg‘格式
+//                        .setTargetFileSize(50) // 设置文件低于这个大小时，不进行压缩
+                        .compress(path)
+                    MXImgShowActivity.open(this@MainActivity, listOf(compressFile.absolutePath))
+                }
             }
         }
         findViewById<View>(R.id.videoBtn).setOnClickListener {
@@ -98,8 +108,9 @@ class MainActivity : FragmentActivity() {
                 if (!agree) return@requestPermission
                 val builder = MXCaptureBuilder().setType(MXPickerType.Image)
                 MXStarter.start(this, builder.createIntent(this)) { resultCode, data ->
-                    if (!builder.getCaptureFile().exists()) return@start
-                    MXImgShowActivity.open(this, listOf(builder.getCaptureFile().absolutePath))
+                    val file = builder.getCaptureFile()
+                    if (!file.exists()) return@start
+                    MXImgShowActivity.open(this@MainActivity, listOf(file.absolutePath))
                 }
             }
         }

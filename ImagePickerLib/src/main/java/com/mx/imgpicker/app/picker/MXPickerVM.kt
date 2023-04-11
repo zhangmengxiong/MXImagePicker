@@ -25,7 +25,7 @@ internal class MXPickerVM : ViewModel() {
         private set
     var compressType: MXCompressType = MXCompressType.SELECT_BY_USER  // 压缩类型
         private set
-    var compressIgnoreSizeKb: Int = 200  // 图片压缩源文件阈值
+    var targetFileSize: Int = 200  // 图片压缩源文件阈值
         private set
     var videoMaxLength: Int = -1 // 视频最长时长
         private set
@@ -37,7 +37,7 @@ internal class MXPickerVM : ViewModel() {
         this.maxSize = config.maxSize
         this.enableCamera = config.enableCamera
         this.compressType = config.compressType
-        this.compressIgnoreSizeKb = config.compressIgnoreSizeKb
+        this.targetFileSize = config.targetFileSize
         this.videoMaxLength = config.videoMaxLength
         this.maxListSize = config.maxListSize
     }
@@ -64,7 +64,7 @@ internal class MXPickerVM : ViewModel() {
     }
 
     suspend fun reloadMediaList() = withContext(Dispatchers.IO) {
-        val start = System.currentTimeMillis()
+        // val start = System.currentTimeMillis()
         val selectDir = selectDirLive.value ?: allDir
         val mediaList = MXDBSource.instance.getAllSource(pickerType, selectDir.path, maxListSize)
         if (!MXUtils.compareList(_mediaList, mediaList)) {
@@ -82,7 +82,7 @@ internal class MXPickerVM : ViewModel() {
             _dirList = allDirs
             dirListLive.postValue(Any())
         }
-        MXUtils.log("刷新->加载时长：${(System.currentTimeMillis() - start) / 1000f} 秒")
+        // MXUtils.log("刷新->加载时长：${(System.currentTimeMillis() - start) / 1000f} 秒")
     }
 
     suspend fun onMediaInsert(file: File) = withContext(Dispatchers.IO) {

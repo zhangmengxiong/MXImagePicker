@@ -1,11 +1,14 @@
 package com.mx.imgpicker.compress
 
 import android.content.Context
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class MXCompressBuild(val context: Context) {
     internal var supportAlpha: Boolean? = null
-    internal var ignoreSize: Int = -1
+    internal var targetFileSize: Int = 0
+    internal var targetPx: Int = 2400
     internal var cacheDir: File? = null
 
     /**
@@ -18,11 +21,20 @@ class MXCompressBuild(val context: Context) {
     }
 
     /**
-     * 设置文件低于这个大小时，不进行压缩
-     * @param size 单位：KB
+     * 设置文件压缩大小需要在这个值左右
+     * @param size 单位：KB 默认=0 自然压缩
      */
-    fun setIgnoreFileSize(size: Int): MXCompressBuild {
-        this.ignoreSize = size
+    fun setTargetFileSize(size: Int): MXCompressBuild {
+        this.targetFileSize = size
+        return this
+    }
+
+    /**
+     * 设置文件压缩后宽/高像素值
+     * @param pixel 单位：px
+     */
+    fun setTargetPixel(pixel: Int): MXCompressBuild {
+        this.targetPx = pixel
         return this
     }
 
@@ -40,8 +52,8 @@ class MXCompressBuild(val context: Context) {
      * @param file 目标文件
      * @return 返回压缩后的图片文件
      */
-    fun compress(file: File): File {
-        return MXImageCompress(this).compress(file)
+    suspend fun compress(file: File): File = withContext(Dispatchers.IO) {
+        return@withContext MXImageCompress(this@MXCompressBuild).compress(file)
     }
 
     /**
@@ -49,7 +61,5 @@ class MXCompressBuild(val context: Context) {
      * @param path 目标文件路径
      * @return 返回压缩后的图片文件
      */
-    fun compress(path: String): File {
-        return MXImageCompress(this).compress(File(path))
-    }
+    suspend fun compress(path: String) = compress(File(path))
 }

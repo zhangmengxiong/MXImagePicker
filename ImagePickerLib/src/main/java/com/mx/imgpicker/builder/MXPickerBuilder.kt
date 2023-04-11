@@ -13,7 +13,7 @@ class MXPickerBuilder : Serializable {
     private var maxSize: Int = 1 //选择最大数量
     private var enableCamera: Boolean = true // 是否可以拍摄
     private var compressType: MXCompressType = MXCompressType.SELECT_BY_USER // 选中图片是否需要压缩至合适大小后返回
-    private var compressIgnoreSizeKb = 200 // 图片压缩阈值，低于这个大小的图片不会被压缩 单位：KB   默认200KB以下不被压缩
+    private var targetFileSize = 200 // 图片压缩阈值，低于这个大小的图片不会被压缩 单位：KB   默认200KB以下不被压缩
     private var videoMaxLength: Int = -1 // 视频最大长度，单位：秒
     private var maxListSize: Int = 1000 // 列表最多显示条数，防止OOM
 
@@ -44,8 +44,8 @@ class MXPickerBuilder : Serializable {
      * 图片压缩阈值，低于这个大小的图片不会被压缩
      * @param size 单位：Kb  默认 = 200KB
      */
-    fun setCompressIgnoreSize(size: Int): MXPickerBuilder {
-        compressIgnoreSizeKb = size
+    fun setTargetFileSize(size: Int): MXPickerBuilder {
+        targetFileSize = size
         return this
     }
 
@@ -99,7 +99,7 @@ class MXPickerBuilder : Serializable {
                 maxSize,
                 enableCamera,
                 compressType,
-                compressIgnoreSizeKb,
+                targetFileSize,
                 videoMaxLength,
                 maxListSize
             )

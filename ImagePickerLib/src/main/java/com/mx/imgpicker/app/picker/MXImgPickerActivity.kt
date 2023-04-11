@@ -244,8 +244,9 @@ class MXImgPickerActivity : AppCompatActivity() {
             }
             val compressPath = if (needCompress) {
                 withContext(Dispatchers.IO) {
-                    val scale = MXImageCompress.from(this@MXImgPickerActivity)
-                        .setIgnoreFileSize(vm.compressIgnoreSizeKb)
+                    val scale = MXImageCompress
+                        .from(this@MXImgPickerActivity)
+                        .setTargetFileSize(vm.targetFileSize)
                     paths.map { item ->
                         if (item.type == MXPickerType.Image) {
                             scale.compress(item.path).absolutePath
