@@ -25,7 +25,7 @@ internal class MXPickerVM : ViewModel() {
         private set
     var compressType: MXCompressType = MXCompressType.SELECT_BY_USER  // 压缩类型
         private set
-    var targetFileSize: Int = 200  // 图片压缩源文件阈值
+    var targetFileSize: Int = -1  // 图片压缩源文件阈值
         private set
     var videoMaxLength: Int = -1 // 视频最长时长
         private set

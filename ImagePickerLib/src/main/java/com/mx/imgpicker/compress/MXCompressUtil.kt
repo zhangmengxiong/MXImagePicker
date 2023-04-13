@@ -2,7 +2,6 @@ package com.mx.imgpicker.compress
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.media.ExifInterface
 import com.mx.imgpicker.utils.MXUtils
 import java.io.ByteArrayOutputStream
@@ -124,6 +123,7 @@ object MXCompressUtil {
         format: Bitmap.CompressFormat
     ): ByteArray? {
         val stream = ByteArrayOutputStream()
+        val minRange = (maxSize * 0.95f).toInt()
         try {
             var qualityMax = 95
             var qualityMin = 1
@@ -132,12 +132,12 @@ object MXCompressUtil {
                 return null
             }
 
-            while (qualityMax - qualityMin > 3) {
+            while (qualityMax - qualityMin > 2) {
                 val quality = (qualityMax + qualityMin) / 2
                 stream.reset()
                 bitmap.compress(format, quality, stream)
                 val size = (stream.size() / 1024)
-                if (targetSize(size, maxSize)) {
+                if (size in minRange until maxSize) {
                     break
                 }
                 if (size < maxSize) {
@@ -157,9 +157,4 @@ object MXCompressUtil {
         return null
     }
 
-    private fun targetSize(size: Int, target: Int): Boolean {
-        val maxT = (target * 1.05f).toInt()
-        val minT = (target * 0.95f).toInt()
-        return (size in minT..maxT)
-    }
 }

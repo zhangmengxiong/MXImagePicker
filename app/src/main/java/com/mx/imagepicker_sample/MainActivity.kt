@@ -81,7 +81,8 @@ class MainActivity : FragmentActivity() {
                     val compressFile = MXImageCompress.from(this@MainActivity)
                         .setCacheDir(applicationContext.cacheDir) // 缓存目录
                         .setSupportAlpha(false) // 支持透明通道(’.png‘格式) 默认=’.jpg‘格式
-//                        .setTargetFileSize(50) // 设置文件低于这个大小时，不进行压缩
+                        .setTargetPixel(500)
+                        .setTargetFileSize(50) // 设置文件低于这个大小时，不进行压缩
                         .compress(path)
                     MXImgShowActivity.open(this@MainActivity, listOf(compressFile.absolutePath))
                 }
