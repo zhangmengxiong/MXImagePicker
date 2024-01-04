@@ -17,16 +17,16 @@ object MXScanBiz {
     private const val PAGE_SIZE = 20
     private const val SCAN_SIZE = PAGE_SIZE * 2
 
-    private var hasDeleteAll = false
+    private var hasDeleteAllFirstTime = false
     private var hasScanAllImage = false
     private var hasScanAllVideo = false
     private var hasScanAllDirs = false
     private var listener: (() -> Unit)? = null
     internal suspend fun preScan(context: Context) = withContext(Dispatchers.Main) {
-        if (!hasDeleteAll) {
+        if (!hasDeleteAllFirstTime) {
             MXUtils.log("MXScanBiz -- deleteAll")
             MXDBSource.instance.deleteAll()
-            hasDeleteAll = true
+            hasDeleteAllFirstTime = true
         }
         scanAll(context)
     }
