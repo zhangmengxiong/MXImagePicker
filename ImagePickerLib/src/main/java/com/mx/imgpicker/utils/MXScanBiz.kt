@@ -17,38 +17,43 @@ object MXScanBiz {
     private const val PAGE_SIZE = 20
     private const val SCAN_SIZE = PAGE_SIZE * 2
 
+    private var hasDeleteAll = false
     private var hasScanAllImage = false
     private var hasScanAllVideo = false
     private var hasScanAllDirs = false
     private var listener: (() -> Unit)? = null
+    internal suspend fun preScan(context: Context) = withContext(Dispatchers.Main) {
+        if (!hasDeleteAll) {
+            MXUtils.log("MXScanBiz -- deleteAll")
+            MXDBSource.instance.deleteAll()
+            hasDeleteAll = true
+        }
+        scanAll(context)
+    }
 
-    fun scanAll(context: Context, scope: CoroutineScope) {
-        MXUtils.log("MXScanBiz -- scanAll")
-        val job = scope.launch {
-            MXUtils.log("MXScanBiz -- scanAll 开始扫描")
-            if (!hasScanAllImage) {
-                val size = scanImage(context, Int.MAX_VALUE)
-                if (size > 0) {
-                    hasScanAllImage = true
-                }
-            }
-            if (!hasScanAllVideo) {
-                val size = scanVideo(context, Int.MAX_VALUE)
-                if (size > 0) {
-                    hasScanAllVideo = true
-                }
-            }
-            if (!hasScanAllDirs) {
-                val size = scanDirs(context, Int.MAX_VALUE)
-                if (size > 0) {
-                    hasScanAllDirs = true
-                }
+    internal suspend fun scanAll(context: Context) = withContext(Dispatchers.Main) {
+        MXUtils.log("MXScanBiz -- scanAll 开始扫描")
+        if (!hasScanAllImage) {
+            val size = scanImage(context, Int.MAX_VALUE)
+            if (size > 0) {
+                hasScanAllImage = true
             }
         }
-        job.invokeOnCompletion {
-            MXUtils.log("MXScanBiz -- scanAll 结束扫描")
-            listener?.invoke()
+        if (!hasScanAllVideo) {
+            val size = scanVideo(context, Int.MAX_VALUE)
+            if (size > 0) {
+                hasScanAllVideo = true
+            }
         }
+        if (!hasScanAllDirs) {
+            val size = scanDirs(context, Int.MAX_VALUE)
+            if (size > 0) {
+                hasScanAllDirs = true
+            }
+        }
+
+        MXUtils.log("MXScanBiz -- scanAll 结束扫描")
+        listener?.invoke()
     }
 
     fun scanRecent(context: Context, scope: CoroutineScope) {

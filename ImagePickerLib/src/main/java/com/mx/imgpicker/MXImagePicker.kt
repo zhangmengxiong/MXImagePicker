@@ -2,12 +2,14 @@ package com.mx.imgpicker
 
 import android.app.Activity
 import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.mx.imgpicker.app.MXImgShowActivity
 import com.mx.imgpicker.app.picker.MXImgPickerActivity
 import com.mx.imgpicker.models.MXItem
+import com.mx.imgpicker.utils.MXScanBiz
 import com.mx.imgpicker.utils.MXUtils
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -73,7 +75,13 @@ object MXImagePicker {
 
         override fun onActivityDestroyed(p0: Activity) {
         }
+    }
 
+    /**
+     * 预扫描所有图片/视频
+     */
+    suspend fun preScan(context: Context) {
+        MXScanBiz.preScan(context)
     }
 }
 
