@@ -8,36 +8,37 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.gyf.immersionbar.ImmersionBar
+import com.mx.imagepicker_sample.databinding.ActivityMainBinding
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.app.MXImgShowActivity
 import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.builder.MXPickerBuilder
-import com.mx.imgpicker.compress.MXCompressBuild
 import com.mx.imgpicker.compress.MXImageCompress
 import com.mx.imgpicker.models.MXCompressType
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.starter.MXStarter
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 
 class MainActivity : FragmentActivity() {
+    private val binding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
 
         MXImagePicker.setDebug(true)
         MXImagePicker.registerImageLoader { item, imageView ->
             if (File(item.path).exists()) {
                 Glide.with(imageView).load(File(item.path))
-                    .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
+                    .placeholder(com.mx.imgpicker.R.drawable.mx_icon_picker_image_place_holder).into(imageView)
             } else if (item.path.startsWith("http")) {
                 Glide.with(imageView).load(item.path)
-                    .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
+                    .placeholder(com.mx.imgpicker.R.drawable.mx_icon_picker_image_place_holder).into(imageView)
             } else {
                 Glide.with(imageView).load(Uri.parse(item.path))
-                    .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
+                    .placeholder(com.mx.imgpicker.R.drawable.mx_icon_picker_image_place_holder).into(imageView)
             }
         }
 

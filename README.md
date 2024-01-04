@@ -8,7 +8,7 @@
 Gradle引用
 
 ```gradle
-    implementation 'com.gitee.zhangmengxiong:MXImagePicker:1.6.3'
+    implementation 'com.gitee.zhangmengxiong:MXImagePicker:1.6.5'
 ```
 
 ![Image text](https://gitee.com/zhangmengxiong/MXImagePicker/raw/master/imgs/screenshot1.png)
