@@ -4,15 +4,21 @@ plugins {
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    namespace 'com.mx.imagepicker_sample'
+    compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.mx.imagepicker_sample"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
+
+        multiDexEnabled true
     }
 
+    viewBinding {
+        enabled = true
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -20,34 +26,27 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
-    namespace 'com.mx.imagepicker_sample'
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation "androidx.recyclerview:recyclerview:1.2.1"
-    implementation 'com.gitee.zhangmengxiong:MXStarter:v1.0.0'
-    implementation 'com.github.bumptech.glide:glide:4.13.2'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation "androidx.recyclerview:recyclerview:1.3.0"
+    implementation 'com.gitee.zhangmengxiong:MXStarter:1.2.3'
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0'
-
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1"
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-
-    // rxpermission
-    implementation 'io.reactivex.rxjava3:rxjava:3.0.4'
-    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
-    implementation 'com.github.tbruyelle:rxpermissions:0.12'
+ 
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
     // 状态栏
     implementation 'com.gyf.immersionbar:immersionbar:3.0.0'

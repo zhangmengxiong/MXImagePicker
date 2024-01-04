@@ -1,11 +1,13 @@
 package com.mx.imgpicker.compress
 
 import android.content.Context
+import android.graphics.Bitmap
+import com.mx.imgpicker.utils.MXUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class MXCompressBuild(val context: Context) {
+class MXCompressBuild internal constructor(val context: Context) {
     internal var supportAlpha: Boolean? = null
     internal var targetFileSize: Int = 0
     internal var targetPx: Int = 2400
@@ -53,6 +55,10 @@ class MXCompressBuild(val context: Context) {
      * @return 返回压缩后的图片文件
      */
     suspend fun compress(file: File): File = withContext(Dispatchers.IO) {
+        if (!file.exists()) {
+            MXUtils.log("缩放图片失败，源文件不存在，返回原文件:${file.absolutePath}")
+            return@withContext file
+        }
         return@withContext MXImageCompress(this@MXCompressBuild).compress(file)
     }
 
@@ -62,4 +68,8 @@ class MXCompressBuild(val context: Context) {
      * @return 返回压缩后的图片文件
      */
     suspend fun compress(path: String) = compress(File(path))
+
+    suspend fun compress(bitmap: Bitmap): File = withContext(Dispatchers.IO) {
+        return@withContext MXImageCompress(this@MXCompressBuild).compress(bitmap, 0)
+    }
 }

@@ -84,10 +84,12 @@ internal object MXImageSource : IMXSource {
             //获取图片时间
 //            val time = File(path).lastModified() / 1000 // 单位：秒
             if (path.endsWith("downloading")) return null
-            if (contentResolver.openFileDescriptor(uri, "r") != null) {
+            val desc = contentResolver.openFileDescriptor(uri, "r")
+            if (desc != null) {
+                desc.close()
                 return MXItem(path, modify * 1000, MXPickerType.Image)
             }
-        } catch (e: java.lang.Exception) {
+        } catch (_: Exception) {
         }
         return null
     }

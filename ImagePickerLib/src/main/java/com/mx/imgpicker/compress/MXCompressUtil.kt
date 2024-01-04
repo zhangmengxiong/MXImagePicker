@@ -2,6 +2,7 @@ package com.mx.imgpicker.compress
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.media.ExifInterface
 import com.mx.imgpicker.utils.MXUtils
 import java.io.ByteArrayOutputStream
@@ -14,31 +15,18 @@ object MXCompressUtil {
     /**
      * 读取文件大小
      */
-    fun readImageSize(file: File): Pair<Int, Int> {
+    fun readImageSize(file: File): Pair<Int, Int>? {
         try {
             val options = BitmapFactory.Options()
             options.inJustDecodeBounds = true
             options.inSampleSize = 1
-
             BitmapFactory.decodeStream(file.inputStream(), null, options)
+            if (options.outWidth <= 0 || options.outHeight <= 0) {
+                throw java.lang.Exception("图片宽高读取失败：${options.outWidth} x ${options.outHeight}")
+            }
             return Pair(options.outWidth, options.outHeight)
         } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return Pair(0, 0)
-    }
-
-    /**
-     * 文件->Bitmap，这里要设置采样率防止OOM
-     */
-    fun decodeBitmapFromFile(target: File, width: Int, height: Int): Bitmap? {
-        try {
-            val options = BitmapFactory.Options()
-            val inSampleSize = computeSampleSize(width, height)
-//            MXUtils.log("缩放图片：decodeBitmapFromFile(inSampleSize=$inSampleSize)")
-            options.inSampleSize = inSampleSize
-            return BitmapFactory.decodeStream(target.inputStream(), null, options)
-        } catch (e: Exception) {
+            MXUtils.log("缩放图片失败:读取源文件错误 -> readImageSize")
             e.printStackTrace()
         }
         return null
@@ -69,12 +57,30 @@ object MXCompressUtil {
     }
 
     /**
+     * 文件->Bitmap，这里要设置采样率防止OOM
+     */
+    fun decodeBitmapFromFile(target: File, width: Int, height: Int): Bitmap? {
+        try {
+            val options = BitmapFactory.Options()
+            val inSampleSize = computeSampleSize(width, height)
+//            MXUtils.log("缩放图片：decodeBitmapFromFile(inSampleSize=$inSampleSize)")
+            options.inSampleSize = inSampleSize
+            val bitmap = BitmapFactory.decodeStream(target.inputStream(), null, options)!!
+            MXUtils.log("读取源文件 ($width x $height) -> (${bitmap.width} x ${bitmap.height})")
+            return bitmap
+        } catch (e: Exception) {
+            MXUtils.log("缩放图片失败:读取源文件错误 -> decodeBitmapFromFile")
+            e.printStackTrace()
+        }
+        return null
+    }
+
+    /**
      * 获取图片读取采样率
      * 采样率影响生成bitmap的文件大小
      * 生成大小等于源文件大小的 1/(sampleSize * sampleSize)
      */
     private fun computeSampleSize(width: Int, height: Int): Int {
-
         val srcWidth = if (width % 2 == 1) width + 1 else width
         val srcHeight = if (height % 2 == 1) height + 1 else height
 
@@ -97,6 +103,33 @@ object MXCompressUtil {
         } else {
             ceil(longSide / (1280.0 / scale)).toInt()
         }
+    }
+
+
+    /**
+     * 缩放到指定大小
+     */
+    fun bitmapMatrix(bitmap: Bitmap, degree: Int, targetPx: Int): Bitmap {
+        val oldWidth = bitmap.width
+        val oldHeight = bitmap.height
+        val scale = targetPx.toFloat() / min(oldWidth, oldHeight).toFloat() // 缩放倍数
+        if ((scale < 0 || scale >= 1f) && degree == 0) { // 需要放大且不旋转时，跳过！
+            MXUtils.log("缩放图片旋转:跳过")
+            return bitmap
+        }
+        val matrix = Matrix()
+        if (degree != 0) {
+            matrix.postRotate(degree.toFloat())
+        }
+        if (scale < 1f && scale > 0f) {
+            matrix.postScale(scale, scale)
+        }
+        val matrixBitmap = Bitmap.createBitmap(bitmap, 0, 0, oldWidth, oldHeight, matrix, true)
+        if (matrixBitmap != null) {
+            MXUtils.log("缩放图片旋转:宽高缩放(${oldWidth}x$oldHeight) -> ${matrixBitmap.width}x${matrixBitmap.height} 旋转角度：$degree")
+        }
+        bitmap.recycle()
+        return matrixBitmap
     }
 
     fun getBitmapDegree(file: File): Int {
@@ -156,5 +189,4 @@ object MXCompressUtil {
         }
         return null
     }
-
 }

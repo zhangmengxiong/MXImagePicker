@@ -3,41 +3,46 @@ package com.mx.imagepicker_sample
 import android.Manifest
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.gyf.immersionbar.ImmersionBar
+import com.mx.imagepicker_sample.databinding.ActivityMainBinding
 import com.mx.imgpicker.MXImagePicker
 import com.mx.imgpicker.app.MXImgShowActivity
 import com.mx.imgpicker.builder.MXCaptureBuilder
 import com.mx.imgpicker.builder.MXPickerBuilder
-import com.mx.imgpicker.compress.MXCompressBuild
 import com.mx.imgpicker.compress.MXImageCompress
 import com.mx.imgpicker.models.MXCompressType
 import com.mx.imgpicker.models.MXPickerType
+import com.mx.imgpicker.utils.MXScanBiz
 import com.mx.starter.MXStarter
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 
 class MainActivity : FragmentActivity() {
+    private val binding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
 
         MXImagePicker.setDebug(true)
         MXImagePicker.registerImageLoader { item, imageView ->
             if (File(item.path).exists()) {
                 Glide.with(imageView).load(File(item.path))
-                    .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
+                    .placeholder(com.mx.imgpicker.R.drawable.mx_icon_picker_image_place_holder)
+                    .into(imageView)
             } else if (item.path.startsWith("http")) {
                 Glide.with(imageView).load(item.path)
-                    .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
+                    .placeholder(com.mx.imgpicker.R.drawable.mx_icon_picker_image_place_holder)
+                    .into(imageView)
             } else {
                 Glide.with(imageView).load(Uri.parse(item.path))
-                    .placeholder(R.drawable.mx_icon_picker_image_place_holder).into(imageView)
+                    .placeholder(com.mx.imgpicker.R.drawable.mx_icon_picker_image_place_holder)
+                    .into(imageView)
             }
         }
 
@@ -49,32 +54,32 @@ class MainActivity : FragmentActivity() {
                 .navigationBarColor(R.color.mx_picker_color_background)
                 .init()
         }
-        findViewById<View>(R.id.fixPickerBtn).setOnClickListener {
+        binding.fixPickerBtn.setOnClickListener {
             MXStarter.start(
                 this,
                 MXPickerBuilder().setType(MXPickerType.ImageAndVideo).setMaxSize(9)
                     .setCameraEnable(true).createIntent(this)
-            ) { resultCode, data ->
+            ) { _, data ->
                 val list = MXPickerBuilder.getPickerResult(data)
                 MXImgShowActivity.open(this, list)
             }
         }
-        findViewById<View>(R.id.imageBtn).setOnClickListener {
+        binding.imageBtn.setOnClickListener {
             MXStarter.start(
                 this,
                 MXPickerBuilder().setMaxSize(9).setMaxListSize(1000).setCameraEnable(true)
                     .createIntent(this)
-            ) { resultCode, data ->
+            ) { _, data ->
                 val list = MXPickerBuilder.getPickerResult(data)
                 MXImgShowActivity.open(this, list, index = list.size - 1)
             }
         }
-        findViewById<View>(R.id.imageScaleBtn).setOnClickListener {
+        binding.imageScaleBtn.setOnClickListener {
             MXStarter.start(
                 this,
                 MXPickerBuilder().setCompressType(MXCompressType.OFF).setMaxSize(1)
                     .setCameraEnable(true).createIntent(this)
-            ) { resultCode, data ->
+            ) { _, data ->
                 val path = MXPickerBuilder.getPickerResult(data).firstOrNull() ?: return@start
                 println(path)
                 lifecycleScope.launch {
@@ -88,18 +93,18 @@ class MainActivity : FragmentActivity() {
                 }
             }
         }
-        findViewById<View>(R.id.videoBtn).setOnClickListener {
+        binding.videoBtn.setOnClickListener {
             MXStarter.start(
                 this,
                 MXPickerBuilder().setMaxSize(3).setMaxVideoLength(15)
                     .setType(MXPickerType.Video)
                     .createIntent(this)
-            ) { resultCode, data ->
+            ) { _, data ->
                 val list = MXPickerBuilder.getPickerResult(data) ?: return@start
                 MXImgShowActivity.open(this, list)
             }
         }
-        findViewById<View>(R.id.imageCapBtn).setOnClickListener {
+        binding.imageCapBtn.setOnClickListener {
             PermissionUtil.requestPermission(
                 this, arrayOf(
                     Manifest.permission.CAMERA,
@@ -115,7 +120,7 @@ class MainActivity : FragmentActivity() {
                 }
             }
         }
-        findViewById<View>(R.id.videoCapBtn).setOnClickListener {
+        binding.videoCapBtn.setOnClickListener {
             PermissionUtil.requestPermission(
                 this, arrayOf(
                     Manifest.permission.CAMERA,
@@ -130,7 +135,7 @@ class MainActivity : FragmentActivity() {
                 }
             }
         }
-        findViewById<View>(R.id.showImgsBtn).setOnClickListener {
+        binding.showImgsBtn.setOnClickListener {
             MXImgShowActivity.open(
                 this, arrayListOf(
                     "http://8.136.101.204/v/饺子主动.jpg",
@@ -163,6 +168,6 @@ class MainActivity : FragmentActivity() {
             )
         }
         MXImagePicker.init(application)
-//        MXScanBiz.scanAll(this, lifecycleScope)
+        MXScanBiz.scanAll(this, lifecycleScope)
     }
 }

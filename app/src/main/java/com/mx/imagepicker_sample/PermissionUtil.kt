@@ -6,15 +6,17 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import com.tbruyelle.rxpermissions3.RxPermissions
+import com.mx.starter.MXPermission
 
 object PermissionUtil {
-    fun requestPermission(activity: FragmentActivity, array: Array<String>, call: ((Boolean) -> Unit)) {
-        RxPermissions(activity)
-                .request(*array)
-                .subscribe { granted ->
-                    call.invoke(granted)
-                }
+    fun requestPermission(
+        activity: FragmentActivity,
+        array: Array<String>,
+        call: ((Boolean) -> Unit)
+    ) {
+        MXPermission.requestPermission(activity, array) { allowed, un_permissions ->
+            call.invoke(allowed)
+        }
     }
 
     fun hasPermission(context: Context, array: Array<String>): Boolean {
@@ -23,7 +25,11 @@ object PermissionUtil {
         }
         val list = ArrayList<String>()
         array.forEach {
-            if (ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    it
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 list.add(it)
             }
         }
@@ -36,7 +42,11 @@ object PermissionUtil {
         }
         val list = ArrayList<String>()
         array.forEach {
-            if (ContextCompat.checkSelfPermission(activity, it) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    activity,
+                    it
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 list.add(it)
             }
         }
