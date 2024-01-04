@@ -57,7 +57,7 @@ startActivityForResult(intent, 0x22)
 
 ```kotlin
 MXImagePicker.init(application)
-lifecycleScope.launch{ MXScanBiz.preScan(this) }
+lifecycleScope.launch{ MXImagePicker.preScan(this@MainActivity) }
 ```
 
 ##### MXPickerBuilder参数说明
