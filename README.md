@@ -8,7 +8,7 @@
 Gradle引用
 
 ```gradle
-    implementation 'com.gitee.zhangmengxiong:MXImagePicker:1.6.5'
+    implementation 'com.gitee.zhangmengxiong:MXImagePicker:1.6.6'
 ```
 
 ![Image text](https://gitee.com/zhangmengxiong/MXImagePicker/raw/master/imgs/screenshot1.png)
@@ -57,7 +57,7 @@ startActivityForResult(intent, 0x22)
 
 ```kotlin
 MXImagePicker.init(application)
-MXScanBiz.scanAll(this, lifecycleScope)
+lifecycleScope.launch{ MXImagePicker.preScan(this@MainActivity) }
 ```
 
 ##### MXPickerBuilder参数说明

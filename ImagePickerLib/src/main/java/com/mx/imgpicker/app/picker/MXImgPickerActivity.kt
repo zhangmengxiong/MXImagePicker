@@ -121,7 +121,9 @@ class MXImgPickerActivity : AppCompatActivity() {
         MXScanBiz.setOnUpdateListener {
             lifecycleScope.launch { vm.reloadMediaList() }
         }
-        MXScanBiz.scanAll(this, lifecycleScope)
+        lifecycleScope.launch {
+            MXScanBiz.scanAll(this@MXImgPickerActivity)
+        }
     }
 
     fun showLargeView(show: Boolean, target: MXItem? = null) {

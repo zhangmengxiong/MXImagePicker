@@ -15,7 +15,6 @@ import com.mx.imgpicker.builder.MXPickerBuilder
 import com.mx.imgpicker.compress.MXImageCompress
 import com.mx.imgpicker.models.MXCompressType
 import com.mx.imgpicker.models.MXPickerType
-import com.mx.imgpicker.utils.MXScanBiz
 import com.mx.starter.MXStarter
 import kotlinx.coroutines.launch
 import java.io.File
@@ -168,6 +167,8 @@ class MainActivity : FragmentActivity() {
             )
         }
         MXImagePicker.init(application)
-        MXScanBiz.scanAll(this, lifecycleScope)
+        lifecycleScope.launch {
+            MXImagePicker.preScan(this@MainActivity)
+        }
     }
 }

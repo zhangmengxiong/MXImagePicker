@@ -91,68 +91,84 @@ internal class MXDBSource private constructor(val context: Context) {
     }
 
     /**
+     * 删除记录
+     */
+    fun deleteAll(): Boolean {
+        synchronized(lock) {
+            val database = dbHelp.writableDatabase
+            try {
+                database.delete(MXSQLite.DB_NAME, null, null)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                database.close()
+            }
+        }
+        return false
+    }
+
+    /**
      * 获取对应类型的所有数据
      */
     suspend fun getAllSource(
         type: MXPickerType,
         path: String,
         maxListSize: Int
-    ): ArrayList<MXItem> =
-        withContext(Dispatchers.IO) {
-            val sourceList = ArrayList<MXItem>()
-            val section = ArrayList<String>()
-            val sectionArg = ArrayList<String>()
+    ): ArrayList<MXItem> = withContext(Dispatchers.IO) {
+        val sourceList = ArrayList<MXItem>()
+        val section = ArrayList<String>()
+        val sectionArg = ArrayList<String>()
 
-            if (type != MXPickerType.ImageAndVideo) {
-                section.add("${MXSQLite.DB_TYPE}=?")
-                sectionArg.add(type.value)
-            }
-            if (path.isNotBlank()) {
-                section.add("${MXSQLite.DB_DIR}=?")
-                sectionArg.add(path)
-            }
-            val orderBy =
-                MXSQLite.DB_TIME + " desc" + (if (maxListSize > 0) " limit $maxListSize" else "")
-
-            synchronized(lock) {
-                val database = dbHelp.writableDatabase
-                var cursor: Cursor? = null
-                try {
-                    cursor = database.query(
-                        MXSQLite.DB_NAME,
-                        arrayOf(
-                            MXSQLite.DB_PATH,
-                            MXSQLite.DB_TIME,
-                            MXSQLite.DB_PRIVATE,
-                            MXSQLite.DB_VIDEO_LENGTH,
-                            MXSQLite.DB_TYPE
-                        ),
-                        section.joinToString(" and "),
-                        sectionArg.toTypedArray(),
-                        null,
-                        null,
-                        orderBy
-                    )
-                    if (cursor != null && cursor.moveToFirst()) {
-                        do {
-                            val item = cursorToItem(database, cursor)
-                            if (item != null) {
-                                sourceList.add(item)
-                            }
-                        } while (cursor.moveToNext())
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                } finally {
-                    try {
-                        cursor?.close()
-                    } catch (e: Exception) {
-                    }
-                    database.close()
-                }
-            }
-            return@withContext sourceList
+        if (type != MXPickerType.ImageAndVideo) {
+            section.add("${MXSQLite.DB_TYPE}=?")
+            sectionArg.add(type.value)
         }
+        if (path.isNotBlank()) {
+            section.add("${MXSQLite.DB_DIR}=?")
+            sectionArg.add(path)
+        }
+        val orderBy =
+            MXSQLite.DB_TIME + " desc" + (if (maxListSize > 0) " limit $maxListSize" else "")
+
+        synchronized(lock) {
+            val database = dbHelp.writableDatabase
+            var cursor: Cursor? = null
+            try {
+                cursor = database.query(
+                    MXSQLite.DB_NAME,
+                    arrayOf(
+                        MXSQLite.DB_PATH,
+                        MXSQLite.DB_TIME,
+                        MXSQLite.DB_PRIVATE,
+                        MXSQLite.DB_VIDEO_LENGTH,
+                        MXSQLite.DB_TYPE
+                    ),
+                    section.joinToString(" and "),
+                    sectionArg.toTypedArray(),
+                    null,
+                    null,
+                    orderBy
+                )
+                if (cursor != null && cursor.moveToFirst()) {
+                    do {
+                        val item = cursorToItem(database, cursor)
+                        if (item != null) {
+                            sourceList.add(item)
+                        }
+                    } while (cursor.moveToNext())
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                try {
+                    cursor?.close()
+                } catch (e: Exception) {
+                }
+                database.close()
+            }
+        }
+        return@withContext sourceList
+    }
 
     suspend fun getAllDirList(type: MXPickerType): ArrayList<MXDirItem> =
         withContext(Dispatchers.IO) {
@@ -251,7 +267,7 @@ internal class MXDBSource private constructor(val context: Context) {
                 } finally {
                     try {
                         cursor?.close()
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                     }
                     database.close()
                 }
