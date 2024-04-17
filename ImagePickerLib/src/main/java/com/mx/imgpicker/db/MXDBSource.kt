@@ -294,7 +294,7 @@ internal class MXDBSource private constructor(val context: Context) {
                 cursor.getLong(cursor.getColumnIndexOrThrow(MXSQLite.DB_VIDEO_LENGTH))
 
             val file = File(path)
-            if (!file.exists() || file.length() <= 0) {
+            if (!file.exists() || file.length() <= 0 || !file.canRead()) {
                 if (!isPrivate) {
                     database.delete(
                         MXSQLite.DB_NAME,

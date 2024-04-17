@@ -16,13 +16,18 @@ internal class MXDirSource(private val dirs: List<MXDirItem>) : IMXSource {
             val files = File(dir.path).listFiles()?.sortedBy { it.name }
             if (files == null || files.isEmpty()) continue
             for (file in files) {
+                if (!file.exists() || file.length() <= 0 || !file.canRead()) {
+                    continue
+                }
                 val item = when (file.extension.lowercase()) {
                     in MXUtils.IMAGE_EXT -> {
                         MXItem(file.absolutePath, file.lastModified(), MXPickerType.Image)
                     }
+
                     in MXUtils.VIDEO_EXT -> {
                         MXItem(file.absolutePath, file.lastModified(), MXPickerType.Video)
                     }
+
                     else -> null
                 }
                 if (item != null) {
