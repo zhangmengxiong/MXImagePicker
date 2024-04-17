@@ -77,15 +77,16 @@ internal object MXVideoSource : IMXSource {
             val modify =
                 mCursor.getLong(mCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED))
             val uri = ContentUris.withAppendedId(SOURCE_URI, id)
-            val path = getFilePath(uri, mCursor)
-
             val duration = mCursor.getInt(
                 mCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
             )
+            val path = getFilePath(uri, mCursor)
+            val file = File(path)
 
             //获取图片时间
 //            val time = File(path).lastModified() / 1000 // 单位：秒
             if (path.endsWith("downloading")) return null
+            if (!file.exists() || file.length() <= 0 || !file.canRead()) return null
             val desc = contentResolver.openFileDescriptor(uri, "r")
             if (desc != null) {
                 desc.close()
