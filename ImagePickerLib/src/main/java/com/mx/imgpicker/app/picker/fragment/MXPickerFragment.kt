@@ -168,6 +168,9 @@ internal class MXPickerFragment : Fragment() {
         } else {
             willResizeLay?.visibility = View.GONE
         }
+        if (vm.pickerType == MXPickerType.Video) {
+            willResizeLay?.visibility = View.GONE
+        }
 
         vm.needCompress.observe(viewLifecycleOwner) { compress ->
             if (!compress) {

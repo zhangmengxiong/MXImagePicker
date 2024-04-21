@@ -12,6 +12,8 @@ import com.mx.imgpicker.R
 import com.mx.imgpicker.models.MXItem
 import com.mx.imgpicker.models.MXPickerType
 import com.mx.imgpicker.utils.MXUtils
+import com.mx.imgpicker.utils.source_loader.MXVideoSource
+import java.io.File
 
 class MXAdaptItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -44,7 +46,13 @@ class MXAdaptItemView @JvmOverloads constructor(
 
         if (item.type == MXPickerType.Video) {
             videoTag.visibility = View.VISIBLE
-            videoLengthTxv.text = MXUtils.timeToString(item.duration)
+            var duration = item.duration
+            if (duration <= 0) {
+                duration = (MXVideoSource.getVideoLength(File(item.path)) / 1000).toInt()
+            }
+            videoLengthTxv.text = if (duration <= 0) {
+                "--"
+            } else MXUtils.timeToString(duration)
         } else {
             videoTag.visibility = View.GONE
         }

@@ -99,7 +99,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="暂无数据！"
+            android:text="@string/mx_picker_string_empty"
             android:textColor="@color/mx_picker_color_important"
             android:textSize="@dimen/mx_img_picker_text_size_normal"
             android:visibility="gone" />
@@ -158,7 +158,7 @@
                 android:tint="@color/mx_picker_color_important" />
 
             <TextView
-                android:id="@+id/emptyTxv"
+                android:id="@+id/originalTxv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

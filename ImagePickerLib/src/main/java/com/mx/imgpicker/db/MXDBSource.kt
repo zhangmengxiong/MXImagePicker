@@ -296,18 +296,10 @@ internal class MXDBSource private constructor(val context: Context) {
             val file = File(path)
             if (!file.exists() || file.length() <= 0 || !file.canRead()) {
                 if (!isPrivate) {
-                    database.delete(
-                        MXSQLite.DB_NAME,
-                        "${MXSQLite.DB_PATH} = ?",
-                        arrayOf(path)
-                    )
+                    database.delete(MXSQLite.DB_NAME, "${MXSQLite.DB_PATH} = ?", arrayOf(path))
                 }
                 if (isPrivate && abs(System.currentTimeMillis() - time) > 60 * 1000) {// 删除超时的自拍数据
-                    database.delete(
-                        MXSQLite.DB_NAME,
-                        "${MXSQLite.DB_PATH} = ?",
-                        arrayOf(path)
-                    )
+                    database.delete(MXSQLite.DB_NAME, "${MXSQLite.DB_PATH} = ?", arrayOf(path))
                 }
                 return null
             }
